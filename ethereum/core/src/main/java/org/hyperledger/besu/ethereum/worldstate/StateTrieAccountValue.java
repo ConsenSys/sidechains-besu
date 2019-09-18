@@ -21,8 +21,9 @@ import org.hyperledger.besu.ethereum.rlp.RLPOutput;
 /** Represents the raw values associated with an account in the world state trie. */
 public class StateTrieAccountValue {
   // Have the indicator above the maximum likely nonce value.
-  private static final long CONTAINS_CROSSCHAIN_EXTENDED_STATE = 0x8000000000000L;
-  private static final long CONTAINS_CROSSCHAIN_EXTENDED_STATE_MASK = 0x7FFFFFFFFFFFFFFFL;
+  // Note that for RLP encoding, the value must be positive.
+  private static final long CONTAINS_CROSSCHAIN_EXTENDED_STATE = 0x4000000000000000L;
+  private static final long CONTAINS_CROSSCHAIN_EXTENDED_STATE_MASK = 0x3FFFFFFFFFFFFFFFL;
   // When the lockability bit is set, it indicates that the contract is lockable.
   private static final long LOCKABLE_BIT_FLAG = 0x01;
   private static final long VERSION_PRESENT_FLAG = 0x02;
@@ -35,7 +36,11 @@ public class StateTrieAccountValue {
   private final int version;
 
   private StateTrieAccountValue(
-      final long nonce, final Wei balance, final boolean lockable, final Hash storageRoot, final Hash codeHash) {
+      final long nonce,
+      final Wei balance,
+      final boolean lockable,
+      final Hash storageRoot,
+      final Hash codeHash) {
     this(nonce, balance, lockable, storageRoot, codeHash, Account.DEFAULT_VERSION);
   }
 
@@ -126,7 +131,6 @@ public class StateTrieAccountValue {
       nonceField |= CONTAINS_CROSSCHAIN_EXTENDED_STATE;
     }
 
-
     out.writeLongScalar(nonceField);
     out.writeUInt256Scalar(balance);
     out.writeBytesValue(storageRoot);
@@ -138,8 +142,7 @@ public class StateTrieAccountValue {
         // version of zero is never written out.
         out.writeIntScalar(version);
       }
-    }
-    else {
+    } else {
       if (writeVersion) {
         flags |= VERSION_PRESENT_FLAG;
       }
@@ -161,7 +164,8 @@ public class StateTrieAccountValue {
     final Hash codeHash = Hash.wrap(in.readBytes32());
     int version = Account.DEFAULT_VERSION;
 
-    boolean extendedState = (nonce & CONTAINS_CROSSCHAIN_EXTENDED_STATE) == CONTAINS_CROSSCHAIN_EXTENDED_STATE;
+    boolean extendedState =
+        (nonce & CONTAINS_CROSSCHAIN_EXTENDED_STATE) == CONTAINS_CROSSCHAIN_EXTENDED_STATE;
 
     boolean isLockable = false;
     if (!extendedState) {
@@ -169,8 +173,7 @@ public class StateTrieAccountValue {
       if (!in.isEndOfCurrentList()) {
         version = in.readIntScalar();
       }
-    }
-    else {
+    } else {
       // Extended state read.
       // Remove the extended state indicator.
       nonce &= CONTAINS_CROSSCHAIN_EXTENDED_STATE_MASK;
