@@ -524,12 +524,11 @@ public class CrosschainTransaction extends Transaction {
     final CrosschainTransaction that = (CrosschainTransaction) other;
     if (this.chainId.equals(that.chainId)
         && this.type.equals(that.type)
-        && this.crosschainCoordinationBlockchainId.equals(
-                    that.crosschainCoordinationBlockchainId)
+        && this.crosschainCoordinationBlockchainId.equals(that.crosschainCoordinationBlockchainId)
         && this.crosschainCoordinationContractAddress.equals(
-                    that.crosschainCoordinationContractAddress)
+            that.crosschainCoordinationContractAddress)
         && this.crosschainTransactionTimeoutBlockNumber.equals(
-                    that.crosschainTransactionTimeoutBlockNumber)
+            that.crosschainTransactionTimeoutBlockNumber)
         && this.crosschainTransactionId.equals(that.crosschainTransactionId)
         && this.originatingSidechainId.equals(that.originatingSidechainId)
         && this.crosschainFromSidechainId.equals(that.crosschainFromSidechainId)
@@ -574,7 +573,9 @@ public class CrosschainTransaction extends Transaction {
       sb.append("crosschainTransactionId=").append(this.crosschainTransactionId.get()).append(", ");
       if (this.crosschainFromSidechainId.isPresent()) {
         sb.append("originatingSidechainId=").append(this.originatingSidechainId.get()).append(", ");
-        sb.append("crosschainFromSidechainId=").append(this.crosschainFromSidechainId.get()).append(", ");
+        sb.append("crosschainFromSidechainId=")
+            .append(this.crosschainFromSidechainId.get())
+            .append(", ");
         sb.append("crosschainFromAddress=").append(this.crosschainFromAddress.get()).append(", ");
       }
     }
