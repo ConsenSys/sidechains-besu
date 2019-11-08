@@ -1,15 +1,3 @@
-/*
- * Copyright 2019 ConsenSys AG.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- */
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.CrosschainProcessor;
@@ -23,19 +11,13 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcRespon
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import org.hyperledger.besu.ethereum.core.Address;
 
-/**
- * Request that the Crosschain Processor check with the Crosschain Coordination Contract whether the
- * contract should be unlocked or not.
- *
- * This function is typically called from other Ethereum nodes that are part of the same multi-chain node.
- */
-public class CrossCheckUnlock implements JsonRpcMethod {
+public class CrossBlockchainPublicKey  implements JsonRpcMethod {
 
   private final JsonRpcParameter parameters;
 
   private final CrosschainProcessor crosschainProcessor;
 
-  public CrossCheckUnlock(
+  public CrossBlockchainPublicKey(
       final CrosschainProcessor crosschainProcessor, final JsonRpcParameter parameters) {
     this.parameters = parameters;
     this.crosschainProcessor = crosschainProcessor;
@@ -48,13 +30,14 @@ public class CrossCheckUnlock implements JsonRpcMethod {
 
   @Override
   public JsonRpcResponse response(final JsonRpcRequest request) {
-    if (request.getParamLength() != 1) {
+    if (request.getParamLength() != 0) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
 
-    final Address address = this.parameters.required(request.getParams(), 0, Address.class);
+    // TODO Get the public key  this.crosschainProcessor.checkUnlock(address);
+    // TODO return the public key.
 
-    this.crosschainProcessor.checkUnlock(address);
+    // 
     return new JsonRpcSuccessResponse(request.getId());
   }
 }
