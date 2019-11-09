@@ -26,7 +26,7 @@ import java.util.Base64;
 import net.consensys.cava.crypto.sodium.Box;
 import org.junit.Before;
 import org.junit.Test;
-import org.web3j.protocol.eea.response.PrivateTransactionReceipt;
+import org.web3j.protocol.besu.response.privacy.PrivateTransactionReceipt;
 
 public class EnclaveErrorAcceptanceTest extends PrivacyAcceptanceTestBase {
 
