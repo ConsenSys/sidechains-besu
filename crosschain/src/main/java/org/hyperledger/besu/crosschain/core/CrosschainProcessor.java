@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc;
+package org.hyperledger.besu.crosschain.core;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

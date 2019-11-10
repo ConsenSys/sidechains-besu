@@ -22,7 +22,7 @@ import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftGetSignerMetrics;
 import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftGetValidatorsByBlockHash;
 import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftGetValidatorsByBlockNumber;
 import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftProposeValidatorVote;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.CrosschainProcessor;
+import org.hyperledger.besu.crosschain.core.CrosschainProcessor;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossCheckUnlock;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthIsLockable;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthIsLocked;

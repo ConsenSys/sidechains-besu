@@ -14,7 +14,7 @@ package org.hyperledger.besu.consensus.ibft;
 
 import org.hyperledger.besu.consensus.common.VoteProposer;
 import org.hyperledger.besu.consensus.common.VoteTallyCache;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.CrosschainProcessor;
+import org.hyperledger.besu.crosschain.core.CrosschainProcessor;
 
 /** Holds the IBFT specific mutable state. */
 public class IbftContext {
