@@ -17,9 +17,7 @@ import org.web3j.protocol.core.Request;
 
 public class MinerRequestFactory {
 
-  private static class BoolResponse extends org.web3j.protocol.core.Response<Boolean> {
-
-  }
+  private static class BoolResponse extends org.web3j.protocol.core.Response<Boolean> {}
 
   private final Web3jService web3jService;
 
@@ -36,10 +34,6 @@ public class MinerRequestFactory {
   }
 
   Request<?, BoolResponse> minerStop() {
-    return new Request<>(
-        "miner_stop",
-        null,
-        web3jService,
-        BoolResponse.class);
+    return new Request<>("miner_stop", null, web3jService, BoolResponse.class);
   }
 }
