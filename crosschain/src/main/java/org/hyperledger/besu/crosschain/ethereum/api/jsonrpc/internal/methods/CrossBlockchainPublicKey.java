@@ -12,14 +12,14 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSucces
 
 public class CrossBlockchainPublicKey  implements JsonRpcMethod {
 
-  private final JsonRpcParameter parameters;
-
-  private final CrosschainProcessor crosschainProcessor;
+//  private final JsonRpcParameter parameters;
+//
+//  private final CrosschainProcessor crosschainProcessor;
 
   public CrossBlockchainPublicKey(
       final CrosschainProcessor crosschainProcessor, final JsonRpcParameter parameters) {
-    this.parameters = parameters;
-    this.crosschainProcessor = crosschainProcessor;
+//    this.parameters = parameters;
+//    this.crosschainProcessor = crosschainProcessor;
   }
 
   @Override
