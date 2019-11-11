@@ -23,26 +23,26 @@ ext.picocliVersion = '3.0.0'
 
 dependencies {
 
-  // Use the Crosschain version of web3j.
-  implementation files('libs/web3j-abi.jar')
-  implementation files('libs/web3j-besu.jar')
-  implementation files('libs/web3j-core.jar')
-  implementation files('libs/web3j-crypto.jar')
-  implementation files('libs/web3j-eea.jar')
-  implementation files('libs/web3j-rlp.jar')
-  implementation files('libs/web3j-tuples.jar')
-  implementation files('libs/web3j-utils.jar')
+//  // Use the Crosschain version of web3j.
+//  implementation files('libs/web3j-abi.jar')
+//  implementation files('libs/web3j-besu.jar')
+//  implementation files('libs/web3j-core.jar')
+//  implementation files('libs/web3j-crypto.jar')
+//  implementation files('libs/web3j-eea.jar')
+//  implementation files('libs/web3j-rlp.jar')
+//  implementation files('libs/web3j-tuples.jar')
+//  implementation files('libs/web3j-utils.jar')
 
   // Web3J dependencies
-  compile "org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion",
-    "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion",
-    "com.github.jnr:jnr-unixsocket:$jnr_unixsocketVersion",
-    "com.squareup.okhttp3:okhttp:$okhttpVersion",
-    "com.squareup.okhttp3:logging-interceptor:$okhttpVersion",
-    "io.reactivex.rxjava2:rxjava:$rxjavaVersion",
-    "org.java-websocket:Java-WebSocket:$javaWebSocketVersion",
-    "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion",
-    "org.slf4j:slf4j-api:$slf4jVersion"
+//  compile "org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion",
+//    "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion",
+//    "com.github.jnr:jnr-unixsocket:$jnr_unixsocketVersion",
+//    "com.squareup.okhttp3:okhttp:$okhttpVersion",
+//    "com.squareup.okhttp3:logging-interceptor:$okhttpVersion",
+//    "io.reactivex.rxjava2:rxjava:$rxjavaVersion",
+//    "org.java-websocket:Java-WebSocket:$javaWebSocketVersion",
+//    "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion",
+//    "org.slf4j:slf4j-api:$slf4jVersion"
 
   testSupportImplementation 'org.apache.logging.log4j:log4j-core'
   testSupportImplementation 'org.apache.logging.log4j:log4j-slf4j-impl'
@@ -80,9 +80,29 @@ dependencies {
   testSupportImplementation 'org.assertj:assertj-core'
   testSupportImplementation 'org.awaitility:awaitility'
   testSupportImplementation 'org.java-websocket:Java-WebSocket'
-  testSupportImplementation 'org.web3j:abi'
-  testSupportImplementation 'org.web3j:pantheon'
-  testSupportImplementation 'org.web3j:crypto'
+
+  testSupportImplementation files('libs/web3j-abi.jar')
+  testSupportImplementation files('libs/web3j-besu.jar')
+  testSupportImplementation files('libs/web3j-core.jar')
+  testSupportImplementation files('libs/web3j-crypto.jar')
+  testSupportImplementation files('libs/web3j-eea.jar')
+  testSupportImplementation files('libs/web3j-rlp.jar')
+  testSupportImplementation files('libs/web3j-tuples.jar')
+  testSupportImplementation files('libs/web3j-utils.jar')
+
+  testSupportImplementation "org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion"
+  testSupportImplementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+  testSupportImplementation "com.github.jnr:jnr-unixsocket:$jnr_unixsocketVersion"
+  testSupportImplementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+  testSupportImplementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+  testSupportImplementation "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
+  testSupportImplementation "org.java-websocket:Java-WebSocket:$javaWebSocketVersion"
+  testSupportImplementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+  testSupportImplementation "org.slf4j:slf4j-api:$slf4jVersion"
+  
+  //testSupportImplementation 'org.web3j:abi'
+  //testSupportImplementation 'org.web3j:pantheon'
+  //testSupportImplementation 'org.web3j:crypto'
   testSupportImplementation 'tech.pegasys.ethsigner.internal:core'
   testSupportImplementation 'tech.pegasys.ethsigner.internal:file-based'
   testSupportImplementation 'tech.pegasys.ethsigner.internal:signing-api'
@@ -90,8 +110,29 @@ dependencies {
   testImplementation 'junit:junit'
   testImplementation 'net.consensys:orion'
   testImplementation 'org.assertj:assertj-core'
-  testImplementation 'org.web3j:abi'
-  testImplementation 'org.web3j:pantheon'
+  //testImplementation 'org.web3j:abi'
+  //testImplementation 'org.web3j:pantheon'
+
+  testImplementation files('libs/web3j-abi.jar')
+  testImplementation files('libs/web3j-besu.jar')
+  testImplementation files('libs/web3j-core.jar')
+  testImplementation files('libs/web3j-crypto.jar')
+  testImplementation files('libs/web3j-eea.jar')
+  testImplementation files('libs/web3j-rlp.jar')
+  testImplementation files('libs/web3j-tuples.jar')
+  testImplementation files('libs/web3j-utils.jar')
+  testImplementation "org.bouncycastle:bcprov-jdk15on:$bouncycastleVersion"
+  testImplementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+  testImplementation "com.github.jnr:jnr-unixsocket:$jnr_unixsocketVersion"
+  testImplementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+  testImplementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+  testImplementation "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
+  testImplementation "org.java-websocket:Java-WebSocket:$javaWebSocketVersion"
+  testImplementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+  testImplementation "org.slf4j:slf4j-api:$slf4jVersion"
+
+
+
   testImplementation project(':ethereum:api')
   testImplementation project(':enclave')
   testImplementation 'org.awaitility:awaitility'

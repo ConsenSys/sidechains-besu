@@ -17,6 +17,10 @@ import org.web3j.protocol.core.Request;
 
 public class MinerRequestFactory {
 
+  private static class BoolResponse extends org.web3j.protocol.core.Response<Boolean> {
+
+  }
+
   private final Web3jService web3jService;
 
   public MinerRequestFactory(final Web3jService web3jService) {
@@ -31,11 +35,11 @@ public class MinerRequestFactory {
         org.web3j.protocol.core.methods.response.VoidResponse.class);
   }
 
-  Request<?, org.web3j.protocol.core.methods.response.VoidResponse> minerStop() {
+  Request<?, BoolResponse> minerStop() {
     return new Request<>(
         "miner_stop",
         null,
         web3jService,
-        org.web3j.protocol.core.methods.response.VoidResponse.class);
+        BoolResponse.class);
   }
 }
