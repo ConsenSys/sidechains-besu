@@ -18,8 +18,8 @@ import static org.hyperledger.besu.controller.KeyPairUtil.loadKeyPair;
 
 import org.hyperledger.besu.config.CrosschainConfigOptions;
 import org.hyperledger.besu.config.GenesisConfigFile;
-import org.hyperledger.besu.crosschain.core.CrosschainProcessor;
-import org.hyperledger.besu.crosschain.ethereum.crosschain.SubordinateViewCoordinator;
+import org.hyperledger.besu.crosschain.core.CrosschainController;
+import org.hyperledger.besu.crosschain.core.subview.SubordinateViewCoordinator;
 import org.hyperledger.besu.crypto.SECP256K1.KeyPair;
 import org.hyperledger.besu.ethereum.ProtocolContext;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethodFactory;
@@ -87,7 +87,7 @@ public abstract class BesuControllerBuilder<C> {
   protected Clock clock;
   protected KeyPair nodeKeys;
   protected boolean isRevertReasonEnabled;
-  protected CrosschainProcessor crosschainProcessor;
+  protected CrosschainController crosschainController;
   private StorageProvider storageProvider;
   private final List<Runnable> shutdownActions = new ArrayList<>();
   private boolean isPruningEnabled;
@@ -203,7 +203,7 @@ public abstract class BesuControllerBuilder<C> {
 
     final ProtocolSchedule<C> protocolSchedule = createProtocolSchedule();
     final GenesisState genesisState = GenesisState.fromConfig(genesisConfig, protocolSchedule);
-    this.crosschainProcessor = new CrosschainProcessor();
+    this.crosschainController = new CrosschainController();
     final ProtocolContext<C> protocolContext =
         ProtocolContext.init(
             storageProvider,
@@ -309,7 +309,7 @@ public abstract class BesuControllerBuilder<C> {
     SubordinateViewCoordinator subordinateViewCoordinator =
         SubordinateViewCoordinator.createSubordinateViewCoordinatorAndOtherNodes(
             chainId.get().intValue(), numNodes, nodeNum, transactionSimulator);
-    this.crosschainProcessor.init(
+    this.crosschainController.init(
         subordinateViewCoordinator,
         transactionSimulator,
         transactionPool,
@@ -356,7 +356,7 @@ public abstract class BesuControllerBuilder<C> {
         },
         additionalJsonRpcMethodFactory,
         nodeKeys,
-        crosschainProcessor);
+        crosschainController);
   }
 
   protected void prepForBuild() {}

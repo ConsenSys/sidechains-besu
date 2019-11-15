@@ -12,7 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
-import org.hyperledger.besu.crosschain.core.CrosschainProcessor;
+import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethod;
@@ -27,18 +27,19 @@ import org.hyperledger.besu.ethereum.core.Address;
  * Request that the Crosschain Processor check with the Crosschain Coordination Contract whether the
  * contract should be unlocked or not.
  *
- * This function is typically called from other Ethereum nodes that are part of the same multi-chain node.
+ * <p>This function is typically called from other Ethereum nodes that are part of the same
+ * multi-chain node.
  */
 public class CrossCheckUnlock implements JsonRpcMethod {
 
   private final JsonRpcParameter parameters;
 
-  private final CrosschainProcessor crosschainProcessor;
+  private final CrosschainController crosschainController;
 
   public CrossCheckUnlock(
-      final CrosschainProcessor crosschainProcessor, final JsonRpcParameter parameters) {
+      final CrosschainController crosschainController, final JsonRpcParameter parameters) {
     this.parameters = parameters;
-    this.crosschainProcessor = crosschainProcessor;
+    this.crosschainController = crosschainController;
   }
 
   @Override
@@ -54,7 +55,7 @@ public class CrossCheckUnlock implements JsonRpcMethod {
 
     final Address address = this.parameters.required(request.getParams(), 0, Address.class);
 
-    this.crosschainProcessor.checkUnlock(address);
+    this.crosschainController.checkUnlock(address);
     return new JsonRpcSuccessResponse(request.getId());
   }
 }
