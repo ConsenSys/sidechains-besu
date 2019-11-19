@@ -12,7 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
-import org.hyperledger.besu.crosschain.core.keys.BlockchainCrosschainKeyManager;
+import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.subview.SubordinateViewCoordinator;
 import org.hyperledger.besu.crypto.SECP256K1;
@@ -33,6 +33,7 @@ import org.hyperledger.besu.ethereum.transaction.TransactionSimulatorResult;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -50,18 +51,18 @@ public class CrosschainController {
   WorldStateArchive worldStateArchive;
 
   CrosschainProcessor processor;
-  BlockchainCrosschainKeyManager crosschainKeyManager;
+  CrosschainKeyManager crosschainKeyManager;
 
   public CrosschainController() {
     this.processor = new CrosschainProcessor();
-    this.crosschainKeyManager = new BlockchainCrosschainKeyManager();
+    this.crosschainKeyManager = new CrosschainKeyManager();
   }
 
   public void init(
       final SubordinateViewCoordinator subordinateViewCoordinator,
       final TransactionSimulator transactionSimulator,
       final TransactionPool transactionPool,
-      final int sidechainId,
+      final BigInteger sidechainId,
       final SECP256K1.KeyPair nodeKeys,
       final Blockchain blockchain,
       final WorldStateArchive worldStateArchive) {
@@ -72,6 +73,7 @@ public class CrosschainController {
         nodeKeys,
         blockchain,
         worldStateArchive);
+    this.crosschainKeyManager.init(sidechainId, nodeKeys);
     this.subordinateViewCoordinator = subordinateViewCoordinator;
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
@@ -164,7 +166,7 @@ public class CrosschainController {
   }
 
   /**
-   * Called by the JSON RPC Call CrossCheckUnlock.
+   * Called by the JSON RPC method: CrossCheckUnlock.
    *
    * <p>If a contract is lockable and locked, then check with the Crosschain Coordination Contract
    * which is coordinating the Crosschain Transaction to see if the transaction has completed and if
@@ -203,6 +205,20 @@ public class CrosschainController {
    * @return The current public key and meta-data.
    */
   public BlsThresholdPublicKey getBlockchainPublicKey() {
-    return this.crosschainKeyManager.getCurrentCredentials();
+    return this.crosschainKeyManager.getActiveCredentials();
   }
+
+
+  // TODO: Implement crosschainGetBlockchainPublicKeyGenerationStatus
+
+
+  /**
+   * Called by the JSON RPC method: cross_generateBlockchainKey
+   * @param threshold The threshold number of validators that will be needed to sign messages.
+   * @return The key version number.
+   */
+  public long crosschainGenerateBlockchainKey(final int threshold) {
+    return this.crosschainKeyManager.generateNewKeys(threshold);
+  }
+
 }

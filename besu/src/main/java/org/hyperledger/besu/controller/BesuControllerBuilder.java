@@ -313,7 +313,7 @@ public abstract class BesuControllerBuilder<C> {
         subordinateViewCoordinator,
         transactionSimulator,
         transactionPool,
-        chainId.get().intValue(),
+        chainId.get(),
         this.nodeKeys,
         blockchain,
         protocolContext.getWorldStateArchive());

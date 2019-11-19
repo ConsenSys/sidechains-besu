@@ -56,14 +56,14 @@ public class CrosschainProcessor {
   SECP256K1.KeyPair nodeKeys;
   Blockchain blockchain;
   WorldStateArchive worldStateArchive;
-  int sidechainId;
+  BigInteger sidechainId;
 
   Vertx vertx;
 
   public void init(
       final TransactionSimulator transactionSimulator,
       final TransactionPool transactionPool,
-      final int sidechainId,
+      final BigInteger sidechainId,
       final SECP256K1.KeyPair nodeKeys,
       final Blockchain blockchain,
       final WorldStateArchive worldStateArchive) {
@@ -298,7 +298,7 @@ public class CrosschainProcessor {
             .to(toAddress)
             .value(Wei.ZERO)
             .payload(BytesValue.EMPTY)
-            .chainId(BigInteger.valueOf(this.sidechainId))
+            .chainId(this.sidechainId)
             .subordinateTransactionsAndViews(emptyList)
             .signAndBuild(this.nodeKeys);
 
