@@ -82,6 +82,10 @@ class SimulatedThresholdKeyGenContractSingleKeyGen {
     this.coefficientPublicValues.put(msgSender, coefPublicPoints);
   }
 
+  int getThreshold() {
+    return this.threshold;
+  }
+
   int getNumberOfNodes() {
     return this.nodeIdArray.size();
   }

@@ -12,7 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.p2p;
 
-import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContract;
+import org.hyperledger.besu.crosschain.core.keys.generation.SimulatedThresholdKeyGenContractWrapper;
+import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
@@ -47,8 +48,8 @@ public class SimulatedOtherNode {
 
   private Map<BigInteger, BigInteger> receivedSecretShares = new TreeMap<>();
 
-  ThresholdKeyGenContract thresholdKeyGenContract;
-  CrosschainDevP2P p2p;
+  ThresholdKeyGenContractInterface thresholdKeyGenContract;
+  CrosschainDevP2PInterface p2p;
 
   private Map<BigInteger, BlsPoint[]> otherNodeCoefficients;
 
@@ -61,18 +62,15 @@ public class SimulatedOtherNode {
   private ThresholdScheme thresholdScheme;
 
   public SimulatedOtherNode(
-      final int threshold,
       final BigInteger nodeAddress,
-      final ThresholdKeyGenContract thresholdKeyGenContract,
-      final CrosschainDevP2P p2p) {
-    this.threshold = threshold;
+      final ThresholdKeyGenContractInterface thresholdKeyGenContract,
+      final CrosschainDevP2PInterface p2p) {
     this.thresholdKeyGenContract = thresholdKeyGenContract;
     this.p2p = p2p;
     this.cryptoProvider =
         BlsCryptoProvider.getInstance(
             BlsCryptoProvider.CryptoProviderTypes.LOCAL_ALT_BN_128,
             BlsCryptoProvider.DigestAlgorithm.KECCAK256);
-    this.thresholdScheme = new ThresholdScheme(this.cryptoProvider, this.threshold, this.prng);
     this.myNodeAddress = nodeAddress;
   }
 
@@ -82,6 +80,8 @@ public class SimulatedOtherNode {
 
   public void requestStartNewKeyGeneration(final long keyVersionNumber) {
     LOG.info("start {}", myNodeAddress);
+    this.threshold = this.thresholdKeyGenContract.getThreshold(keyVersionNumber);
+    this.thresholdScheme = new ThresholdScheme(this.cryptoProvider, this.threshold, this.prng);
     thresholdKeyGenContract.setNodeId(keyVersionNumber, myNodeAddress);
   }
 

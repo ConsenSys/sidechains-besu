@@ -29,11 +29,10 @@ class SimulatedThresholdKeyGenContract {
       final long version,
       final BigInteger msgSender,
       final int threshold,
-      final int roundDurationInBlocks)
-      throws Exception {
+      final int roundDurationInBlocks) {
     if (version != this.expectedNextVersion) {
       // Simulate a require() statement.
-      throw new Exception(
+      throw new RuntimeException(
           "require: As a way of ensuring only one key generation as any version number");
     }
     this.keyGens.put(
@@ -61,6 +60,10 @@ class SimulatedThresholdKeyGenContract {
 
   long getExpectedKeyGenerationVersion() {
     return this.expectedNextVersion;
+  }
+
+  int getThreshold(final long version) {
+    return getKeyGenInstance(version).getThreshold();
   }
 
   int getNumberOfNodes(final long version) {

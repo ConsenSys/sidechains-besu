@@ -12,9 +12,11 @@
  */
 package org.hyperledger.besu.crosschain.core.keys;
 
-import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContract;
+import org.hyperledger.besu.crosschain.core.keys.generation.SimulatedThresholdKeyGenContractWrapper;
+import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGeneration;
-import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2P;
+import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
+import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
 import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
@@ -67,11 +69,20 @@ public class CrosschainKeyManager {
   Map<Long, BlsThresholdCredentials> credentials;
 
   public Map<Long, ThresholdKeyGeneration> activeKeyGenerations = new TreeMap<>();
-  ThresholdKeyGenContract thresholdKeyGenContract = new ThresholdKeyGenContract();
-  CrosschainDevP2P p2p = new CrosschainDevP2P();
+  ThresholdKeyGenContractInterface thresholdKeyGenContract;
+  CrosschainDevP2PInterface p2p;
 
   // TODO add key generation contract address
-  public CrosschainKeyManager() {
+  public static CrosschainKeyManager getCrosschainKeyManager() {
+    // TODO when real versions of p2p and key gen contract exist, this is the place to link them in.
+    ThresholdKeyGenContractInterface keyGen = new SimulatedThresholdKeyGenContractWrapper();
+    CrosschainDevP2PInterface p2pI = new SimulatedCrosschainDevP2P(keyGen);
+    return new CrosschainKeyManager(keyGen, p2pI);
+  }
+
+  public CrosschainKeyManager(final ThresholdKeyGenContractInterface thresholdKeyGenContract, final CrosschainDevP2PInterface p2p) {
+    this.thresholdKeyGenContract = thresholdKeyGenContract;
+    this.p2p = p2p;
 
     this.credentials = CrosschainKeyManagerStorage.loadAllCredentials();
     if (this.credentials.size() != 0) {
@@ -112,19 +123,7 @@ public class CrosschainKeyManager {
     return null;
   }
 
-  int NUMBER_OF_SIMULATED_NODES = 4;
-  public SimulatedOtherNode[] others = new SimulatedOtherNode[NUMBER_OF_SIMULATED_NODES];
-
   public long generateNewKeys(final int threshold) {
-    // TODO ****************************************
-    this.p2p.clearSimulatedNodes();
-    for (int i = 0; i < NUMBER_OF_SIMULATED_NODES; i++) {
-      others[i] =
-          new SimulatedOtherNode(
-              threshold, BigInteger.valueOf(i+1), this.thresholdKeyGenContract, this.p2p);
-      others[i].init();
-    }
-
     ThresholdKeyGeneration keyGen =
         new ThresholdKeyGeneration(
             threshold, this.nodeKeys, this.thresholdKeyGenContract, this.p2p);

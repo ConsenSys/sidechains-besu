@@ -15,41 +15,44 @@ package org.hyperledger.besu.crosschain.crypto.threshold;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
+import org.hyperledger.besu.crosschain.core.keys.generation.SimulatedThresholdKeyGenContractWrapper;
+import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGeneration;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.IntegerSecretShare;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
+import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
+import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
 import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
 import org.hyperledger.besu.crypto.SECP256K1;
 
 import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
 
 // This is the main class for running through a simple scenario.
-public class ThresholdKeyGenerationTest {
-
-  static byte[] DATA = new byte[] {0x01, 0x02, 0x03, 0x04};
-
+public abstract class AbstractThresholdKeyGenerationTest {
   ThresholdKeyGeneration keyGeneration;
-  SimulatedOtherNode[] otherNodes;
+  Collection<SimulatedOtherNode> otherNodes;
+  int threshold;
 
-  int threshold = 3;
+  public void generateKeys(final int numberOfNodes, final int threshold) {
+    this.threshold = threshold;
 
-  @Before
-  public void generateKeys() {
-    CrosschainKeyManager keyManager = new CrosschainKeyManager();
+    ThresholdKeyGenContractInterface keyGen = new SimulatedThresholdKeyGenContractWrapper();
+    SimulatedCrosschainDevP2P p2pI = new SimulatedCrosschainDevP2P(keyGen, numberOfNodes-1);
+    CrosschainKeyManager keyManager = new CrosschainKeyManager(keyGen, p2pI);
     BigInteger blockchainId = BigInteger.TEN;
-
     keyManager.init(blockchainId, SECP256K1.KeyPair.generate());
-
     long keyVersionNumber = keyManager.generateNewKeys(threshold);
 
     this.keyGeneration = keyManager.activeKeyGenerations.get(keyVersionNumber);
 
-    this.otherNodes = keyManager.others;
+    this.otherNodes = p2pI.otherNodes.values();
   }
 
   @Test
@@ -70,10 +73,12 @@ public class ThresholdKeyGenerationTest {
     shares[0] =
         new IntegerSecretShare(
             this.keyGeneration.getMyNodeAddress(), this.keyGeneration.getPrivateKeyShare());
+    Iterator<SimulatedOtherNode> iter = this.otherNodes.iterator();
     for (int i = 0; i < this.threshold - 1; i++) {
+      SimulatedOtherNode otherNode = iter.next();
       shares[i + 1] =
           new IntegerSecretShare(
-              this.otherNodes[i].getMyNodeAddress(), this.otherNodes[i].getPrivateKeyShare());
+              otherNode.getMyNodeAddress(), otherNode.getPrivateKeyShare());
     }
 
     BlsCryptoProvider cryptoProvider =

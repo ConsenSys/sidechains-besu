@@ -22,9 +22,11 @@ import java.math.BigInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** Class wraps the Threshold Key Generation Contract. */
-public class ThresholdKeyGenContract {
-  public static final int DEFAULT_ROUND_DURATION = 5;
+/**
+ * Wraps the test version of the Threshold Key Generation Contract.
+ */
+public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenContractInterface {
+  private static final int DEFAULT_ROUND_DURATION = 5;
 
   private SimulatedThresholdKeyGenContract keyGen = new SimulatedThresholdKeyGenContract();
 
@@ -38,13 +40,14 @@ public class ThresholdKeyGenContract {
   //  WorldStateArchive worldStateArchive;
   //  int sidechainId;
 
-  BigInteger msgSender;
+  private BigInteger msgSender;
 
   //  Vertx vertx;
 
   // TODO will need to take a parameter: the address of the deployed contract.
-  public ThresholdKeyGenContract() {}
+  public SimulatedThresholdKeyGenContractWrapper() {}
 
+  @Override
   public void init(
       //      final TransactionSimulator transactionSimulator,
       //      final TransactionPool transactionPool,
@@ -66,56 +69,73 @@ public class ThresholdKeyGenContract {
     //    this.vertx = Vertx.vertx();
   }
 
-  public void startNewKeyGeneration(final long version, final int threshold) throws Exception {
+  @Override
+  public void startNewKeyGeneration(final long version, final int threshold) {
     startNewKeyGeneration(version, threshold, DEFAULT_ROUND_DURATION);
   }
 
+  @Override
   public void startNewKeyGeneration(
-      final long version, final int threshold, final int roundDurationInBlocks) throws Exception {
+      final long version, final int threshold, final int roundDurationInBlocks) {
     // TODO when this is implemented for real, submit http request via vertx.
     // TODO indicate a time-out for the overall key generation process
     this.keyGen.startNewKeyGeneration(version, this.msgSender, threshold, roundDurationInBlocks);
   }
 
-  public void setNodeId(final long version) throws Exception {
+  @Override
+  public void setNodeId(final long version) {
     this.keyGen.setNodeId(version, this.msgSender);
   }
 
+  @Override
   public void setNodeId(final long version, final BigInteger msgSender) {
     this.keyGen.setNodeId(version, msgSender);
   }
 
+  @Override
   public void setNodeCoefficientsCommitments(
       final long version, final Bytes32[] coefPublicPointCommitments) {
     this.keyGen.setNodeCoefficientsCommitments(version, this.msgSender, coefPublicPointCommitments);
   }
 
+  @Override
   public void setNodeCoefficientsCommitments(
       final long version, final BigInteger msgSender, final Bytes32[] coefPublicPointCommitments) {
     this.keyGen.setNodeCoefficientsCommitments(version, msgSender, coefPublicPointCommitments);
   }
 
+  @Override
   public void setNodeCoefficientsPublicValues(final long version, final BlsPoint[] coefPublicPoints) {
     this.keyGen.setNodeCoefficientsPublicValues(version, this.msgSender, coefPublicPoints);
   }
 
+  @Override
   public void setNodeCoefficientsPublicValues(
       final long version, final BigInteger msgSender, final BlsPoint[] coefPublicPoints) {
     this.keyGen.setNodeCoefficientsPublicValues(version, msgSender, coefPublicPoints);
   }
 
+  @Override
   public long getExpectedKeyGenerationVersion() {
     return this.keyGen.getExpectedKeyGenerationVersion();
   }
 
+  @Override
+  public int getThreshold(final long version) {
+    return this.keyGen.getThreshold(version);
+  }
+
+  @Override
   public int getNumberOfNodes(final long version) {
     return this.keyGen.getNumberOfNodes(version);
   }
 
+  @Override
   public BigInteger getNodeAddress(final long version, final int index) {
     return this.keyGen.getNodeAddress(version, index);
   }
 
+  @Override
   public BlsPoint getCoefficientPublicValue(
       final long version, final BigInteger fromAddress, final int coefNumber) {
     return this.keyGen.getCoefficientPublicValue(version, fromAddress, coefNumber);

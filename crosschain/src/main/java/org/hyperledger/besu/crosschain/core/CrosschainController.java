@@ -55,7 +55,7 @@ public class CrosschainController {
 
   public CrosschainController() {
     this.processor = new CrosschainProcessor();
-    this.crosschainKeyManager = new CrosschainKeyManager();
+    this.crosschainKeyManager = CrosschainKeyManager.getCrosschainKeyManager();
   }
 
   public void init(

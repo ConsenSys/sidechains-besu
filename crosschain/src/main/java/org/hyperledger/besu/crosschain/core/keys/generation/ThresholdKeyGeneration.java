@@ -15,7 +15,7 @@ package org.hyperledger.besu.crosschain.core.keys.generation;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
-import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2P;
+import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
 import org.hyperledger.besu.crosschain.p2p.CrosschainPartSecretShareCallback;
 import org.hyperledger.besu.crypto.Hash;
 import org.hyperledger.besu.crypto.PRNGSecureRandom;
@@ -48,8 +48,8 @@ public class ThresholdKeyGeneration {
 
   private Map<BigInteger, BigInteger> receivedSecretShares = new TreeMap<>();
 
-  ThresholdKeyGenContract thresholdKeyGenContract;
-  CrosschainDevP2P p2p;
+  ThresholdKeyGenContractInterface thresholdKeyGenContract;
+  CrosschainDevP2PInterface p2p;
 
   private Map<BigInteger, BlsPoint[]> otherNodeCoefficients;
 
@@ -64,8 +64,8 @@ public class ThresholdKeyGeneration {
   public ThresholdKeyGeneration(
       final int threshold,
       final SECP256K1.KeyPair nodeKeyPair,
-      final ThresholdKeyGenContract thresholdKeyGenContract,
-      final CrosschainDevP2P p2p) {
+      final ThresholdKeyGenContractInterface thresholdKeyGenContract,
+      final CrosschainDevP2PInterface p2p) {
     this.threshold = threshold;
     this.thresholdKeyGenContract = thresholdKeyGenContract;
     this.p2p = p2p;
@@ -99,7 +99,7 @@ public class ThresholdKeyGeneration {
       // TODO: After some time-out, to allow other nodes to post their node ids.
       // TODO Use vertix
       // Probably have to wait multiple block times.
-      Thread.sleep(2000);
+      //Thread.sleep(2000);
       this.p2p.requestPostCommits(keyVersionNumber);
 
       int numberOfNodes = this.thresholdKeyGenContract.getNumberOfNodes(keyVersionNumber);
@@ -124,7 +124,7 @@ public class ThresholdKeyGeneration {
 
       // TODO wait for a period of time, to let other nodes post their commitments.
       // Probably have to wait multiple block times.
-      Thread.sleep(2000);
+      //Thread.sleep(2000);
 
       // Post Public Values Round.
       this.p2p.requestPostPublicValues(keyVersionNumber);
@@ -135,7 +135,7 @@ public class ThresholdKeyGeneration {
           keyVersionNumber, this.myCoeffsPublicValues);
 
       // Probably have to wait multiple block times.
-      Thread.sleep(2000);
+      //Thread.sleep(2000);
       // Get all of the other node's coefficient public values.
       LOG.info("Get all of the other node's coefficient public values.");
       this.otherNodeCoefficients = new TreeMap<BigInteger, BlsPoint[]>();
