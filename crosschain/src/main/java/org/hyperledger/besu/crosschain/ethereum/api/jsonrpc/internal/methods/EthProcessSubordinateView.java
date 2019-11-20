@@ -97,7 +97,8 @@ public class EthProcessSubordinateView implements JsonRpcMethod {
     //   calculation we won't notice this problem.
     // Maybe we should return a hash, and the result can be fetched later based on the hash?
 
-    Object resultOrError = this.crosschainController.getSignedSubordinateViewResult(transaction, blockNumber);
+    Object resultOrError =
+        this.crosschainController.getSignedSubordinateViewResult(transaction, blockNumber);
     if (resultOrError == null) {
       LOG.info("Transaction Simulation returned null as error");
       throw new Error("Unexpected result: null");

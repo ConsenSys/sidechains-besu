@@ -25,55 +25,63 @@ class SimulatedThresholdKeyGenContract {
 
   private Map<Long, SimulatedThresholdKeyGenContractSingleKeyGen> keyGens = new TreeMap<>();
 
-  void startNewKeyGeneration(final long version, final BigInteger msgSender, final int threshold, final int roundDurationInBlocks) throws Exception {
-    if (version != this.expectedNextVersion+1) {
-      throw new Exception("require: As a way of ensuring only one key generation as any version number");
+  void startNewKeyGeneration(
+      final long version,
+      final BigInteger msgSender,
+      final int threshold,
+      final int roundDurationInBlocks)
+      throws Exception {
+    if (version != this.expectedNextVersion) {
+      // Simulate a require() statement.
+      throw new Exception(
+          "require: As a way of ensuring only one key generation as any version number");
     }
-    this.keyGens.put(version, new SimulatedThresholdKeyGenContractSingleKeyGen(threshold, roundDurationInBlocks));
+    this.keyGens.put(
+        version,
+        new SimulatedThresholdKeyGenContractSingleKeyGen(threshold, roundDurationInBlocks));
     this.expectedNextVersion++;
 
     setNodeId(version, msgSender);
   }
 
-
-  void setNodeId(final long version, final BigInteger msgSender) throws Exception {
+  void setNodeId(final long version, final BigInteger msgSender) {
     getKeyGenInstance(version).setNodeId(msgSender);
   }
 
   void setNodeCoefficientsCommitments(
-      final long version, final BigInteger msgSender, final Bytes32[] coefPublicPointCommitments) throws Exception {
-    getKeyGenInstance(version).setNodeCoefficientsCommitments(msgSender, coefPublicPointCommitments);
+      final long version, final BigInteger msgSender, final Bytes32[] coefPublicPointCommitments) {
+    getKeyGenInstance(version)
+        .setNodeCoefficientsCommitments(msgSender, coefPublicPointCommitments);
   }
 
-  void setNodeCoefficientsPublicValues(final long version,
-                                              final BigInteger msgSender, final BlsPoint[] coefPublicPoints) throws Exception {
+  void setNodeCoefficientsPublicValues(
+      final long version, final BigInteger msgSender, final BlsPoint[] coefPublicPoints) {
     getKeyGenInstance(version).setNodeCoefficientsPublicValues(msgSender, coefPublicPoints);
   }
-
 
   long getExpectedKeyGenerationVersion() {
     return this.expectedNextVersion;
   }
 
-  int getNumberOfNodes(final long version) throws Exception {
+  int getNumberOfNodes(final long version) {
     return getKeyGenInstance(version).getNumberOfNodes();
   }
 
-
-  BigInteger getNodeAddress(final long version, final int index) throws Exception {
+  BigInteger getNodeAddress(final long version, final int index) {
     return getKeyGenInstance(version).getNodeAddress(index);
   }
 
-  BlsPoint getCoefficientPublicValue(final long version, final BigInteger fromAddress, final int coefNumber) throws Exception {
+  BlsPoint getCoefficientPublicValue(
+      final long version, final BigInteger fromAddress, final int coefNumber) {
     return getKeyGenInstance(version).getCoefficientPublicValue(fromAddress, coefNumber);
   }
 
-  private SimulatedThresholdKeyGenContractSingleKeyGen getKeyGenInstance(final long version) throws Exception {
+  private SimulatedThresholdKeyGenContractSingleKeyGen getKeyGenInstance(final long version) {
     SimulatedThresholdKeyGenContractSingleKeyGen keyGen = this.keyGens.get(version);
     if (keyGen == null) {
-      throw new Exception("require: As a way of ensuring only one key generation as any version number");
+      throw new RuntimeException(
+          "require: As a way of ensuring only one key generation as any version number");
     }
     return keyGen;
   }
-
 }

@@ -18,7 +18,6 @@ import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2P;
 import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
-import org.hyperledger.besu.util.bytes.Bytes32;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -37,6 +36,7 @@ public class CrosschainKeyManager {
     ACTIVE_CREDENTIALS_NOT_AVAILABLE_ON_THIS_NODE,
     ACTIVE_CREDENTIALS_AVAILABLE
   }
+
   public enum NegotiatingCredentialsStatus {
     NO_NEGOTIATION,
     ACTIVE_NEGOTIATION,
@@ -44,33 +44,31 @@ public class CrosschainKeyManager {
   }
 
   private static long NOT_KNOWN = -1;
-  //long highestKnownVersion = NOT_KNOWN;
+  // long highestKnownVersion = NOT_KNOWN;
   long activeKeyVersion = NOT_KNOWN;
   boolean activeVersionNotKnown = true;
 
-
   // TODO blockkchain ID will be used when interacting with the crosschain coordination contract.
-//  private BigInteger blockchainId;
+  //  private BigInteger blockchainId;
   private SECP256K1.KeyPair nodeKeys;
 
   private static class Coord {
     BigInteger coordinationBlockchainId;
     Address coodinationContract;
+
     Coord(final BigInteger coordinationBlockchainId, final Address coodinationContract) {
       this.coodinationContract = coodinationContract;
       this.coordinationBlockchainId = coordinationBlockchainId;
     }
   }
-  List<Coord> coordinationContracts = new ArrayList<>();
 
+  List<Coord> coordinationContracts = new ArrayList<>();
 
   Map<Long, BlsThresholdCredentials> credentials;
 
   public Map<Long, ThresholdKeyGeneration> activeKeyGenerations = new TreeMap<>();
   ThresholdKeyGenContract thresholdKeyGenContract = new ThresholdKeyGenContract();
   CrosschainDevP2P p2p = new CrosschainDevP2P();
-
-
 
   // TODO add key generation contract address
   public CrosschainKeyManager() {
@@ -85,26 +83,25 @@ public class CrosschainKeyManager {
     }
   }
 
-  public void init(
-      final BigInteger sidechainId,
-      final SECP256K1.KeyPair nodeKeys) {
-//    this.blockchainId = sidechainId;
+  public void init(final BigInteger sidechainId, final SECP256K1.KeyPair nodeKeys) {
+    //    this.blockchainId = sidechainId;
     this.nodeKeys = nodeKeys;
 
+    this.thresholdKeyGenContract.init(nodeKeys);
   }
 
-  public void addCoordinationContract(final BigInteger coordinationBlockchainId, final Address coodinationContract) {
+  public void addCoordinationContract(
+      final BigInteger coordinationBlockchainId, final Address coodinationContract) {
     // TODO check that this coodination contrat is not already in the list.
     this.coordinationContracts.add(new Coord(coordinationBlockchainId, coodinationContract));
   }
 
-  public void removeCoordinationContract(final BigInteger coordinationBlockchainId, final Address coodinationContract) {
+  public void removeCoordinationContract(
+      final BigInteger coordinationBlockchainId, final Address coodinationContract) {
     // TODO
   }
 
-
-
-    public BlsThresholdCredentials getActiveCredentials() {
+  public BlsThresholdCredentials getActiveCredentials() {
     if (this.activeVersionNotKnown) {
       return BlsThresholdCredentials.emptyCredentials();
     }
@@ -115,25 +112,24 @@ public class CrosschainKeyManager {
     return null;
   }
 
-
-  int NUM = 2;
-  public SimulatedOtherNode[] others = new SimulatedOtherNode[NUM];
+  int NUMBER_OF_SIMULATED_NODES = 4;
+  public SimulatedOtherNode[] others = new SimulatedOtherNode[NUMBER_OF_SIMULATED_NODES];
 
   public long generateNewKeys(final int threshold) {
-    //TODO ****************************************
+    // TODO ****************************************
     this.p2p.clearSimulatedNodes();
-    for (int i = 0; i < 2; i++) {
-      others[i] = new SimulatedOtherNode(threshold, BigInteger.valueOf(i), this.thresholdKeyGenContract, this.p2p);
+    for (int i = 0; i < NUMBER_OF_SIMULATED_NODES; i++) {
+      others[i] =
+          new SimulatedOtherNode(
+              threshold, BigInteger.valueOf(i+1), this.thresholdKeyGenContract, this.p2p);
       others[i].init();
     }
 
-    ThresholdKeyGeneration keyGen = new ThresholdKeyGeneration(threshold, this.nodeKeys, this.thresholdKeyGenContract, this.p2p);
+    ThresholdKeyGeneration keyGen =
+        new ThresholdKeyGeneration(
+            threshold, this.nodeKeys, this.thresholdKeyGenContract, this.p2p);
     long keyVersionNumber = keyGen.startKeyGeneration();
     this.activeKeyGenerations.put(keyVersionNumber, keyGen);
     return keyVersionNumber;
   }
-
-
-
-
 }

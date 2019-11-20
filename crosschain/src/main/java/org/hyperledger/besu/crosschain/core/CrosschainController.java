@@ -12,8 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
-import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
+import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.subview.SubordinateViewCoordinator;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
@@ -133,7 +133,8 @@ public class CrosschainController {
    * @param blockNumber Execute view at this block number.
    * @return Result or an error.
    */
-  public Object getSignedSubordinateViewResult(final CrosschainTransaction subordinateView, final long blockNumber) {
+  public Object getSignedSubordinateViewResult(
+      final CrosschainTransaction subordinateView, final long blockNumber) {
     // Get Subordinate View results.
     if (this.processor.processSubordinates(subordinateView, false)) {
       return TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_VIEW;
@@ -208,17 +209,15 @@ public class CrosschainController {
     return this.crosschainKeyManager.getActiveCredentials();
   }
 
-
   // TODO: Implement crosschainGetBlockchainPublicKeyGenerationStatus
-
 
   /**
    * Called by the JSON RPC method: cross_generateBlockchainKey
+   *
    * @param threshold The threshold number of validators that will be needed to sign messages.
    * @return The key version number.
    */
   public long crosschainGenerateBlockchainKey(final int threshold) {
     return this.crosschainKeyManager.generateNewKeys(threshold);
   }
-
 }

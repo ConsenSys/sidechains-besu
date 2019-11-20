@@ -12,32 +12,31 @@
  */
 package org.hyperledger.besu.crosschain.crypto.threshold;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGeneration;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.IntegerSecretShare;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
+import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
+import org.hyperledger.besu.crypto.SECP256K1;
 
 import java.math.BigInteger;
 
-import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
-import org.hyperledger.besu.crypto.SECP256K1;
 import org.junit.Before;
 import org.junit.Test;
-import static org.assertj.core.api.Assertions.assertThat;
-
 
 // This is the main class for running through a simple scenario.
 public class ThresholdKeyGenerationTest {
 
   static byte[] DATA = new byte[] {0x01, 0x02, 0x03, 0x04};
 
-
   ThresholdKeyGeneration keyGeneration;
   SimulatedOtherNode[] otherNodes;
 
-  int threshold = 2;
+  int threshold = 3;
 
   @Before
   public void generateKeys() {
@@ -53,12 +52,10 @@ public class ThresholdKeyGenerationTest {
     this.otherNodes = keyManager.others;
   }
 
-
-
   @Test
   public void allPubKeysMatch() {
     BlsPoint pubKey = keyGeneration.getPublicKey();
-    for (SimulatedOtherNode other: otherNodes) {
+    for (SimulatedOtherNode other : otherNodes) {
       assertThat(pubKey).isEqualTo(other.getPublicKey());
     }
   }
@@ -67,19 +64,16 @@ public class ThresholdKeyGenerationTest {
   public void checkPublicKeyMatchesGroupPrivateKeyTest() throws Exception {
     // Calculate the group private key.
     // In a real situation, this private key is never combined.
-
-    // Add all of the points for each of the x values.
-    BigInteger[] xValues = new BigInteger[this.otherNodes.length + 1];
-    xValues[0] = this.keyGeneration.getPrivateKeyShare();
-    for (int i = 0; i < this.otherNodes.length; i++) {
-      xValues[i+1] = this.otherNodes[i].getPrivateKeyShare();
-    }
-
-
+    // TODO: This just checks one combination of shares. If one combination works, they probably all
+    // work. It would, however, be good to check.
     IntegerSecretShare[] shares = new IntegerSecretShare[this.threshold];
-    shares[0] = new IntegerSecretShare(this.keyGeneration.getMyNodeAddress(), this.keyGeneration.getPrivateKeyShare());
-    for (int i = 0; i < this.threshold-1; i++) {
-      shares[i+1] = new IntegerSecretShare(this.otherNodes[i].getMyNodeAddress(), this.otherNodes[i].getPrivateKeyShare());
+    shares[0] =
+        new IntegerSecretShare(
+            this.keyGeneration.getMyNodeAddress(), this.keyGeneration.getPrivateKeyShare());
+    for (int i = 0; i < this.threshold - 1; i++) {
+      shares[i + 1] =
+          new IntegerSecretShare(
+              this.otherNodes[i].getMyNodeAddress(), this.otherNodes[i].getPrivateKeyShare());
     }
 
     BlsCryptoProvider cryptoProvider =
@@ -90,12 +84,11 @@ public class ThresholdKeyGenerationTest {
 
     // Do Lagrange interpolation to determine the group private key (the point for x=0).
     BigInteger privateKey = thresholdScheme.calculateSecret(shares);
-//    System.out.println("Private Key: " + privateKey);
+    //    System.out.println("Private Key: " + privateKey);
 
     BlsPoint shouldBePublicKey = cryptoProvider.createPointE2(privateKey);
-//    System.out.println("Public Key derived from private key: " + shouldBePublicKey);
+    //    System.out.println("Public Key derived from private key: " + shouldBePublicKey);
 
     assertThat(this.keyGeneration.getPublicKey()).isEqualTo(shouldBePublicKey);
   }
-
 }

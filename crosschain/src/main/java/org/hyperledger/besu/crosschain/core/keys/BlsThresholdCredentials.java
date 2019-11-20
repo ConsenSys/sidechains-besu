@@ -27,7 +27,8 @@ public class BlsThresholdCredentials implements BlsThresholdPublicKey {
   private long threshold;
   private BlsPoint publicKey;
 
-  public BlsThresholdCredentials(final BlsPoint publicKey, final long keyVersion, final long threshold) {
+  public BlsThresholdCredentials(
+      final BlsPoint publicKey, final long keyVersion, final long threshold) {
     this.keyVersion = keyVersion;
     this.threshold = threshold;
     this.publicKey = publicKey;
