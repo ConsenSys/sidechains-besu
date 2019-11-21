@@ -14,7 +14,6 @@ package org.hyperledger.besu.crosschain.core;
 
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
-import org.hyperledger.besu.crosschain.core.subview.SubordinateViewCoordinator;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
@@ -45,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 public class CrosschainController {
   protected static final Logger LOG = LogManager.getLogger();
 
-  SubordinateViewCoordinator subordinateViewCoordinator;
   TransactionPool transactionPool;
   Blockchain blockchain;
   WorldStateArchive worldStateArchive;
@@ -59,7 +57,6 @@ public class CrosschainController {
   }
 
   public void init(
-      final SubordinateViewCoordinator subordinateViewCoordinator,
       final TransactionSimulator transactionSimulator,
       final TransactionPool transactionPool,
       final BigInteger sidechainId,
@@ -74,7 +71,6 @@ public class CrosschainController {
         blockchain,
         worldStateArchive);
     this.crosschainKeyManager.init(sidechainId, nodeKeys);
-    this.subordinateViewCoordinator = subordinateViewCoordinator;
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;
@@ -147,9 +143,11 @@ public class CrosschainController {
       BytesValue resultBytesValue = resultTxSim.getOutput();
       LOG.info("Transaction Simulator Result: " + resultBytesValue.toString());
 
-      BytesValue signedResult =
-          this.subordinateViewCoordinator.getSignedResult(
-              subordinateView, blockNumber, resultBytesValue);
+      BytesValue signedResult = resultBytesValue;
+      // TODO RESULT IS NOT SIGNED
+      //      BytesValue signedResult =
+      //          this.subordinateViewCoordinator.getSignedResult(
+      //              subordinateView, blockNumber, resultBytesValue);
 
       // Replace the output with the output and signature in the result object.
       txResult =

@@ -99,7 +99,7 @@ public class ThresholdKeyGeneration {
       // TODO: After some time-out, to allow other nodes to post their node ids.
       // TODO Use vertix
       // Probably have to wait multiple block times.
-      //Thread.sleep(2000);
+      // Thread.sleep(2000);
       this.p2p.requestPostCommits(keyVersionNumber);
 
       int numberOfNodes = this.thresholdKeyGenContract.getNumberOfNodes(keyVersionNumber);
@@ -124,7 +124,7 @@ public class ThresholdKeyGeneration {
 
       // TODO wait for a period of time, to let other nodes post their commitments.
       // Probably have to wait multiple block times.
-      //Thread.sleep(2000);
+      // Thread.sleep(2000);
 
       // Post Public Values Round.
       this.p2p.requestPostPublicValues(keyVersionNumber);
@@ -135,7 +135,7 @@ public class ThresholdKeyGeneration {
           keyVersionNumber, this.myCoeffsPublicValues);
 
       // Probably have to wait multiple block times.
-      //Thread.sleep(2000);
+      // Thread.sleep(2000);
       // Get all of the other node's coefficient public values.
       LOG.info("Get all of the other node's coefficient public values.");
       this.otherNodeCoefficients = new TreeMap<BigInteger, BlsPoint[]>();
@@ -146,7 +146,8 @@ public class ThresholdKeyGeneration {
         if (!nodeAddress.equals(this.myNodeAddress)) {
           BlsPoint[] points = new BlsPoint[this.myCoeffsPublicValues.length];
           for (int j = 0; j < this.myCoeffsPublicValues.length; j++) {
-            LOG.info("this.thresholdKeyGenContract.getCoefficientPublicValue for node: {}", nodeAddress);
+            LOG.info(
+                "this.thresholdKeyGenContract.getCoefficientPublicValue for node: {}", nodeAddress);
             points[j] =
                 this.thresholdKeyGenContract.getCoefficientPublicValue(
                     keyVersionNumber, nodeAddress, j);
@@ -163,7 +164,6 @@ public class ThresholdKeyGeneration {
       this.p2p.sendPrivateValues(
           this.myNodeAddress, this.nodesStillActiveInKeyGeneration, this.mySecretShares);
       this.p2p.requestSendPrivateValues(keyVersionNumber);
-
 
       this.p2p.requestNodesCompleteKeyGen();
       // Calculate private key shares and public key round.

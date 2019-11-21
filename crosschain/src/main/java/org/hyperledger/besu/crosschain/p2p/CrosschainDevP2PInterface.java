@@ -32,20 +32,25 @@ public interface CrosschainDevP2PInterface {
 
   void setSecretShareCallback(final CrosschainPartSecretShareCallback implementation);
 
-
   // ****** Everything below here is only needed for test implementations.
   void setMyNodeAddress(final BigInteger myNodeAddress);
+
   void clearSimulatedNodes();
+
   void addSimulatedOtherNode(final BigInteger address, final SimulatedOtherNode node);
+
   void simulatedNodesSendPrivateValues(
       final BigInteger myAddress,
       final List<BigInteger> nodeAddresses,
       final Map<BigInteger, BigInteger> mySecretShares);
+
   void requestPostCommits(final long keyVersion);
+
   void requestPostPublicValues(final long keyVersion);
+
   void requestGetOtherNodeCoefs(final long keyVersion);
+
   void requestSendPrivateValues(final long keyVersion);
+
   void requestNodesCompleteKeyGen();
-
-
 }

@@ -19,8 +19,7 @@ import org.hyperledger.besu.util.bytes.Bytes32;
 import java.math.BigInteger;
 
 /**
- * All implementations of the Threshold Key Generation Contract wrapper
- * must implement this method.
+ * All implementations of the Threshold Key Generation Contract wrapper must implement this method.
  */
 public interface ThresholdKeyGenContractInterface {
   void init(
@@ -48,18 +47,19 @@ public interface ThresholdKeyGenContractInterface {
 
   int getThreshold(final long version);
 
-    int getNumberOfNodes(final long version);
+  int getNumberOfNodes(final long version);
 
   BigInteger getNodeAddress(final long version, final int index);
 
   BlsPoint getCoefficientPublicValue(
       final long version, final BigInteger fromAddress, final int coefNumber);
 
-
   // ****  Functions below here are needed for testing purposes only. ****
   void setNodeId(final long version, final BigInteger msgSender);
+
   void setNodeCoefficientsCommitments(
       final long version, final BigInteger msgSender, final Bytes32[] coefPublicPointCommitments);
+
   void setNodeCoefficientsPublicValues(
       final long version, final BigInteger msgSender, final BlsPoint[] coefPublicPoints);
 }

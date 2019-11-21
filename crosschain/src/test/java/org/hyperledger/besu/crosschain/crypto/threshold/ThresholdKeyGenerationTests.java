@@ -16,12 +16,12 @@ import org.junit.Before;
 
 // This is the main class for running through a simple scenario.
 public class ThresholdKeyGenerationTests {
-    public static class Scenario1_1 extends AbstractThresholdKeyGenerationTest {
-      @Before
-      public void genKeys() {
-        generateKeys(1, 1);
-      }
+  public static class Scenario1_1 extends AbstractThresholdKeyGenerationTest {
+    @Before
+    public void genKeys() {
+      generateKeys(1, 1);
     }
+  }
 
   public static class Scenario2_1 extends AbstractThresholdKeyGenerationTest {
     @Before

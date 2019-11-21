@@ -12,15 +12,15 @@
  */
 package org.hyperledger.besu.crosschain.p2p;
 
-import jdk.jfr.Threshold;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
   protected static final Logger LOG = LogManager.getLogger();
@@ -33,12 +33,13 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
     this(keyGenContractInterface, DEFAULT_NUMBER_OF_SIMULATED_NODES);
   }
 
-  public SimulatedCrosschainDevP2P(final ThresholdKeyGenContractInterface keyGenContractInterface, final int numberOfSimulatedNodes) {
+  public SimulatedCrosschainDevP2P(
+      final ThresholdKeyGenContractInterface keyGenContractInterface,
+      final int numberOfSimulatedNodes) {
     otherNodes = new TreeMap<>();
     for (int i = 0; i < numberOfSimulatedNodes; i++) {
       SimulatedOtherNode other =
-          new SimulatedOtherNode(
-              BigInteger.valueOf(i + 1), keyGenContractInterface, this);
+          new SimulatedOtherNode(BigInteger.valueOf(i + 1), keyGenContractInterface, this);
       other.init();
     }
   }
@@ -81,11 +82,8 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
     this.cb = implementation;
   }
 
-
   @Override
-  public void clearSimulatedNodes() {
-
-  }
+  public void clearSimulatedNodes() {}
 
   @Override
   public void addSimulatedOtherNode(final BigInteger address, final SimulatedOtherNode node) {
@@ -104,8 +102,7 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
       LOG.info("node address: {}", nodeAddress);
       if (nodeAddress.equals(realNodesAddress)) {
         this.cb.storePrivateSecretShareCallback(myAddress, mySecretShares.get(nodeAddress));
-      }
-      else if (!nodeAddress.equals(myAddress)) {
+      } else if (!nodeAddress.equals(myAddress)) {
         LOG.info("processing node address: {}", nodeAddress);
         LOG.info(" othernodes.get(): {}", this.otherNodes.get(nodeAddress));
         this.otherNodes
@@ -114,7 +111,6 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
       }
     }
   }
-
 
   @Override
   public void requestPostCommits(final long keyVersion) {
@@ -129,7 +125,6 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
       node.requestPostPublicValues(keyVersion);
     }
   }
-
 
   @Override
   public void requestGetOtherNodeCoefs(final long keyVersion) {
@@ -151,6 +146,4 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
       node.requestNodesCompleteKeyGen();
     }
   }
-
-
 }

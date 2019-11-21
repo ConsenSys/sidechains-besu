@@ -12,14 +12,24 @@
  */
 package org.hyperledger.besu.crosschain.core.keys;
 
+import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
-/** Exposes just the Blockchain Public Key and related information. */
+import java.math.BigInteger;
+
+/**
+ * Exposes just the Blockchain Public Key and related meta-data. This is all the information that
+ * needs to be stored in the Crosschain Coordination Contract.
+ */
 public interface BlsThresholdPublicKey {
 
-  BytesValue getBlockchainPublicKey();
+  BlsPoint getPublicKey();
 
-  long getBlockchainPublicKeyVersion();
+  long getKeyVersion();
 
-  long getBlockchainPublicKeyThreshold();
+  BigInteger getBlockchainId();
+
+  BlsThresholdCryptoSystem getAlgorithm();
+
+  BytesValue getEncodedPublicKey();
 }

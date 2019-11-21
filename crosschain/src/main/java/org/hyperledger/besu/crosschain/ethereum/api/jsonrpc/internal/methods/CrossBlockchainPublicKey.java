@@ -47,9 +47,7 @@ public class CrossBlockchainPublicKey implements JsonRpcMethod {
     final Map<String, Object> response = new HashMap<>();
     BlsThresholdPublicKey credentials = this.crosschainController.getBlockchainPublicKey();
 
-    response.put("key", credentials.getBlockchainPublicKey());
-    response.put("version", credentials.getBlockchainPublicKeyVersion());
-    response.put("threshold", credentials.getBlockchainPublicKeyThreshold());
+    response.put("pubkey", credentials.getEncodedPublicKey());
 
     return new JsonRpcSuccessResponse(request.getId(), response);
   }

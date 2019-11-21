@@ -15,9 +15,8 @@ package org.hyperledger.besu.crosschain.core.keys;
 import org.hyperledger.besu.crosschain.core.keys.generation.SimulatedThresholdKeyGenContractWrapper;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGeneration;
-import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
 import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
-import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
+import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
 
@@ -27,7 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class CrosschainKeyManager {
+  protected static final Logger LOG = LogManager.getLogger();
+
   public enum ActiveCredentialStatus {
     // No credentials available for this node. The Crosschain Coordination Contract
     // does not have any public key specified for this blockchain.
@@ -80,7 +84,9 @@ public class CrosschainKeyManager {
     return new CrosschainKeyManager(keyGen, p2pI);
   }
 
-  public CrosschainKeyManager(final ThresholdKeyGenContractInterface thresholdKeyGenContract, final CrosschainDevP2PInterface p2p) {
+  public CrosschainKeyManager(
+      final ThresholdKeyGenContractInterface thresholdKeyGenContract,
+      final CrosschainDevP2PInterface p2p) {
     this.thresholdKeyGenContract = thresholdKeyGenContract;
     this.p2p = p2p;
 
@@ -123,6 +129,12 @@ public class CrosschainKeyManager {
     return null;
   }
 
+  /**
+   * Coordinate with other nodes to generate a new threshold key set.
+   *
+   * @param threshold The threshold number of keys that need to cooperate to sign messages.
+   * @return The key version number of the key.
+   */
   public long generateNewKeys(final int threshold) {
     ThresholdKeyGeneration keyGen =
         new ThresholdKeyGeneration(
@@ -131,4 +143,26 @@ public class CrosschainKeyManager {
     this.activeKeyGenerations.put(keyVersionNumber, keyGen);
     return keyVersionNumber;
   }
+
+  /**
+   * Coordinate with other nodes to sign the message.
+   *
+   * @param message The message to be signed.
+   * @return The signed message.
+   */
+  //  private BytesValue thresholdSign(final BytesValue message) {
+  //    // TODO this is going to need to be re-written assuming asynchronous signature results
+  //
+  //  }
+  //
+  //  public BytesValue signSubordinateViewResult(final BytesValue message) {
+  //    LOG.info("Subordinate View Result: coordinating the signing of message: {}", message);
+  //    return thresholdSign(message);
+  //  }
+  //
+  //
+  //  public BytesValue localSign(final long keyVersion, final BytesValue message) {
+  //
+  //  }
+
 }

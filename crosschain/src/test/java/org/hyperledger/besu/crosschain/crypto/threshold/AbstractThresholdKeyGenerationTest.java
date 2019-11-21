@@ -22,7 +22,6 @@ import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.IntegerSecretShare;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
-import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
 import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
 import org.hyperledger.besu.crosschain.p2p.SimulatedOtherNode;
 import org.hyperledger.besu.crypto.SECP256K1;
@@ -31,7 +30,6 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.junit.Before;
 import org.junit.Test;
 
 // This is the main class for running through a simple scenario.
@@ -44,7 +42,7 @@ public abstract class AbstractThresholdKeyGenerationTest {
     this.threshold = threshold;
 
     ThresholdKeyGenContractInterface keyGen = new SimulatedThresholdKeyGenContractWrapper();
-    SimulatedCrosschainDevP2P p2pI = new SimulatedCrosschainDevP2P(keyGen, numberOfNodes-1);
+    SimulatedCrosschainDevP2P p2pI = new SimulatedCrosschainDevP2P(keyGen, numberOfNodes - 1);
     CrosschainKeyManager keyManager = new CrosschainKeyManager(keyGen, p2pI);
     BigInteger blockchainId = BigInteger.TEN;
     keyManager.init(blockchainId, SECP256K1.KeyPair.generate());
@@ -77,8 +75,7 @@ public abstract class AbstractThresholdKeyGenerationTest {
     for (int i = 0; i < this.threshold - 1; i++) {
       SimulatedOtherNode otherNode = iter.next();
       shares[i + 1] =
-          new IntegerSecretShare(
-              otherNode.getMyNodeAddress(), otherNode.getPrivateKeyShare());
+          new IntegerSecretShare(otherNode.getMyNodeAddress(), otherNode.getPrivateKeyShare());
     }
 
     BlsCryptoProvider cryptoProvider =

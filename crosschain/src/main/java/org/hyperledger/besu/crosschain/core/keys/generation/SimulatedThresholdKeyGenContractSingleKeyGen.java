@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.core.keys.generation;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crypto.Hash;
 import org.hyperledger.besu.util.bytes.Bytes32;
@@ -23,6 +21,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // Simulates a contract which sits on the sidechain.
 class SimulatedThresholdKeyGenContractSingleKeyGen {

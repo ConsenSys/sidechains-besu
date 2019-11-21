@@ -22,9 +22,7 @@ import java.math.BigInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Wraps the test version of the Threshold Key Generation Contract.
- */
+/** Wraps the test version of the Threshold Key Generation Contract. */
 public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenContractInterface {
   private static final int DEFAULT_ROUND_DURATION = 5;
 
@@ -64,7 +62,8 @@ public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenC
     //    this.worldStateArchive = worldStateArchive;
 
     // Just have something for the simulator based on the node public key.
-    this.msgSender = new BigInteger(Address.extract(nodeKeys.getPublicKey()).toUnprefixedString(), 16);
+    this.msgSender =
+        new BigInteger(Address.extract(nodeKeys.getPublicKey()).toUnprefixedString(), 16);
 
     //    this.vertx = Vertx.vertx();
   }
@@ -105,7 +104,8 @@ public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenC
   }
 
   @Override
-  public void setNodeCoefficientsPublicValues(final long version, final BlsPoint[] coefPublicPoints) {
+  public void setNodeCoefficientsPublicValues(
+      final long version, final BlsPoint[] coefPublicPoints) {
     this.keyGen.setNodeCoefficientsPublicValues(version, this.msgSender, coefPublicPoints);
   }
 
