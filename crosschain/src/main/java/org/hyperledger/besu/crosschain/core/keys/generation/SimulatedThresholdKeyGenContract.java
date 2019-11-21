@@ -74,6 +74,10 @@ class SimulatedThresholdKeyGenContract {
     return getKeyGenInstance(version).getNodeAddress(index);
   }
 
+  boolean nodeCoefficientsCommitmentsSet(final long version, final BigInteger address) {
+    return getKeyGenInstance(version).nodeCoefficientsCommitmentsSet(address);
+  }
+
   BlsPoint getCoefficientPublicValue(
       final long version, final BigInteger fromAddress, final int coefNumber) {
     return getKeyGenInstance(version).getCoefficientPublicValue(fromAddress, coefNumber);

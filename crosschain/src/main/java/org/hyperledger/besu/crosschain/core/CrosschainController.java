@@ -12,6 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
+import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crypto.SECP256K1;
@@ -207,15 +208,25 @@ public class CrosschainController {
     return this.crosschainKeyManager.getActiveCredentials();
   }
 
-  // TODO: Implement crosschainGetBlockchainPublicKeyGenerationStatus
 
   /**
-   * Called by the JSON RPC method: cross_generateBlockchainKey
+   * Called by the JSON RPC method: cross_startThresholdKeyGeneration.
    *
    * @param threshold The threshold number of validators that will be needed to sign messages.
+   * @param algorithm The ECC curve and message digest function to be used.
    * @return The key version number.
    */
-  public long crosschainGenerateBlockchainKey(final int threshold) {
-    return this.crosschainKeyManager.generateNewKeys(threshold);
+  public long crossStartThresholdKeyGeneration(final int threshold, final BlsThresholdCryptoSystem algorithm) {
+    return this.crosschainKeyManager.generateNewKeys(threshold, algorithm);
+  }
+
+  /**
+   * Called by the JSON RPC method: cross_getKeyGenerationStatus.
+   *
+   * @param keyVersion
+   * @return
+   */
+  public int getKeyGenerationStatus(final long keyVersion) {
+    // TODO
   }
 }

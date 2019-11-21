@@ -15,8 +15,10 @@ package org.hyperledger.besu.crosschain.p2p;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +51,12 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
     this.realNodesAddress = myNodeAddress;
   }
 
+  @Override
+  public Set<BigInteger> getAllPeers() {
+    return this.otherNodes.keySet();
+  }
+
+
   /**
    * Request other nodes start the Threshold Key Generation process.
    *
@@ -64,9 +72,9 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
   @Override
   public void sendPrivateValues(
       final BigInteger myAddress,
-      final List<BigInteger> nodeAddresses,
+      final Set<BigInteger> nodeAddresses,
       final Map<BigInteger, BigInteger> mySecretShares) {
-    for (BigInteger nodeAddress : nodeAddresses) {
+    for (BigInteger nodeAddress: nodeAddresses) {
       if (!nodeAddress.equals(myAddress)) {
         this.otherNodes
             .get(nodeAddress)

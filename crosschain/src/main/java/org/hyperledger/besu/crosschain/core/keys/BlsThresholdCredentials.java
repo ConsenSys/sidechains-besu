@@ -12,78 +12,135 @@
  */
 package org.hyperledger.besu.crosschain.core.keys;
 
+import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.ethereum.rlp.RLP;
+import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Holds the Blockchain Public Key, the node's BLS Private Key Share, the threshold and key version.
- * The key version is incremented each time a key generation is started.
+ * Holds all of the information related to a round of key generation.
  */
-public class BlsThresholdCredentials implements BlsThresholdPublicKeyWithThreshold {
-  public static final long NO_PUBLIC_KEY_SET = 0;
-  public static final int NO_PUBLIC_KEY_SETI = 0;
-  public static final BytesValue NO_PUBLIC_KEY_SET_BV = BytesValue.EMPTY;
-
-  private long keyVersion;
-  private int threshold;
-  private BlsPoint publicKey;
-  private BigInteger blockchainId;
-  private BlsThresholdCryptoSystem algorithm;
+public class BlsThresholdCredentials extends BlsThresholdPubKey {
+  private Map<BigInteger, BigInteger> mySecretShares;
+  private BigInteger myNodeAddress;
+  private Set<BigInteger> nodesStillActiveInKeyGeneration;
+  private Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration;
+  private KeyGenFailureToCompleteReason failureReason;
 
   public BlsThresholdCredentials(
-      final BlsPoint publicKey, final long keyVersion, final int threshold) {
-    this.keyVersion = keyVersion;
-    this.threshold = threshold;
-    this.publicKey = publicKey;
+      final long keyVersion,
+      final int threshold,
+      final BlsPoint publicKey,
+      final BigInteger blockchainId,
+      final BlsThresholdCryptoSystem algorithm,
+      final Map<BigInteger, BigInteger> mySecretShares,
+      final BigInteger myNodeAddress,
+      final Set<BigInteger> nodesStillActiveInKeyGeneration,
+      final Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration,
+      final KeyGenFailureToCompleteReason failureReason) {
+    super(publicKey, keyVersion, threshold, blockchainId, algorithm);
+    this.mySecretShares = mySecretShares;
+    this.myNodeAddress = myNodeAddress;
+    this.nodesStillActiveInKeyGeneration = nodesStillActiveInKeyGeneration;
+    this.nodesNoLongerInKeyGeneration = nodesNoLongerInKeyGeneration;
+    this.failureReason = failureReason;
   }
 
-  public static BlsThresholdCredentials emptyCredentials() {
-    return new BlsThresholdCredentials(null, NO_PUBLIC_KEY_SET, NO_PUBLIC_KEY_SETI);
+  public Map<BigInteger, BigInteger> getMySecretShares() {
+    return mySecretShares;
   }
 
-  @Override
-  public BlsPoint getPublicKey() {
-    return this.publicKey;
+  public BigInteger getMyNodeAddress() {
+    return myNodeAddress;
   }
 
-  @Override
-  public long getKeyVersion() {
-    return this.keyVersion;
+  public Set<BigInteger> getNodesCompletedKeyGeneration() {
+    return nodesStillActiveInKeyGeneration;
   }
 
-  @Override
-  public int getThreshold() {
-    return this.threshold;
+  public Map<BigInteger, KeyGenFailureToCompleteReason> getNodesDoppedOutOfKeyGeneration() {
+    return nodesNoLongerInKeyGeneration;
   }
 
-  @Override
-  public BlsThresholdCryptoSystem getAlgorithm() {
-    return this.algorithm;
+  public KeyGenFailureToCompleteReason getFailureReason() {
+    return failureReason;
   }
 
-  @Override
-  public BigInteger getBlockchainId() {
-    return this.blockchainId;
-  }
 
-  @Override
-  public BytesValue getEncodedPublicKey() {
-    return RLP.encode(
-        out -> {
-          out.startList();
-          out.writeLongScalar(this.keyVersion);
-          out.writeLongScalar(this.threshold);
-          out.writeLongScalar(this.algorithm.value);
-          out.writeBytesValue(BytesValue.wrap(this.publicKey.store()));
-          out.writeBigIntegerScalar(this.blockchainId);
-          out.endList();
-        });
-  }
+  public static class Builder {
+    private long keyVersion;
+    private int threshold;
+    private BlsPoint publicKey;
+    private BigInteger blockchainId;
+    private BlsThresholdCryptoSystem algorithm;
+    private Map<BigInteger, BigInteger> mySecretShares;
+    private BigInteger myNodeAddress;
+    private Set<BigInteger> nodesStillActiveInKeyGeneration;
+    private Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration;
+    private KeyGenFailureToCompleteReason failureReason;
 
-  public BigInteger getPrivateKeyShare() {
-    throw new Error();
+
+    public Builder keyVersion(long keyVersion) {
+      this.keyVersion = keyVersion;
+      return this;
+    }
+    public Builder threshold(int threshold) {
+      this.threshold = threshold;
+      return this;
+    }
+    public Builder publicKey(BlsPoint publicKey) {
+      this.publicKey = publicKey;
+      return this;
+    }
+    public Builder blockchainId(BigInteger blockchainId) {
+      this.blockchainId = blockchainId;
+      return this;
+    }
+    public Builder algorithm(BlsThresholdCryptoSystem algorithm) {
+      this.algorithm = algorithm;
+      return this;
+    }
+    public Builder mySecretShares(Map<BigInteger, BigInteger> mySecretShares) {
+      this.mySecretShares = mySecretShares;
+      return this;
+    }
+    public Builder myNodeAddress(BigInteger myNodeAddress) {
+      this.myNodeAddress = myNodeAddress;
+      return this;
+    }
+    public Builder nodesStillActiveInKeyGeneration(Set<BigInteger> nodesStillActiveInKeyGeneration) {
+      this.nodesStillActiveInKeyGeneration = nodesStillActiveInKeyGeneration;
+      return this;
+    }
+    public Builder nodesNoLongerInKeyGeneration(Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration) {
+      this.nodesNoLongerInKeyGeneration = nodesNoLongerInKeyGeneration;
+      return this;
+    }
+    public Builder failureReason(KeyGenFailureToCompleteReason failureReason) {
+      this.failureReason = failureReason;
+      return this;
+    }
+
+    public BlsThresholdCredentials build() {
+      return new BlsThresholdCredentials(
+        keyVersion,
+        threshold,
+        publicKey,
+        blockchainId,
+        algorithm,
+        mySecretShares,
+        myNodeAddress,
+        nodesStillActiveInKeyGeneration,
+        nodesNoLongerInKeyGeneration,
+        failureReason
+      );
+    }
+
   }
 }

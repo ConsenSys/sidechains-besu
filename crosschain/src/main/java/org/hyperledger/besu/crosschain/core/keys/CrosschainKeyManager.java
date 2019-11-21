@@ -76,6 +76,9 @@ public class CrosschainKeyManager {
   ThresholdKeyGenContractInterface thresholdKeyGenContract;
   CrosschainDevP2PInterface p2p;
 
+  BigInteger blockchainId;
+
+
   // TODO add key generation contract address
   public static CrosschainKeyManager getCrosschainKeyManager() {
     // TODO when real versions of p2p and key gen contract exist, this is the place to link them in.
@@ -101,7 +104,7 @@ public class CrosschainKeyManager {
   }
 
   public void init(final BigInteger sidechainId, final SECP256K1.KeyPair nodeKeys) {
-    //    this.blockchainId = sidechainId;
+    this.blockchainId = sidechainId;
     this.nodeKeys = nodeKeys;
 
     this.thresholdKeyGenContract.init(nodeKeys);
@@ -120,7 +123,7 @@ public class CrosschainKeyManager {
 
   public BlsThresholdCredentials getActiveCredentials() {
     if (this.activeVersionNotKnown) {
-      return BlsThresholdCredentials.emptyCredentials();
+      return null;
     }
     return this.credentials.get(activeKeyVersion);
   }
@@ -133,16 +136,20 @@ public class CrosschainKeyManager {
    * Coordinate with other nodes to generate a new threshold key set.
    *
    * @param threshold The threshold number of keys that need to cooperate to sign messages.
+   * @param algorithm The ECC curve and message digest function to be used.
    * @return The key version number of the key.
    */
-  public long generateNewKeys(final int threshold) {
+  public long generateNewKeys(final int threshold, final BlsThresholdCryptoSystem algorithm) {
     ThresholdKeyGeneration keyGen =
         new ThresholdKeyGeneration(
-            threshold, this.nodeKeys, this.thresholdKeyGenContract, this.p2p);
+            threshold, this.blockchainId, algorithm, this.nodeKeys, this.thresholdKeyGenContract, this.p2p);
     long keyVersionNumber = keyGen.startKeyGeneration();
     this.activeKeyGenerations.put(keyVersionNumber, keyGen);
     return keyVersionNumber;
   }
+
+
+
 
   /**
    * Coordinate with other nodes to sign the message.

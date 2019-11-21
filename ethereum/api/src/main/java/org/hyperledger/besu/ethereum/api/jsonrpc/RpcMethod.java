@@ -115,7 +115,8 @@ public enum RpcMethod {
   ETH_SEND_RAW_CROSSCHAIN_TRANSACTION("eth_sendRawCrosschainTransaction"),
   ETH_PROCESS_RAW_SUBORDINATE_VIEW("eth_processSubordinateView"),
   CROSS_CHECK_UNLOCK("cross_checkUnlock"),
-  CROSS_GET_BLOCKCHAIN_PUBLIC_KEY("cross_getBlockchainPublicKey");
+  CROSS_GET_BLOCKCHAIN_PUBLIC_KEY("cross_getBlockchainPublicKey"),
+  CROSS_START_THRESHOLD_KEY_GENERATION("cross_startThresholdKeyGeneration");
 
   private final String methodName;
 

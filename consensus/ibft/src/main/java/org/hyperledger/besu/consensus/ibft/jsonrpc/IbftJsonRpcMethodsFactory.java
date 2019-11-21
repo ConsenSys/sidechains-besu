@@ -23,8 +23,10 @@ import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftGetValidatorsByBl
 import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftGetValidatorsByBlockNumber;
 import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftProposeValidatorVote;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossBlockchainPublicKey;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossGetBlockchainPublicKey;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossCheckUnlock;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossGetKeyGenerationStatus;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossStartThresholdKeyGeneration;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthIsLockable;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthIsLocked;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthProcessSubordinateView;
@@ -83,7 +85,9 @@ public class IbftJsonRpcMethodsFactory implements JsonRpcMethodFactory {
           new EthIsLockable(blockchainQueries, jsonRpcParameter),
           new EthIsLocked(blockchainQueries, jsonRpcParameter),
           new CrossCheckUnlock(crosschainController, jsonRpcParameter),
-          new CrossBlockchainPublicKey(crosschainController));
+          new CrossGetBlockchainPublicKey(crosschainController),
+          new CrossStartThresholdKeyGeneration(crosschainController, jsonRpcParameter),
+          new CrossGetKeyGenerationStatus(crosschainController, jsonRpcParameter));
     }
 
     return rpcMethods;
