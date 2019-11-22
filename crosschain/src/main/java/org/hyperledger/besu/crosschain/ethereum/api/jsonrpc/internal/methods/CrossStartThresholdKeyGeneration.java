@@ -58,10 +58,10 @@ public class CrossStartThresholdKeyGeneration implements JsonRpcMethod {
     } catch (RuntimeException ex) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
-    LOG.info("JSON RPC Request to start key generation. Threshold {}, Algorithm {}", threshold, algorithm);
+    LOG.trace("JSON RPC {}: Threshold: {}, Algorithm: {}", getName(), threshold, algorithm);
 
-    long keyVersion = this.crosschainController.crossStartThresholdKeyGeneration(threshold, algorithm);
-
+    long keyVersion = this.crosschainController.startThresholdKeyGeneration(threshold, algorithm);
+    LOG.trace("JSON RPC {}: Threshold: {}, Algorithm: {}: Key Version", getName(), threshold, algorithm, keyVersion);
     return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyVersion));
   }
 

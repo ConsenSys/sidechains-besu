@@ -12,6 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
@@ -21,12 +23,14 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /** Return the Blockchain Public key, if such a key exists. */
 public class CrossGetBlockchainPublicKey implements JsonRpcMethod {
+  private static final Logger LOG = LogManager.getLogger();
   private final CrosschainController crosschainController;
 
   public CrossGetBlockchainPublicKey(final CrosschainController crosschainController) {
@@ -47,8 +51,9 @@ public class CrossGetBlockchainPublicKey implements JsonRpcMethod {
     final Map<String, Object> response = new HashMap<>();
     BlsThresholdPublicKey credentials = this.crosschainController.getBlockchainPublicKey();
 
-    response.put("pubkey", credentials.getEncodedPublicKey());
-
+    BytesValue encodedPublicKey = credentials.getEncodedPublicKey();
+    LOG.trace("JSON RPC {}: Returning encoded public key: {}", getName(), encodedPublicKey);
+    response.put("pubkey", encodedPublicKey);
     return new JsonRpcSuccessResponse(request.getId(), response);
   }
 }

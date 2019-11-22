@@ -110,12 +110,13 @@ public enum RpcMethod {
   TX_POOL_BESU_TRANSACTIONS("txpool_besuTransactions"),
   WEB3_CLIENT_VERSION("web3_clientVersion"),
   WEB3_SHA3("web3_sha3"),
-  ETH_IS_LOCKABLE("eth_isLockable"),
-  ETH_IS_LOCKED("eth_isLocked"),
-  ETH_SEND_RAW_CROSSCHAIN_TRANSACTION("eth_sendRawCrosschainTransaction"),
-  ETH_PROCESS_RAW_SUBORDINATE_VIEW("eth_processSubordinateView"),
+  CROSS_IS_LOCKABLE("cross_isLockable"),
+  CROSS_IS_LOCKED("cross_isLocked"),
+  CROSS_SEND_RAW_CROSSCHAIN_TRANSACTION("cross_sendRawCrosschainTransaction"),
+  CROSS_PROCESS_RAW_SUBORDINATE_VIEW("cross_processSubordinateView"),
   CROSS_CHECK_UNLOCK("cross_checkUnlock"),
   CROSS_GET_BLOCKCHAIN_PUBLIC_KEY("cross_getBlockchainPublicKey"),
+  CROSS_GET_KEY_STATUS("cross_getKeyStatus"),
   CROSS_START_THRESHOLD_KEY_GENERATION("cross_startThresholdKeyGeneration");
 
   private final String methodName;

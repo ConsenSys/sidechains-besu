@@ -12,6 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.core.keys;
 
+import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.crosschain.core.keys.generation.SimulatedThresholdKeyGenContractWrapper;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGeneration;
@@ -24,7 +25,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 public class CrosschainKeyManager {
   protected static final Logger LOG = LogManager.getLogger();
 
-  public enum ActiveCredentialStatus {
+  public enum CredentialStatus {
     // No credentials available for this node. The Crosschain Coordination Contract
     // does not have any public key specified for this blockchain.
     NO_CREDENTIALS,
@@ -49,10 +52,6 @@ public class CrosschainKeyManager {
     NEGOTIATED_CREDENTIALS_READY
   }
 
-  private static long NOT_KNOWN = -1;
-  // long highestKnownVersion = NOT_KNOWN;
-  long activeKeyVersion = NOT_KNOWN;
-  boolean activeVersionNotKnown = true;
 
   // TODO blockkchain ID will be used when interacting with the crosschain coordination contract.
   //  private BigInteger blockchainId;
@@ -70,9 +69,15 @@ public class CrosschainKeyManager {
 
   List<Coord> coordinationContracts = new ArrayList<>();
 
-  Map<Long, BlsThresholdCredentials> credentials;
+
+  private long NO_ACTIVE_VERSION = -1;
+  long activeKeyVersion = NO_ACTIVE_VERSION;
 
   public Map<Long, ThresholdKeyGeneration> activeKeyGenerations = new TreeMap<>();
+
+  Map<Long, BlsThresholdCredentials> credentials;
+
+
   ThresholdKeyGenContractInterface thresholdKeyGenContract;
   CrosschainDevP2PInterface p2p;
 
@@ -121,16 +126,6 @@ public class CrosschainKeyManager {
     // TODO
   }
 
-  public BlsThresholdCredentials getActiveCredentials() {
-    if (this.activeVersionNotKnown) {
-      return null;
-    }
-    return this.credentials.get(activeKeyVersion);
-  }
-
-  public BlsThresholdCredentials getGenerationCompleteCredentials() {
-    return null;
-  }
 
   /**
    * Coordinate with other nodes to generate a new threshold key set.
@@ -149,14 +144,108 @@ public class CrosschainKeyManager {
   }
 
 
+  public KeyStatus getKeyStatus(final long keyVersion) {
+    BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
+    if (credentials != null) {
+      return credentials.getKeyStatus();
+    }
+    ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
+    if (keyGeneration != null) {
+      return keyGeneration.getKeyStatus();
+    }
+    return KeyStatus.UNKNOWN_KEY;
+  }
+
+  public Map<BigInteger, KeyGenFailureToCompleteReason> getKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
+    BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
+    if (credentials != null) {
+      return credentials.getNodesDoppedOutOfKeyGeneration();
+    }
+    ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
+    if (keyGeneration != null) {
+      return keyGeneration.getNodesNoLongerInKeyGeneration();
+    }
+    return new TreeMap<>();
+  }
+
+  public KeyGenFailureToCompleteReason getKeyGenFailureReason(final long keyVersion) {
+    BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
+    if (credentials != null) {
+      return KeyGenFailureToCompleteReason.SUCCESS;
+    }
+    ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
+    if (keyGeneration != null) {
+      return keyGeneration.getFailureReason();
+    }
+    return KeyGenFailureToCompleteReason.UNKNOWN_KEY;
+  }
+
+  public Set<BigInteger> getKeyGenActiveNodes(final long keyVersion) {
+    BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
+    if (credentials != null) {
+      return credentials.getNodesCompletedKeyGeneration();
+    }
+    ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
+    if (keyGeneration != null) {
+      return keyGeneration.getNodesStillActiveInKeyGeneration();
+    }
+    return new TreeSet<>();
+  }
+
+  public void activateKey(final long keyVersion) {
+    if (keyVersion == this.activeKeyVersion) {
+      // The key version is already active: there is nothing to do.
+      return;
+    }
+
+    // TODO Check crosshcain coordination contract to make sure this key version is the active version
+
+    // TODO send a signalling transaction to all nodes requesting they check the crosschain coordination contract.
+
+    // Check to see if the key version represents an existing key. That is, the decision may have
+    // been made to switch to an older key.
+    BlsThresholdCredentials oldCredentials = this.credentials.get(keyVersion);
+    if (oldCredentials == null) {
+      // Check to see if there is a key generation that matches the key version.
+      ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
+      if ((keyGeneration != null) && (keyGeneration.getKeyStatus().equals(KeyStatus.KEY_GEN_COMPLETE))) {
+        this.credentials.put(keyVersion, keyGeneration.getCredentials());
+        this.activeKeyGenerations.remove(keyVersion);
+      }
+      // If the key isn't ready or doesn't exist, then just ignore the request.
+      return;
+    }
+    this.activeKeyVersion = keyVersion;
+  }
+
+  public long getActiveKeyVersion() {
+    return this.activeKeyVersion;
+  }
+
+  public BlsThresholdPublicKey getPublicKey(final long keyVersion) {
+    BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
+    if (credentials != null) {
+      return credentials;
+    }
+    ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
+    if (keyGeneration != null) {
+      return keyGeneration.getCredentials();
+    }
+    return BlsThresholdPublicKey.NONE;
+  }
+
+  public BlsThresholdPublicKey getActivePublicKey() {
+      return getPublicKey(this.activeKeyVersion);
+  }
 
 
-  /**
-   * Coordinate with other nodes to sign the message.
-   *
-   * @param message The message to be signed.
-   * @return The signed message.
-   */
+
+    /**
+     * Coordinate with other nodes to sign the message.
+     *
+     * @param message The message to be signed.
+     * @return The signed message.
+     */
   //  private BytesValue thresholdSign(final BytesValue message) {
   //    // TODO this is going to need to be re-written assuming asynchronous signature results
   //

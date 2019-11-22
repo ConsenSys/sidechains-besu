@@ -20,12 +20,11 @@ import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  * Holds the Blockchain Public Key and associated meta-data.
  */
-public class BlsThresholdPubKey implements BlsThresholdPublicKeyWithThreshold {
+public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKeyWithThreshold {
   protected static final Logger LOG = LogManager.getLogger();
 
   private long keyVersion;
@@ -34,7 +33,7 @@ public class BlsThresholdPubKey implements BlsThresholdPublicKeyWithThreshold {
   private BigInteger blockchainId;
   private BlsThresholdCryptoSystem algorithm;
 
-  public BlsThresholdPubKey(
+  public BlsThresholdPublicKeyImpl(
       final BlsPoint publicKey, final long keyVersion, final int threshold, final BigInteger blockchainId, final BlsThresholdCryptoSystem algorithm) {
     this.keyVersion = keyVersion;
     this.threshold = threshold;
@@ -102,7 +101,7 @@ public class BlsThresholdPubKey implements BlsThresholdPublicKeyWithThreshold {
         LOG.error(msg);
         throw new RuntimeException(msg);
     }
-    return new BlsThresholdPubKey(publicKey, keyVersion, threshold, blockchainId, cryptoSystem);
+    return new BlsThresholdPublicKeyImpl(publicKey, keyVersion, threshold, blockchainId, cryptoSystem);
   }
 
 }

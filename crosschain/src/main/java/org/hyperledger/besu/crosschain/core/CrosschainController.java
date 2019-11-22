@@ -15,6 +15,8 @@ package org.hyperledger.besu.crosschain.core;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
+import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
+import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
@@ -34,7 +36,9 @@ import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +46,12 @@ import org.apache.logging.log4j.Logger;
 // TODO: This class needs to be moved to its own module, and it needs to use the Vertx, rather than
 // blocking,
 // TODO and use the main Vertx instance.
+
+/**
+ * This class is the entry point for ALL JSON RPC calls into the crosschain core code. It
+ * is the class the is initialise when the Ethereum Client starts up, and holds references
+ * to all of the parts of the crosschain core code.
+ */
 public class CrosschainController {
   protected static final Logger LOG = LogManager.getLogger();
 
@@ -200,33 +210,103 @@ public class CrosschainController {
   }
 
   /**
-   * Called by the JSON RPC Call cross_getBlockchainPublicKey
-   *
-   * @return The current public key and meta-data.
-   */
-  public BlsThresholdPublicKey getBlockchainPublicKey() {
-    return this.crosschainKeyManager.getActiveCredentials();
-  }
-
-
-  /**
    * Called by the JSON RPC method: cross_startThresholdKeyGeneration.
    *
    * @param threshold The threshold number of validators that will be needed to sign messages.
    * @param algorithm The ECC curve and message digest function to be used.
    * @return The key version number.
    */
-  public long crossStartThresholdKeyGeneration(final int threshold, final BlsThresholdCryptoSystem algorithm) {
+  public long startThresholdKeyGeneration(final int threshold, final BlsThresholdCryptoSystem algorithm) {
     return this.crosschainKeyManager.generateNewKeys(threshold, algorithm);
   }
 
   /**
-   * Called by the JSON RPC method: cross_getKeyGenerationStatus.
+   * Called by the JSON RPC method: cross_getKeyStatus.
    *
-   * @param keyVersion
+   * @param keyVersion version of key to fetch information about.
+   * @return Indicates the status of the key.
+   */
+  public KeyStatus getKeyStatus(final long keyVersion) {
+    return this.crosschainKeyManager.getKeyStatus(keyVersion);
+  }
+
+
+  /**
+   * Called by the JSON RPC Call cross_getKeyGenNodesDroppedOutOfKeyGeneration
+   *
+   * @param keyVersion version of key to fetch information about.
+   * @return The current public key and meta-data.
+   */
+  public Map<BigInteger, KeyGenFailureToCompleteReason> getKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
+    return this.crosschainKeyManager.getKeyGenNodesDroppedOutOfKeyGeneration(keyVersion);
+  }
+
+
+  /**
+   * Called by the JSON RPC Call cross_getKeyGenFailureReason. Returns the top level reason
+   * why the key generation failed, if it did. If a key generation didn't fail, then the
+   * indicate is success.
+   *
+   * @param keyVersion version of key to fetch information about.
+   * @return key generation failure status.
+   */
+  public KeyGenFailureToCompleteReason getKeyGenFailureReason(final long keyVersion) {
+    return this.crosschainKeyManager.getKeyGenFailureReason(keyVersion);
+  }
+
+  /**
+   * Called by the JSON RPC call: cross_getKeyGenActiveNodes. Returns the list of
+   * nodes that hold secret shares and who can participate in threshold signing.
+   *
+   * @param keyVersion version of key to fetch information about.
+   * @return nodes active in a threshold key.
+   */
+  public Set<BigInteger> getKeyGenActiveNodes(final long keyVersion) {
+    return this.crosschainKeyManager.getKeyGenActiveNodes(keyVersion);
+  }
+
+
+  /**
+   * Called by the JSON RPC call: cross_activateKeyVersion.
+   *
+   * @param keyVersion Key version to activate.
+   */
+  public void activateKey(final long keyVersion) {
+    this.crosschainKeyManager.activateKey(keyVersion);
+  }
+
+
+  /**
+   * Called by JSON RPC call: cross_getActiveKeyVersion
+   *
    * @return
    */
-  public int getKeyGenerationStatus(final long keyVersion) {
-    // TODO
+  public long getActiveKeyVersion() {
+    return this.crosschainKeyManager.getActiveKeyVersion();
   }
+
+
+    /**
+     * Called by the JSON RPC Call cross_getBlockchainPublicKey
+     *
+     * @return The current public key and meta-data.
+     */
+  public BlsThresholdPublicKey getBlockchainPublicKey() {
+    return this.crosschainKeyManager.getActivePublicKey();
+  }
+
+  /**
+   * Called by the JSON RPC Call cross_getBlockchainPublicKeyByVersion
+   *
+   * @param keyVersion to fetch key for.
+   * @return The current public key and meta-data.
+   */
+  public BlsThresholdPublicKey getBlockchainPublicKey(final long keyVersion) {
+    return this.crosschainKeyManager.getPublicKey(keyVersion);
+  }
+
+
+
+
+
 }

@@ -12,6 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
@@ -31,9 +33,9 @@ import org.hyperledger.besu.ethereum.core.Address;
  * multi-chain node.
  */
 public class CrossCheckUnlock implements JsonRpcMethod {
+  private static final Logger LOG = LogManager.getLogger();
 
   private final JsonRpcParameter parameters;
-
   private final CrosschainController crosschainController;
 
   public CrossCheckUnlock(
@@ -52,8 +54,8 @@ public class CrossCheckUnlock implements JsonRpcMethod {
     if (request.getParamLength() != 1) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
-
     final Address address = this.parameters.required(request.getParams(), 0, Address.class);
+    LOG.trace("JSON RPC {}: Called with address: {}", getName(), address);
 
     this.crosschainController.checkUnlock(address);
     return new JsonRpcSuccessResponse(request.getId());

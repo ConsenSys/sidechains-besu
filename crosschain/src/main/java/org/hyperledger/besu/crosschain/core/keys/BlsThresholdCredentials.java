@@ -14,24 +14,21 @@ package org.hyperledger.besu.crosschain.core.keys;
 
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
-import org.hyperledger.besu.ethereum.rlp.RLP;
-import org.hyperledger.besu.util.bytes.Bytes32;
-import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Holds all of the information related to a round of key generation.
  */
-public class BlsThresholdCredentials extends BlsThresholdPubKey {
+public class BlsThresholdCredentials extends BlsThresholdPublicKeyImpl {
   private Map<BigInteger, BigInteger> mySecretShares;
   private BigInteger myNodeAddress;
   private Set<BigInteger> nodesStillActiveInKeyGeneration;
   private Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration;
   private KeyGenFailureToCompleteReason failureReason;
+  private KeyStatus keyStatus;
 
   public BlsThresholdCredentials(
       final long keyVersion,
@@ -43,13 +40,15 @@ public class BlsThresholdCredentials extends BlsThresholdPubKey {
       final BigInteger myNodeAddress,
       final Set<BigInteger> nodesStillActiveInKeyGeneration,
       final Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration,
-      final KeyGenFailureToCompleteReason failureReason) {
+      final KeyGenFailureToCompleteReason failureReason,
+      final KeyStatus keyStatus) {
     super(publicKey, keyVersion, threshold, blockchainId, algorithm);
     this.mySecretShares = mySecretShares;
     this.myNodeAddress = myNodeAddress;
     this.nodesStillActiveInKeyGeneration = nodesStillActiveInKeyGeneration;
     this.nodesNoLongerInKeyGeneration = nodesNoLongerInKeyGeneration;
     this.failureReason = failureReason;
+    this.keyStatus = keyStatus;
   }
 
   public Map<BigInteger, BigInteger> getMySecretShares() {
@@ -72,6 +71,9 @@ public class BlsThresholdCredentials extends BlsThresholdPubKey {
     return failureReason;
   }
 
+  public KeyStatus getKeyStatus() {
+    return this.keyStatus;
+  }
 
   public static class Builder {
     private long keyVersion;
@@ -84,6 +86,7 @@ public class BlsThresholdCredentials extends BlsThresholdPubKey {
     private Set<BigInteger> nodesStillActiveInKeyGeneration;
     private Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration;
     private KeyGenFailureToCompleteReason failureReason;
+    private KeyStatus keyStatus;
 
 
     public Builder keyVersion(long keyVersion) {
@@ -126,6 +129,10 @@ public class BlsThresholdCredentials extends BlsThresholdPubKey {
       this.failureReason = failureReason;
       return this;
     }
+    public Builder keyStatus(KeyStatus keyStatus) {
+      this.keyStatus = keyStatus;
+      return this;
+    }
 
     public BlsThresholdCredentials build() {
       return new BlsThresholdCredentials(
@@ -138,7 +145,8 @@ public class BlsThresholdCredentials extends BlsThresholdPubKey {
         myNodeAddress,
         nodesStillActiveInKeyGeneration,
         nodesNoLongerInKeyGeneration,
-        failureReason
+        failureReason,
+        keyStatus
       );
     }
 

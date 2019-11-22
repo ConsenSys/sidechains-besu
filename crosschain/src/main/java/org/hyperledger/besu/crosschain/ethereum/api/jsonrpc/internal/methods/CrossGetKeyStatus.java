@@ -15,7 +15,7 @@ package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
-import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
+import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethod;
@@ -26,14 +26,13 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcRespon
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.results.Quantity;
 
-public class CrossGetKeyGenerationStatus implements JsonRpcMethod {
-
+public class CrossGetKeyStatus implements JsonRpcMethod {
   private static final Logger LOG = LogManager.getLogger();
 
   private final CrosschainController crosschainController;
   private final JsonRpcParameter parameters;
 
-  public CrossGetKeyGenerationStatus(
+  public CrossGetKeyStatus(
       final CrosschainController crosschainController, final JsonRpcParameter parameters) {
     this.crosschainController = crosschainController;
     this.parameters = parameters;
@@ -41,7 +40,7 @@ public class CrossGetKeyGenerationStatus implements JsonRpcMethod {
 
   @Override
   public String getName() {
-    return RpcMethod.CROSS_START_THRESHOLD_KEY_GENERATION.getMethodName();
+    return RpcMethod.CROSS_GET_KEY_STATUS.getMethodName();
   }
 
   @Override
@@ -51,11 +50,10 @@ public class CrossGetKeyGenerationStatus implements JsonRpcMethod {
     }
     Object[] params = request.getParams();
     final long keyVersion = parameters.required(params, 0, Long.class);
-    LOG.info("JSON RPC Request to check key generation status. Version {}", keyVersion);
 
-    int status = this.crosschainController.getKeyGenerationStatus(keyVersion);
-
-    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyVersion));
+    KeyStatus keyStatus = this.crosschainController.getKeyStatus(keyVersion);
+    LOG.trace("JSON RPC {}: Version: {}, Status: {}", getName(), keyVersion, keyStatus.value);
+    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyStatus.value));
   }
 
 }

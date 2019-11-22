@@ -14,6 +14,7 @@ package org.hyperledger.besu.crosschain.core.keys.generation;
 
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCredentials;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
+import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
@@ -42,6 +43,8 @@ public class ThresholdKeyGeneration {
   private int threshold;
   private BigInteger blockchainId;
   private BlsThresholdCryptoSystem algorithm;
+  private KeyStatus keyGenerationStatus = KeyStatus.UNKNOWN_KEY;
+
   private SecureRandom prng = new PRNGSecureRandom();
 
   private Map<BigInteger, BigInteger> mySecretShares;
@@ -49,8 +52,12 @@ public class ThresholdKeyGeneration {
   private Bytes32[] myCoeffsPublicValueCommitments;
   private BigInteger myNodeAddress;
   private Set<BigInteger> nodesStillActiveInKeyGeneration;
+
+  // For each node that drops out of the key generation, record why is dropped out.
   private Map<BigInteger, KeyGenFailureToCompleteReason> nodesNoLongerInKeyGeneration;
-  private KeyGenFailureToCompleteReason failureReason;
+
+  // This will indicate why, overall, the key generation failed.
+  private KeyGenFailureToCompleteReason failureReason = KeyGenFailureToCompleteReason.NO_FAILURE_THUS_FAR;
 
   private Map<BigInteger, BigInteger> receivedSecretShares = new TreeMap<>();
 
@@ -110,6 +117,7 @@ public class ThresholdKeyGeneration {
       this.nodesNoLongerInKeyGeneration = new TreeMap<>();
 
       this.keyVersionNumber = this.thresholdKeyGenContract.getExpectedKeyGenerationVersion();
+      this.keyGenerationStatus = KeyStatus.KEY_GEN_POST_XVALUE;
 
       this.p2p.setSecretShareCallback(new CrosschainPartSecretShareCallbackImpl());
       this.p2p.setMyNodeAddress(this.myNodeAddress);
@@ -125,6 +133,7 @@ public class ThresholdKeyGeneration {
       // TODO Use vertix
       // Probably have to wait multiple block times.
       // Thread.sleep(2000);
+      this.keyGenerationStatus = KeyStatus.KEY_GEN_POST_COMMITMENT;
       this.p2p.requestPostCommits(keyVersionNumber);
 
 
@@ -172,6 +181,7 @@ public class ThresholdKeyGeneration {
       }
 
       // Post Public Values Round.
+      this.keyGenerationStatus = KeyStatus.KEY_GEN_PUBLIC_VALUES;
       this.p2p.requestPostPublicValues(keyVersionNumber);
       LOG.info("Post Public Values");
       // TODO only publish the public values after all of the commitments are posted.
@@ -212,6 +222,7 @@ public class ThresholdKeyGeneration {
       // TODO send private values
       // TODO Note that the nodeAddresses will have had some purged for nodes that have not posted
       // the commitments or public values.
+      this.keyGenerationStatus = KeyStatus.KEY_GEN_PRIVATE_VALUES;
       this.p2p.sendPrivateValues(
           this.myNodeAddress, this.nodesStillActiveInKeyGeneration, this.mySecretShares);
       this.p2p.requestSendPrivateValues(keyVersionNumber);
@@ -236,6 +247,7 @@ public class ThresholdKeyGeneration {
 
       this.publicKey = calculatePublicKey();
 
+      this.keyGenerationStatus = KeyStatus.KEY_GEN_COMPLETE;
       return keyVersionNumber;
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -284,11 +296,23 @@ public class ThresholdKeyGeneration {
     return this.publicKey;
   }
 
+  public KeyStatus getKeyStatus() {
+    return this.keyGenerationStatus;
+  }
+
   public KeyGenFailureToCompleteReason getFailureReason() {
     return this.failureReason;
   }
 
-  BlsThresholdCredentials getCredentials() {
+  public Map<BigInteger, KeyGenFailureToCompleteReason> getNodesNoLongerInKeyGeneration() {
+    return this.nodesNoLongerInKeyGeneration;
+  }
+
+  public Set<BigInteger> getNodesStillActiveInKeyGeneration() {
+    return this.nodesStillActiveInKeyGeneration;
+  }
+
+  public BlsThresholdCredentials getCredentials() {
     return new BlsThresholdCredentials.Builder()
         .keyVersion(this.keyVersionNumber)
         .threshold(this.threshold)
@@ -300,6 +324,7 @@ public class ThresholdKeyGeneration {
         .nodesStillActiveInKeyGeneration(this.nodesStillActiveInKeyGeneration)
         .nodesNoLongerInKeyGeneration(this.nodesNoLongerInKeyGeneration)
         .failureReason(this.failureReason)
+        .keyStatus(this.keyGenerationStatus)
         .build();
   }
 

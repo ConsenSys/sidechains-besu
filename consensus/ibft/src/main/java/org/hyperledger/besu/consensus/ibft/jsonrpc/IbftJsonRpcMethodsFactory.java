@@ -25,12 +25,12 @@ import org.hyperledger.besu.consensus.ibft.jsonrpc.methods.IbftProposeValidatorV
 import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossGetBlockchainPublicKey;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossCheckUnlock;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossGetKeyGenerationStatus;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossGetKeyStatus;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossStartThresholdKeyGeneration;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthIsLockable;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthIsLocked;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthProcessSubordinateView;
-import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.EthSendRawCrosschainTransaction;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossIsLockable;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossIsLocked;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossProcessSubordinateView;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossSendRawCrosschainTransaction;
 import org.hyperledger.besu.ethereum.ProtocolContext;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcApi;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcApis;
@@ -80,14 +80,14 @@ public class IbftJsonRpcMethodsFactory implements JsonRpcMethodFactory {
 
       addMethods(
           rpcMethods,
-          new EthSendRawCrosschainTransaction(crosschainController, jsonRpcParameter),
-          new EthProcessSubordinateView(blockchainQueries, crosschainController, jsonRpcParameter),
-          new EthIsLockable(blockchainQueries, jsonRpcParameter),
-          new EthIsLocked(blockchainQueries, jsonRpcParameter),
+          new CrossSendRawCrosschainTransaction(crosschainController, jsonRpcParameter),
+          new CrossProcessSubordinateView(blockchainQueries, crosschainController, jsonRpcParameter),
+          new CrossIsLockable(blockchainQueries, jsonRpcParameter),
+          new CrossIsLocked(blockchainQueries, jsonRpcParameter),
           new CrossCheckUnlock(crosschainController, jsonRpcParameter),
           new CrossGetBlockchainPublicKey(crosschainController),
           new CrossStartThresholdKeyGeneration(crosschainController, jsonRpcParameter),
-          new CrossGetKeyGenerationStatus(crosschainController, jsonRpcParameter));
+          new CrossGetKeyStatus(crosschainController, jsonRpcParameter));
     }
 
     return rpcMethods;
