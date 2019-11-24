@@ -22,8 +22,7 @@ import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -52,23 +51,11 @@ public class CrosschainKeyManager {
     NEGOTIATED_CREDENTIALS_READY
   }
 
-
   // TODO blockkchain ID will be used when interacting with the crosschain coordination contract.
   //  private BigInteger blockchainId;
   private SECP256K1.KeyPair nodeKeys;
 
-  private static class Coord {
-    BigInteger coordinationBlockchainId;
-    Address coodinationContract;
-
-    Coord(final BigInteger coordinationBlockchainId, final Address coodinationContract) {
-      this.coodinationContract = coodinationContract;
-      this.coordinationBlockchainId = coordinationBlockchainId;
-    }
-  }
-
-  List<Coord> coordinationContracts = new ArrayList<>();
-
+  Map<String, CoordinationContractInformation> coordinationContracts = new TreeMap<>();
 
   private long NO_ACTIVE_VERSION = -1;
   long activeKeyVersion = NO_ACTIVE_VERSION;
@@ -77,12 +64,10 @@ public class CrosschainKeyManager {
 
   Map<Long, BlsThresholdCredentials> credentials;
 
-
   ThresholdKeyGenContractInterface thresholdKeyGenContract;
   CrosschainDevP2PInterface p2p;
 
   BigInteger blockchainId;
-
 
   // TODO add key generation contract address
   public static CrosschainKeyManager getCrosschainKeyManager() {
@@ -116,16 +101,30 @@ public class CrosschainKeyManager {
   }
 
   public void addCoordinationContract(
-      final BigInteger coordinationBlockchainId, final Address coodinationContract) {
-    // TODO check that this coodination contrat is not already in the list.
-    this.coordinationContracts.add(new Coord(coordinationBlockchainId, coodinationContract));
+      final BigInteger coordinationBlockchainId,
+      final Address coodinationContractAddress,
+      final String ipAddressAndPort) {
+    String key = coordinationBlockchainId.toString(16) + coodinationContractAddress.getHexString();
+    this.coordinationContracts.put(
+        key,
+        new CoordinationContractInformation(
+            coordinationBlockchainId, coodinationContractAddress, ipAddressAndPort));
   }
 
   public void removeCoordinationContract(
-      final BigInteger coordinationBlockchainId, final Address coodinationContract) {
-    // TODO
+      final BigInteger coordinationBlockchainId, final Address coodinationContractAddress) {
+    String key = coordinationBlockchainId.toString(16) + coodinationContractAddress.getHexString();
+    this.coordinationContracts.remove(key);
   }
 
+  public Collection<CoordinationContractInformation> getAllCoordinationContracts() {
+    return this.coordinationContracts.values();
+  }
+
+  public void setKeyGenerationContractAddress(final Address address) {
+    // TODO
+    throw new Error("Not implemented yet");
+  }
 
   /**
    * Coordinate with other nodes to generate a new threshold key set.
@@ -137,12 +136,16 @@ public class CrosschainKeyManager {
   public long generateNewKeys(final int threshold, final BlsThresholdCryptoSystem algorithm) {
     ThresholdKeyGeneration keyGen =
         new ThresholdKeyGeneration(
-            threshold, this.blockchainId, algorithm, this.nodeKeys, this.thresholdKeyGenContract, this.p2p);
+            threshold,
+            this.blockchainId,
+            algorithm,
+            this.nodeKeys,
+            this.thresholdKeyGenContract,
+            this.p2p);
     long keyVersionNumber = keyGen.startKeyGeneration();
     this.activeKeyGenerations.put(keyVersionNumber, keyGen);
     return keyVersionNumber;
   }
-
 
   public KeyStatus getKeyStatus(final long keyVersion) {
     BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
@@ -156,7 +159,8 @@ public class CrosschainKeyManager {
     return KeyStatus.UNKNOWN_KEY;
   }
 
-  public Map<BigInteger, KeyGenFailureToCompleteReason> getKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
+  public Map<BigInteger, KeyGenFailureToCompleteReason> getKeyGenNodesDroppedOutOfKeyGeneration(
+      final long keyVersion) {
     BlsThresholdCredentials credentials = this.credentials.get(keyVersion);
     if (credentials != null) {
       return credentials.getNodesDoppedOutOfKeyGeneration();
@@ -198,9 +202,11 @@ public class CrosschainKeyManager {
       return;
     }
 
-    // TODO Check crosshcain coordination contract to make sure this key version is the active version
+    // TODO Check crosshcain coordination contract to make sure this key version is the active
+    // version
 
-    // TODO send a signalling transaction to all nodes requesting they check the crosschain coordination contract.
+    // TODO send a signalling transaction to all nodes requesting they check the crosschain
+    // coordination contract.
 
     // Check to see if the key version represents an existing key. That is, the decision may have
     // been made to switch to an older key.
@@ -208,7 +214,8 @@ public class CrosschainKeyManager {
     if (oldCredentials == null) {
       // Check to see if there is a key generation that matches the key version.
       ThresholdKeyGeneration keyGeneration = this.activeKeyGenerations.get(keyVersion);
-      if ((keyGeneration != null) && (keyGeneration.getKeyStatus().equals(KeyStatus.KEY_GEN_COMPLETE))) {
+      if ((keyGeneration != null)
+          && (keyGeneration.getKeyStatus().equals(KeyStatus.KEY_GEN_COMPLETE))) {
         this.credentials.put(keyVersion, keyGeneration.getCredentials());
         this.activeKeyGenerations.remove(keyVersion);
       }
@@ -235,17 +242,15 @@ public class CrosschainKeyManager {
   }
 
   public BlsThresholdPublicKey getActivePublicKey() {
-      return getPublicKey(this.activeKeyVersion);
+    return getPublicKey(this.activeKeyVersion);
   }
 
-
-
-    /**
-     * Coordinate with other nodes to sign the message.
-     *
-     * @param message The message to be signed.
-     * @return The signed message.
-     */
+  /**
+   * Coordinate with other nodes to sign the message.
+   *
+   * @param message The message to be signed.
+   * @return The signed message.
+   */
   //  private BytesValue thresholdSign(final BytesValue message) {
   //    // TODO this is going to need to be re-written assuming asynchronous signature results
   //

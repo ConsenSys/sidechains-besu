@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.core.keys;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
@@ -21,9 +19,10 @@ import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
 
-/**
- * Holds the Blockchain Public Key and associated meta-data.
- */
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/** Holds the Blockchain Public Key and associated meta-data. */
 public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKeyWithThreshold {
   protected static final Logger LOG = LogManager.getLogger();
 
@@ -34,7 +33,11 @@ public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKeyWithThres
   private BlsThresholdCryptoSystem algorithm;
 
   public BlsThresholdPublicKeyImpl(
-      final BlsPoint publicKey, final long keyVersion, final int threshold, final BigInteger blockchainId, final BlsThresholdCryptoSystem algorithm) {
+      final BlsPoint publicKey,
+      final long keyVersion,
+      final int threshold,
+      final BigInteger blockchainId,
+      final BlsThresholdCryptoSystem algorithm) {
     this.keyVersion = keyVersion;
     this.threshold = threshold;
     this.publicKey = publicKey;
@@ -81,11 +84,11 @@ public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKeyWithThres
         });
   }
 
-  public static BlsThresholdPublicKeyWithThreshold readFrom(BytesValue input) {
+  public static BlsThresholdPublicKeyWithThreshold readFrom(final BytesValue input) {
     RLPInput in = RLP.input(input);
     in.enterList();
     long keyVersion = in.readLongScalar();
-    int threshold = (int)in.readLongScalar();
+    int threshold = (int) in.readLongScalar();
     int algorithm = (int) in.readLongScalar();
     BytesValue publicKeyBytesValue = in.readBytesValue();
     BigInteger blockchainId = in.readBigIntegerScalar();
@@ -101,7 +104,7 @@ public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKeyWithThres
         LOG.error(msg);
         throw new RuntimeException(msg);
     }
-    return new BlsThresholdPublicKeyImpl(publicKey, keyVersion, threshold, blockchainId, cryptoSystem);
+    return new BlsThresholdPublicKeyImpl(
+        publicKey, keyVersion, threshold, blockchainId, cryptoSystem);
   }
-
 }

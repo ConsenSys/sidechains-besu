@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.AbstractBlockParameterMethod;
@@ -22,6 +20,9 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcPara
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.queries.BlockchainQueries;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.results.Quantity;
 import org.hyperledger.besu.ethereum.core.Address;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CrossIsLockable extends AbstractBlockParameterMethod {
   private static final Logger LOG = LogManager.getLogger();
@@ -43,11 +44,17 @@ public class CrossIsLockable extends AbstractBlockParameterMethod {
   @Override
   protected String resultByBlockNumber(final JsonRpcRequest request, final long blockNumber) {
     final Address address = getParameters().required(request.getParams(), 0, Address.class);
-    String result = getBlockchainQueries()
-        .isContractLockable(address, blockNumber)
-        .map(Quantity::create)
-        .orElse(null);
-    LOG.trace("JSON RPC {}: Address: {}, Block number: {}, IsLockable: {}", getName(), address, blockNumber, result);
+    String result =
+        getBlockchainQueries()
+            .isContractLockable(address, blockNumber)
+            .map(Quantity::create)
+            .orElse(null);
+    LOG.trace(
+        "JSON RPC {}: Address: {}, Block number: {}, IsLockable: {}",
+        getName(),
+        address,
+        blockNumber,
+        result);
     return result;
   }
 }

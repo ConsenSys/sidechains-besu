@@ -35,7 +35,6 @@ public class AltBn128Fq2PointWrapper implements BlsPoint {
     return BlsCryptoProvider.CryptoProviderTypes.LOCAL_ALT_BN_128;
   }
 
-
   // Add a point to this point.
   @Override
   public BlsPoint add(final BlsPoint obj) {

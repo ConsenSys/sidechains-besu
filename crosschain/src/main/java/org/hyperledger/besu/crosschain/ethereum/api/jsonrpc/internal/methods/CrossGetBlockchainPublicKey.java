@@ -12,13 +12,11 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethod;
+import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcResponse;
@@ -29,12 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Return the Blockchain Public key, if such a key exists. */
-public class CrossGetBlockchainPublicKey implements JsonRpcMethod {
-  private static final Logger LOG = LogManager.getLogger();
-  private final CrosschainController crosschainController;
+public class CrossGetBlockchainPublicKey extends AbstractCrossWithKeyVersionParam {
 
-  public CrossGetBlockchainPublicKey(final CrosschainController crosschainController) {
-    this.crosschainController = crosschainController;
+  public CrossGetBlockchainPublicKey(
+      final CrosschainController crosschainController, final JsonRpcParameter parameters) {
+    super(crosschainController, parameters);
   }
 
   @Override
@@ -44,15 +41,28 @@ public class CrossGetBlockchainPublicKey implements JsonRpcMethod {
 
   @Override
   public JsonRpcResponse response(final JsonRpcRequest request) {
-    if (request.getParamLength() != 0) {
+    int numParams = request.getParamLength();
+    if (!(numParams == 0 || numParams == 1)) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
-
+    BytesValue encodedPublicKey;
+    if (numParams == 1) {
+      long keyVersion = getKeyVersionParameter(request);
+      BlsThresholdPublicKey publicKey =
+          this.crosschainController.getBlockchainPublicKey(keyVersion);
+      encodedPublicKey = publicKey.getEncodedPublicKey();
+      LOG.trace(
+          "JSON RPC {}: Encoded public key: {}, Key version: {}",
+          getName(),
+          encodedPublicKey,
+          keyVersion);
+    } else {
+      BlsThresholdPublicKey publicKey = this.crosschainController.getBlockchainPublicKey();
+      encodedPublicKey = publicKey.getEncodedPublicKey();
+      LOG.trace(
+          "JSON RPC {}: Encoded public key: {}, Key Version: Current", getName(), encodedPublicKey);
+    }
     final Map<String, Object> response = new HashMap<>();
-    BlsThresholdPublicKey credentials = this.crosschainController.getBlockchainPublicKey();
-
-    BytesValue encodedPublicKey = credentials.getEncodedPublicKey();
-    LOG.trace("JSON RPC {}: Returning encoded public key: {}", getName(), encodedPublicKey);
     response.put("pubkey", encodedPublicKey);
     return new JsonRpcSuccessResponse(request.getId(), response);
   }

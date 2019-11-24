@@ -13,10 +13,9 @@
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
 import org.hyperledger.besu.crosschain.core.CrosschainController;
-import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
+import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
@@ -24,50 +23,28 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcRespon
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.results.Quantity;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+public class CrossGetKeyGenFailureReason extends AbstractCrossWithKeyVersionParam {
 
-public class CrossStartThresholdKeyGeneration implements JsonRpcMethod {
-
-  private static final Logger LOG = LogManager.getLogger();
-
-  private final CrosschainController crosschainController;
-  private final JsonRpcParameter parameters;
-
-  public CrossStartThresholdKeyGeneration(
+  public CrossGetKeyGenFailureReason(
       final CrosschainController crosschainController, final JsonRpcParameter parameters) {
-    this.crosschainController = crosschainController;
-    this.parameters = parameters;
+    super(crosschainController, parameters);
   }
 
   @Override
   public String getName() {
-    return RpcMethod.CROSS_START_THRESHOLD_KEY_GENERATION.getMethodName();
+    return RpcMethod.CROSS_GET_KEY_GEN_FAILURE_REASON.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(final JsonRpcRequest request) {
-    if (request.getParamLength() != 2) {
+    if (request.getParamLength() != 1) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
-    Object[] params = request.getParams();
-    final int threshold = parameters.required(params, 0, Integer.TYPE);
-    final int algorithmInt = parameters.required(params, 1, Integer.TYPE);
-    BlsThresholdCryptoSystem algorithm;
-    try {
-      algorithm = BlsThresholdCryptoSystem.create(algorithmInt);
-    } catch (RuntimeException ex) {
-      return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
-    }
-    LOG.trace("JSON RPC {}: Threshold: {}, Algorithm: {}", getName(), threshold, algorithm);
+    final long keyVersion = getKeyVersionParameter(request);
 
-    long keyVersion = this.crosschainController.startThresholdKeyGeneration(threshold, algorithm);
-    LOG.trace(
-        "JSON RPC {}: Threshold: {}, Algorithm: {}: Key Version: {}",
-        getName(),
-        threshold,
-        algorithm,
-        keyVersion);
-    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyVersion));
+    KeyGenFailureToCompleteReason reason =
+        this.crosschainController.getKeyGenFailureReason(keyVersion);
+    LOG.trace("JSON RPC {}: Version: {}, Reason: {}", getName(), keyVersion, reason.value);
+    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(reason.value));
   }
 }

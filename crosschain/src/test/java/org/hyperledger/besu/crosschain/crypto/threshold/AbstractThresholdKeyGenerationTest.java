@@ -47,7 +47,8 @@ public abstract class AbstractThresholdKeyGenerationTest {
     CrosschainKeyManager keyManager = new CrosschainKeyManager(keyGen, p2pI);
     BigInteger blockchainId = BigInteger.TEN;
     keyManager.init(blockchainId, SECP256K1.KeyPair.generate());
-    long keyVersionNumber = keyManager.generateNewKeys(threshold, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256);
+    long keyVersionNumber =
+        keyManager.generateNewKeys(threshold, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256);
 
     this.keyGeneration = keyManager.activeKeyGenerations.get(keyVersionNumber);
 
@@ -72,6 +73,7 @@ public abstract class AbstractThresholdKeyGenerationTest {
     shares[0] =
         new IntegerSecretShare(
             this.keyGeneration.getMyNodeAddress(), this.keyGeneration.getPrivateKeyShare());
+
     Iterator<SimulatedOtherNode> iter = this.otherNodes.iterator();
     for (int i = 0; i < this.threshold - 1; i++) {
       SimulatedOtherNode otherNode = iter.next();

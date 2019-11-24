@@ -20,8 +20,8 @@ import java.util.Set;
 public interface CrosschainDevP2PInterface {
 
   /**
-   * Request the list of all peers connected with this peer.
-   * TODO: THIS ASSUMES ALL PEERS ARE DIRECTLY CONNECTED WITH THIS PEER.
+   * Request the list of all peers connected with this peer. TODO: THIS ASSUMES ALL PEERS ARE
+   * DIRECTLY CONNECTED WITH THIS PEER.
    *
    * @return node addresses of all peers.
    */

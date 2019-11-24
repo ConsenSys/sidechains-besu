@@ -32,34 +32,31 @@ public interface BlsThresholdPublicKey {
 
   BytesValue getEncodedPublicKey();
 
+  BlsThresholdPublicKey NONE =
+      new BlsThresholdPublicKey() {
+        @Override
+        public BlsPoint getPublicKey() {
+          return null;
+        }
 
+        @Override
+        public long getKeyVersion() {
+          return 0;
+        }
 
-  BlsThresholdPublicKey NONE = new BlsThresholdPublicKey() {
-    @Override
-    public BlsPoint getPublicKey() {
-      return null;
-    }
+        @Override
+        public BigInteger getBlockchainId() {
+          return null;
+        }
 
-    @Override
-    public long getKeyVersion() {
-      return 0;
-    }
+        @Override
+        public BlsThresholdCryptoSystem getAlgorithm() {
+          return null;
+        }
 
-    @Override
-    public BigInteger getBlockchainId() {
-      return null;
-    }
-
-    @Override
-    public BlsThresholdCryptoSystem getAlgorithm() {
-      return null;
-    }
-
-    @Override
-    public BytesValue getEncodedPublicKey() {
-      return BytesValue.EMPTY;
-    }
-  };
-
-
+        @Override
+        public BytesValue getEncodedPublicKey() {
+          return BytesValue.EMPTY;
+        }
+      };
 }

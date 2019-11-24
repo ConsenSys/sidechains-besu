@@ -13,7 +13,6 @@
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
 import org.hyperledger.besu.crosschain.core.CrosschainController;
-import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
@@ -21,18 +20,25 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.results.Quantity;
 
-public class CrossGetKeyStatus extends AbstractCrossWithKeyVersionParam {
+import java.math.BigInteger;
+import java.util.Set;
 
-  public CrossGetKeyStatus(
+/**
+ * Returns the list of nodes that hold secret shares and who can participate in threshold signing.
+ * During a key generation, this will be the set of nodes still active in the key generation
+ * process.
+ */
+public class CrossGetKeyActiveNodes extends AbstractCrossWithKeyVersionParam {
+
+  public CrossGetKeyActiveNodes(
       final CrosschainController crosschainController, final JsonRpcParameter parameters) {
     super(crosschainController, parameters);
   }
 
   @Override
   public String getName() {
-    return RpcMethod.CROSS_GET_KEY_STATUS.getMethodName();
+    return RpcMethod.CROSS_GET_KEY_ACTIVE_NODES.getMethodName();
   }
 
   @Override
@@ -42,8 +48,8 @@ public class CrossGetKeyStatus extends AbstractCrossWithKeyVersionParam {
     }
     final long keyVersion = getKeyVersionParameter(request);
 
-    KeyStatus keyStatus = this.crosschainController.getKeyStatus(keyVersion);
-    LOG.trace("JSON RPC {}: Version: {}, Status: {}", getName(), keyVersion, keyStatus.value);
-    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyStatus.value));
+    Set<BigInteger> keyInfo = this.crosschainController.getKeyGenActiveNodes(keyVersion);
+    LOG.trace("JSON RPC {}: Version: {}, Size: {}", getName(), keyVersion, keyInfo.size());
+    return new JsonRpcSuccessResponse(request.getId(), keyInfo);
   }
 }

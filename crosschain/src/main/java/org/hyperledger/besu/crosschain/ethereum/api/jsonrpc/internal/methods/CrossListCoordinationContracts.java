@@ -13,61 +13,47 @@
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
 import org.hyperledger.besu.crosschain.core.CrosschainController;
-import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
+import org.hyperledger.besu.crosschain.core.keys.CoordinationContractInformation;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethod;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.results.Quantity;
+
+import java.util.Collection;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class CrossStartThresholdKeyGeneration implements JsonRpcMethod {
-
+/**
+ * Returns the list of nodes that hold secret shares and who can participate in threshold signing.
+ * During a key generation, this will be the set of nodes still active in the key generation
+ * process.
+ */
+public class CrossListCoordinationContracts implements JsonRpcMethod {
   private static final Logger LOG = LogManager.getLogger();
-
   private final CrosschainController crosschainController;
-  private final JsonRpcParameter parameters;
 
-  public CrossStartThresholdKeyGeneration(
-      final CrosschainController crosschainController, final JsonRpcParameter parameters) {
+  public CrossListCoordinationContracts(final CrosschainController crosschainController) {
     this.crosschainController = crosschainController;
-    this.parameters = parameters;
   }
 
   @Override
   public String getName() {
-    return RpcMethod.CROSS_START_THRESHOLD_KEY_GENERATION.getMethodName();
+    return RpcMethod.CROSS_LIST_COORDINAITON_CONTRACTS.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(final JsonRpcRequest request) {
-    if (request.getParamLength() != 2) {
+    if (request.getParamLength() != 0) {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
-    Object[] params = request.getParams();
-    final int threshold = parameters.required(params, 0, Integer.TYPE);
-    final int algorithmInt = parameters.required(params, 1, Integer.TYPE);
-    BlsThresholdCryptoSystem algorithm;
-    try {
-      algorithm = BlsThresholdCryptoSystem.create(algorithmInt);
-    } catch (RuntimeException ex) {
-      return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
-    }
-    LOG.trace("JSON RPC {}: Threshold: {}, Algorithm: {}", getName(), threshold, algorithm);
 
-    long keyVersion = this.crosschainController.startThresholdKeyGeneration(threshold, algorithm);
-    LOG.trace(
-        "JSON RPC {}: Threshold: {}, Algorithm: {}: Key Version: {}",
-        getName(),
-        threshold,
-        algorithm,
-        keyVersion);
-    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyVersion));
+    Collection<CoordinationContractInformation> info =
+        this.crosschainController.listCoordinationContracts();
+    LOG.trace("JSON RPC {}: Size: {}", getName(), info.size());
+    return new JsonRpcSuccessResponse(request.getId(), info);
   }
 }

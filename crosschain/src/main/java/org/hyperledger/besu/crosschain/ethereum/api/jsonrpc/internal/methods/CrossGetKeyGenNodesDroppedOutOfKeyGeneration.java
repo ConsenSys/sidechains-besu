@@ -13,7 +13,7 @@
 package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 
 import org.hyperledger.besu.crosschain.core.CrosschainController;
-import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
+import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
@@ -21,18 +21,19 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.results.Quantity;
 
-public class CrossGetKeyStatus extends AbstractCrossWithKeyVersionParam {
+import java.math.BigInteger;
+import java.util.Map;
 
-  public CrossGetKeyStatus(
+public class CrossGetKeyGenNodesDroppedOutOfKeyGeneration extends AbstractCrossWithKeyVersionParam {
+  public CrossGetKeyGenNodesDroppedOutOfKeyGeneration(
       final CrosschainController crosschainController, final JsonRpcParameter parameters) {
     super(crosschainController, parameters);
   }
 
   @Override
   public String getName() {
-    return RpcMethod.CROSS_GET_KEY_STATUS.getMethodName();
+    return RpcMethod.CROSS_GET_KEY_GEN_NODES_DROPPED_OUT_OF_KEY_GENERATION.getMethodName();
   }
 
   @Override
@@ -42,8 +43,9 @@ public class CrossGetKeyStatus extends AbstractCrossWithKeyVersionParam {
     }
     final long keyVersion = getKeyVersionParameter(request);
 
-    KeyStatus keyStatus = this.crosschainController.getKeyStatus(keyVersion);
-    LOG.trace("JSON RPC {}: Version: {}, Status: {}", getName(), keyVersion, keyStatus.value);
-    return new JsonRpcSuccessResponse(request.getId(), Quantity.create(keyStatus.value));
+    Map<BigInteger, KeyGenFailureToCompleteReason> keyInfo =
+        this.crosschainController.getKeyGenNodesDroppedOutOfKeyGeneration(keyVersion);
+    LOG.trace("JSON RPC {}: Version: {}, Size: {}", getName(), keyVersion, keyInfo.size());
+    return new JsonRpcSuccessResponse(request.getId(), keyInfo);
   }
 }
