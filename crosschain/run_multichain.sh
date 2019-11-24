@@ -1,30 +1,30 @@
 #!/bin/bash
 
 # This script partitions the terminal window using tmux,
-# running as many instances of CMD_LINE as params are in PARAMS,
-# plus an extra shell
+# running as many instances of CMD_LINE as params are in PARAMS.
+# Press Escape to exit everything.
 
 CMD_LINE="crosschain/run_node.js "
 PARAMS="33 22 11"
 
 STANDOUT=`tput smso`
 OFFSTANDOUT=`tput rmso`
-MESSAGE="Press $STANDOUT Control-Q $OFFSTANDOUT to exit everything"
 
-tmux new-session -s multichain -d "bash --init-file <(echo \". \"$HOME/.bash_profile\"; echo $MESSAGE\" ) "
-# The init-file incantation is needed so bash stays interactive after running the given command
-# The initial pane is not special in any way. It simply feels comfortable to have a shell there.
-tmux bind-key -n C-q kill-session
-tmux set remain-on-exit on
-tmux set -g mouse on
-
-#tmux set -g display-time 0
-#tmux display-message "Press Control-Q to exit everything"
+IS_FIRST=1
 
 for CHAINID in $PARAMS
 do
     FULL_CMD_LINE="$CMD_LINE $CHAINID"
-    tmux split-window -v -d "bash -c \"echo $STANDOUT Running '$FULL_CMD_LINE' $OFFSTANDOUT ; $FULL_CMD_LINE\""
+    if (( $IS_FIRST == 1))
+    then
+      IS_FIRST=0
+      tmux new-session -s multichain -d "bash -c \"echo $STANDOUT Running '$FULL_CMD_LINE' $OFFSTANDOUT ; $FULL_CMD_LINE\""
+      tmux bind-key -n Escape kill-session
+      tmux set remain-on-exit on
+      tmux set -g mouse on
+    else
+      tmux split-window -b -t 0 -d "bash -c \"echo $STANDOUT Running '$FULL_CMD_LINE' $OFFSTANDOUT ; $FULL_CMD_LINE\""
+    fi
 done
 tmux select-layout even-vertical
 tmux attach
