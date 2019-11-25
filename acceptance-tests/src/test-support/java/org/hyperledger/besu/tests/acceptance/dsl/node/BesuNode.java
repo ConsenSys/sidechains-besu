@@ -624,8 +624,8 @@ public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable 
     expected.verify(this);
   }
 
-  public Web3jService getJsonRpcWeb3jServiceFromHttpUrl(final String url) {
+  public Web3jService getJsonRpcWeb3jServiceFromHttpUrl(final String fallbackUrl) {
     return jsonRpcBaseUrl().map(HttpService::new)
-            .orElse(new HttpService(url));
+            .orElse(new HttpService(fallbackUrl));
   }
 }
