@@ -276,6 +276,15 @@ public class BesuNodeFactory {
             .build());
   }
 
+  public BesuNode createCrosschainCbcIbft2Node(final String name) throws IOException {
+    return create(
+        new BesuNodeConfigurationBuilder().name(name).miningEnabled().jsonRpcConfiguration(
+            node.createJsonRpcWithCrosschainEnabledConfig()).
+            webSocketConfiguration(node.createWebSocketEnabledConfig()).devMode(false).
+            genesisConfigProvider(genesis::createCrosschainCbcIbft2GenesisConfig).build());
+  }
+
+
   public BesuNode createNodeWithStaticNodes(final String name, final List<Node> staticNodes)
       throws IOException {
 

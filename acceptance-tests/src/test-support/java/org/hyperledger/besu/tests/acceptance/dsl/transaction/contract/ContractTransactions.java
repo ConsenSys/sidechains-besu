@@ -15,6 +15,7 @@ package org.hyperledger.besu.tests.acceptance.dsl.transaction.contract;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.CallSmartContractFunction;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.DeploySmartContractTransaction;
 
+import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.DeployLockableSmartContractTransaction;
 import org.web3j.tx.Contract;
 
 public class ContractTransactions {
@@ -22,6 +23,11 @@ public class ContractTransactions {
   public <T extends Contract> DeploySmartContractTransaction<T> createSmartContract(
       final Class<T> clazz) {
     return new DeploySmartContractTransaction<>(clazz);
+  }
+
+  public <T extends Contract> DeployLockableSmartContractTransaction<T> createLockableSmartContract(
+      final Class<T> clazz) {
+    return new DeployLockableSmartContractTransaction<>(clazz);
   }
 
   public CallSmartContractFunction callSmartContract(

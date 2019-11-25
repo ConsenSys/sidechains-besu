@@ -73,4 +73,11 @@ public class GenesisConfigurationFactory {
       throw new IllegalStateException("Unable to get test genesis config " + filepath);
     }
   }
+
+
+
+  public Optional<String> createCrosschainCbcIbft2GenesisConfig(final Collection<? extends RunnableNode> validators) {
+    final String template = readGenesisFile("/ibft/crosschaincbc.json");
+    return updateGenesisExtraData(validators, template, IbftExtraData::createGenesisExtraDataString);
+  }
 }

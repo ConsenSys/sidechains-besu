@@ -64,6 +64,7 @@ import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketClient;
@@ -309,7 +310,7 @@ public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable 
 
       nodeRequests =
           new NodeRequests(
-              new JsonRpc2_0Web3j(web3jService, 2000, Async.defaultExecutorService()),
+              new JsonRpc2_0Besu(web3jService, 2000),
               new CliqueRequestFactory(web3jService),
               new Ibft2RequestFactory(web3jService),
               new PermissioningJsonRpcRequestFactory(web3jService),
