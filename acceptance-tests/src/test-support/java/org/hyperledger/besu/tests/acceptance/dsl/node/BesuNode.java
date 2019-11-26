@@ -65,12 +65,10 @@ import org.awaitility.core.ConditionTimeoutException;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.besu.JsonRpc2_0Besu;
-import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketClient;
 import org.web3j.protocol.websocket.WebSocketListener;
 import org.web3j.protocol.websocket.WebSocketService;
-import org.web3j.utils.Async;
 
 public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable {
 
@@ -630,7 +628,6 @@ public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable 
   }
 
   public Web3jService getJsonRpcWeb3jServiceFromHttpUrl(final String fallbackUrl) {
-    return jsonRpcBaseUrl().map(HttpService::new)
-            .orElse(new HttpService(fallbackUrl));
+    return jsonRpcBaseUrl().map(HttpService::new).orElse(new HttpService(fallbackUrl));
   }
 }

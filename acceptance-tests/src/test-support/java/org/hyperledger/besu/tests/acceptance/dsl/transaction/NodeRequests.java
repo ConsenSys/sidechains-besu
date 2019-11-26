@@ -23,7 +23,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.privacy.PrivacyRequ
 
 import java.util.Optional;
 
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.websocket.WebSocketService;
 

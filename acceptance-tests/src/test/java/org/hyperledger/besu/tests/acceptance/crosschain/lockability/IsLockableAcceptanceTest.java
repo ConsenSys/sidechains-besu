@@ -13,20 +13,15 @@
 package org.hyperledger.besu.tests.acceptance.crosschain.lockability;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.junit.Assert.assertThat;
 
 import org.hyperledger.besu.tests.acceptance.crosschain.CrosschainAcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable;
 import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockableCrosschain;
-import org.hyperledger.besu.tests.acceptance.dsl.AcceptanceTestBase;
-import org.hyperledger.besu.tests.acceptance.dsl.node.BesuNode;
-import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.CrossIsLockableTransaction;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.web3j.tx.CrosschainTransactionManager;
-
-import static org.junit.Assert.assertThat;
 
 public class IsLockableAcceptanceTest extends CrosschainAcceptanceTestBase {
   @Before
@@ -38,7 +33,8 @@ public class IsLockableAcceptanceTest extends CrosschainAcceptanceTestBase {
   @Test
   public void normalDeployShouldBeNotLockable() {
     final SimpleIsLockable simpleContract =
-        this.nodeOnBlockchain1.execute(contractTransactions.createSmartContract(SimpleIsLockable.class));
+        this.nodeOnBlockchain1.execute(
+            contractTransactions.createSmartContract(SimpleIsLockable.class));
     final String contractAddress = simpleContract.getContractAddress();
 
     CrossIsLockableTransaction isLockableObj = crossTransactions.getIsLockable(contractAddress);
@@ -50,7 +46,9 @@ public class IsLockableAcceptanceTest extends CrosschainAcceptanceTestBase {
   @Test
   public void lockableDeployShouldBeLockable() {
     final SimpleIsLockableCrosschain simpleContract =
-        nodeOnBlockchain1.execute(contractTransactions.createLockableSmartContract(SimpleIsLockableCrosschain.class, this.transactionManagerBlockchain1));
+        nodeOnBlockchain1.execute(
+            contractTransactions.createLockableSmartContract(
+                SimpleIsLockableCrosschain.class, this.transactionManagerBlockchain1));
     final String contractAddress = simpleContract.getContractAddress();
 
     CrossIsLockableTransaction isLockableObj = crossTransactions.getIsLockable(contractAddress);
@@ -58,5 +56,4 @@ public class IsLockableAcceptanceTest extends CrosschainAcceptanceTestBase {
 
     assertThat(isLockable).isTrue();
   }
-
 }

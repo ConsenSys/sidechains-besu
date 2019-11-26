@@ -12,14 +12,15 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.web3j.protocol.core.DefaultBlockParameterName.LATEST;
+
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.CrosschainIsLockable;
 
 import java.io.IOException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.web3j.protocol.core.DefaultBlockParameterName.LATEST;
+import org.web3j.protocol.besu.response.crosschain.CrosschainIsLockable;
 
 public class CrossIsLockableTransaction implements Transaction<Boolean> {
 

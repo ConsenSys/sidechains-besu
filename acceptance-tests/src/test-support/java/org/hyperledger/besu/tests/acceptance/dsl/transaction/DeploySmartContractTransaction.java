@@ -16,7 +16,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.util.ArrayList;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
@@ -42,7 +41,9 @@ public class DeploySmartContractTransaction<T extends Contract> implements Trans
     this.clazz = clazz;
     this.option = 0;
   }
-  public DeploySmartContractTransaction(final Class<T> clazz, final String string, final BigInteger bigInteger) {
+
+  public DeploySmartContractTransaction(
+      final Class<T> clazz, final String string, final BigInteger bigInteger) {
     this.clazz = clazz;
     this.string = string;
     this.bigInteger = bigInteger;
@@ -56,16 +57,36 @@ public class DeploySmartContractTransaction<T extends Contract> implements Trans
       final Object invoked;
       switch (this.option) {
         case 0:
-          method = clazz.getMethod(
-              "deploy", Web3j.class, Credentials.class, BigInteger.class, BigInteger.class);
-          invoked = method.invoke(
-                  METHOD_IS_STATIC, node.eth(), BENEFACTOR_ONE, DEFAULT_GAS_PRICE, DEFAULT_GAS_LIMIT);
+          method =
+              clazz.getMethod(
+                  "deploy", Web3j.class, Credentials.class, BigInteger.class, BigInteger.class);
+          invoked =
+              method.invoke(
+                  METHOD_IS_STATIC,
+                  node.eth(),
+                  BENEFACTOR_ONE,
+                  DEFAULT_GAS_PRICE,
+                  DEFAULT_GAS_LIMIT);
           break;
         case 1:
-          method = clazz.getMethod(
-              "deploy", Web3j.class, Credentials.class, BigInteger.class, BigInteger.class, String.class, BigInteger.class);
-          invoked = method.invoke(
-              METHOD_IS_STATIC, node.eth(), BENEFACTOR_ONE, DEFAULT_GAS_PRICE, DEFAULT_GAS_LIMIT, this.string, this.bigInteger);
+          method =
+              clazz.getMethod(
+                  "deploy",
+                  Web3j.class,
+                  Credentials.class,
+                  BigInteger.class,
+                  BigInteger.class,
+                  String.class,
+                  BigInteger.class);
+          invoked =
+              method.invoke(
+                  METHOD_IS_STATIC,
+                  node.eth(),
+                  BENEFACTOR_ONE,
+                  DEFAULT_GAS_PRICE,
+                  DEFAULT_GAS_LIMIT,
+                  this.string,
+                  this.bigInteger);
           break;
         default:
           throw new Error();

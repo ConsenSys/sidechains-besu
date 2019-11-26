@@ -12,19 +12,16 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain;
 
-import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.besu.Besu;
-import org.web3j.protocol.besu.JsonRpc2_0Besu;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.tx.Contract;
-import org.web3j.tx.CrosschainTransactionManager;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+
+import org.web3j.protocol.besu.Besu;
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.tx.Contract;
+import org.web3j.tx.CrosschainTransactionManager;
 
 public class DeployLockableSmartContractTransaction<T extends Contract> implements Transaction<T> {
 
@@ -33,10 +30,10 @@ public class DeployLockableSmartContractTransaction<T extends Contract> implemen
   private static final Object METHOD_IS_STATIC = null;
   private final CrosschainTransactionManager transactionManager;
 
-
   private final Class<T> clazz;
 
-  public DeployLockableSmartContractTransaction(final Class<T> clazz, final CrosschainTransactionManager transactionManager) {
+  public DeployLockableSmartContractTransaction(
+      final Class<T> clazz, final CrosschainTransactionManager transactionManager) {
     this.clazz = clazz;
     this.transactionManager = transactionManager;
   }
@@ -46,11 +43,19 @@ public class DeployLockableSmartContractTransaction<T extends Contract> implemen
     try {
       final Method method =
           clazz.getMethod(
-              "deployLockable", Besu.class, CrosschainTransactionManager.class, BigInteger.class, BigInteger.class);
+              "deployLockable",
+              Besu.class,
+              CrosschainTransactionManager.class,
+              BigInteger.class,
+              BigInteger.class);
 
       final Object invoked =
           method.invoke(
-              METHOD_IS_STATIC, node.eth(), this.transactionManager, DEFAULT_GAS_PRICE, DEFAULT_GAS_LIMIT);
+              METHOD_IS_STATIC,
+              node.eth(),
+              this.transactionManager,
+              DEFAULT_GAS_PRICE,
+              DEFAULT_GAS_LIMIT);
 
       return cast(invoked).send();
     } catch (final Exception e) {

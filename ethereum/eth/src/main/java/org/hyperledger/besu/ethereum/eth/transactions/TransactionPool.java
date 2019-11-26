@@ -66,7 +66,7 @@ public class TransactionPool implements BlockAddedObserver {
   private final SyncState syncState;
 
   // Added for the purposes of crosschain acceptance tests. TO BE REMOVED LATER
-  //private final Wei minTransactionGasPrice;
+  // private final Wei minTransactionGasPrice;
   private Wei minTransactionGasPrice;
 
   private final LabelledMetric<Counter> duplicateTransactionCounter;

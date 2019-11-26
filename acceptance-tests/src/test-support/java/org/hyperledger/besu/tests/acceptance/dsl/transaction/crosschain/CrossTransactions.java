@@ -17,5 +17,4 @@ public class CrossTransactions {
   public CrossIsLockableTransaction getIsLockable(final String address) {
     return new CrossIsLockableTransaction(address);
   }
-
 }

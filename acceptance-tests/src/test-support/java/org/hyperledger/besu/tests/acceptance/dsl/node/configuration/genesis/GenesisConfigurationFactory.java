@@ -74,21 +74,24 @@ public class GenesisConfigurationFactory {
     }
   }
 
-
-
-  public Optional<String> createCrosschainCoordinationBlockchainGenesisConfig(final Collection<? extends RunnableNode> validators) {
+  public Optional<String> createCrosschainCoordinationBlockchainGenesisConfig(
+      final Collection<? extends RunnableNode> validators) {
     final String template = readGenesisFile("/crosschain/crosschain_coordination_blockchain.json");
-    return updateGenesisExtraData(validators, template, IbftExtraData::createGenesisExtraDataString);
+    return updateGenesisExtraData(
+        validators, template, IbftExtraData::createGenesisExtraDataString);
   }
 
-  public Optional<String> createCrosschainBlockchain1GenesisConfig(final Collection<? extends RunnableNode> validators) {
+  public Optional<String> createCrosschainBlockchain1GenesisConfig(
+      final Collection<? extends RunnableNode> validators) {
     final String template = readGenesisFile("/crosschain/crosschain_blockchain_01.json");
-    return updateGenesisExtraData(validators, template, IbftExtraData::createGenesisExtraDataString);
+    return updateGenesisExtraData(
+        validators, template, IbftExtraData::createGenesisExtraDataString);
   }
 
-  public Optional<String> createCrosschainBlockchain2GenesisConfig(final Collection<? extends RunnableNode> validators) {
+  public Optional<String> createCrosschainBlockchain2GenesisConfig(
+      final Collection<? extends RunnableNode> validators) {
     final String template = readGenesisFile("/crosschain/crosschain_coordination_blockchain.json");
-    return updateGenesisExtraData(validators, template, IbftExtraData::createGenesisExtraDataString);
+    return updateGenesisExtraData(
+        validators, template, IbftExtraData::createGenesisExtraDataString);
   }
-
 }
