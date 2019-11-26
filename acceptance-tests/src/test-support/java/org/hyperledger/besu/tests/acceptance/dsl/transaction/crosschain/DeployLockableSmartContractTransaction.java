@@ -25,7 +25,7 @@ import org.web3j.tx.CrosschainTransactionManager;
 
 public class DeployLockableSmartContractTransaction<T extends Contract> implements Transaction<T> {
 
-  private static final BigInteger DEFAULT_GAS_PRICE = BigInteger.valueOf(1000);
+  private static final BigInteger DEFAULT_GAS_PRICE = BigInteger.valueOf(0);
   private static final BigInteger DEFAULT_GAS_LIMIT = BigInteger.valueOf(3000000);
   private static final Object METHOD_IS_STATIC = null;
   private final CrosschainTransactionManager transactionManager;
