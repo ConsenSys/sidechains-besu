@@ -30,8 +30,8 @@ public class ContractTransactions {
     return new DeploySmartContractTransaction<>(clazz);
   }
   public <T extends Contract> DeploySmartContractTransaction<T> createSmartContract(
-      final Class<T> clazz, ArrayList<Class> types, ArrayList<Object> actualValues) {
-    return new DeploySmartContractTransaction<>(clazz, types, actualValues);
+      final Class<T> clazz, final String string, final BigInteger bigInteger) {
+    return new DeploySmartContractTransaction<>(clazz, string, bigInteger);
   }
 
   public <T extends Contract> DeployLockableSmartContractTransaction<T> createLockableSmartContract(

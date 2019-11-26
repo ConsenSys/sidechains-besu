@@ -56,15 +56,9 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     final VotingAlgMajorityWhoVoted votingContract =
       nodeOnCoordinationBlockchain.execute(contractTransactions.createSmartContract(VotingAlgMajorityWhoVoted.class));
-    ArrayList<Class> parameterTypes = new ArrayList<>();
-    parameterTypes.add(String.class);
-    parameterTypes.add(BigInteger.class);
-    ArrayList<Object> values = new ArrayList<>();
-    values.add(votingContract.getContractAddress());
-    values.add(BigInteger.valueOf(VOTING_TIME_OUT));
-
-    coordContract =
-        nodeOnCoordinationBlockchain.execute(contractTransactions.createSmartContract(CrosschainCoordinationV1.class, parameterTypes, values));
+    this.coordContract =
+        nodeOnCoordinationBlockchain.execute(contractTransactions.createSmartContract(
+            CrosschainCoordinationV1.class, votingContract.getContractAddress(), BigInteger.valueOf(VOTING_TIME_OUT)));
   }
 
   public void setUpBlockchain1() throws Exception {

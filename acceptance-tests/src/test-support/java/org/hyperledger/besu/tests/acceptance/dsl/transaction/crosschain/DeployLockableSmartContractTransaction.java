@@ -31,8 +31,6 @@ public class DeployLockableSmartContractTransaction<T extends Contract> implemen
   private static final BigInteger DEFAULT_GAS_PRICE = BigInteger.valueOf(1000);
   private static final BigInteger DEFAULT_GAS_LIMIT = BigInteger.valueOf(3000000);
   private static final Object METHOD_IS_STATIC = null;
-  private static final Credentials BENEFACTOR_ONE =
-      Credentials.create(Accounts.GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
   private final CrosschainTransactionManager transactionManager;
 
 
