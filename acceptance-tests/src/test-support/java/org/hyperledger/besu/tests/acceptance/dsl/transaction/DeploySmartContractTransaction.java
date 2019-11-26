@@ -16,6 +16,7 @@ import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
@@ -35,13 +36,16 @@ public class DeploySmartContractTransaction<T extends Contract> implements Trans
   public DeploySmartContractTransaction(final Class<T> clazz) {
     this.clazz = clazz;
   }
+  public DeploySmartContractTransaction(final Class<T> clazz, ArrayList<Class> types, ArrayList<Object> actualValues) {
+    this.clazz = clazz;
+  }
 
   @Override
   public T execute(final NodeRequests node) {
     try {
       final Method method =
           clazz.getMethod(
-              "deploy", Web3j.class, Credentials.class, BigInteger.class, BigInteger.class);
+              "deploy", Web3j.class, Credentials.class, BigInteger.class, BigInteger.class, String.class, BigInteger.class);
 
       final Object invoked =
           method.invoke(

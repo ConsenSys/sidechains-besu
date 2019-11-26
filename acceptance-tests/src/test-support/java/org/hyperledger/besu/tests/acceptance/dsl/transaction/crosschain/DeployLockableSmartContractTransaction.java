@@ -18,6 +18,7 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.besu.Besu;
+import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.tx.Contract;
 import org.web3j.tx.CrosschainTransactionManager;
@@ -32,14 +33,14 @@ public class DeployLockableSmartContractTransaction<T extends Contract> implemen
   private static final Object METHOD_IS_STATIC = null;
   private static final Credentials BENEFACTOR_ONE =
       Credentials.create(Accounts.GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
-  private static final CrosschainTransactionManager CROSSCHAIN_TRANSACTION_MANAGER = null; //new CrosschainTransactionManager()
-      // TODO Besu besu, Credentials credentials, BigInteger chainId, int attempts, long sleepDuration, Web3j coordinationBlockchain, BigInteger crosschainCoordinationBlockchainId, String crosschainCoordinationContractAddress, long crosschainTimeoutInBlocks
+  private final CrosschainTransactionManager transactionManager;
 
 
   private final Class<T> clazz;
 
-  public DeployLockableSmartContractTransaction(final Class<T> clazz) {
+  public DeployLockableSmartContractTransaction(final Class<T> clazz, final CrosschainTransactionManager transactionManager) {
     this.clazz = clazz;
+    this.transactionManager = transactionManager;
   }
 
   @Override
@@ -51,7 +52,7 @@ public class DeployLockableSmartContractTransaction<T extends Contract> implemen
 
       final Object invoked =
           method.invoke(
-              METHOD_IS_STATIC, node.eth(), CROSSCHAIN_TRANSACTION_MANAGER, DEFAULT_GAS_PRICE, DEFAULT_GAS_LIMIT);
+              METHOD_IS_STATIC, node.eth(), this.transactionManager, DEFAULT_GAS_PRICE, DEFAULT_GAS_LIMIT);
 
       return cast(invoked).send();
     } catch (final Exception e) {

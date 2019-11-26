@@ -12,11 +12,16 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.contract;
 
+import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.CallSmartContractFunction;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.DeploySmartContractTransaction;
 
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.DeployLockableSmartContractTransaction;
 import org.web3j.tx.Contract;
+import org.web3j.tx.CrosschainTransactionManager;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
 
 public class ContractTransactions {
 
@@ -24,10 +29,14 @@ public class ContractTransactions {
       final Class<T> clazz) {
     return new DeploySmartContractTransaction<>(clazz);
   }
+  public <T extends Contract> DeploySmartContractTransaction<T> createSmartContract(
+      final Class<T> clazz, ArrayList<Class> types, ArrayList<Object> actualValues) {
+    return new DeploySmartContractTransaction<>(clazz, types, actualValues);
+  }
 
   public <T extends Contract> DeployLockableSmartContractTransaction<T> createLockableSmartContract(
-      final Class<T> clazz) {
-    return new DeployLockableSmartContractTransaction<>(clazz);
+      final Class<T> clazz, final CrosschainTransactionManager transactionManager) {
+    return new DeployLockableSmartContractTransaction<>(clazz, transactionManager);
   }
 
   public CallSmartContractFunction callSmartContract(

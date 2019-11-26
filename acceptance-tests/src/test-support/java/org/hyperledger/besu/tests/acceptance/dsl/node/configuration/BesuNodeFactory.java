@@ -276,12 +276,26 @@ public class BesuNodeFactory {
             .build());
   }
 
-  public BesuNode createCrosschainCbcIbft2Node(final String name) throws IOException {
+  public BesuNode createCrosschainCoordinationBlockchainIbft2Node(final String name) throws IOException {
     return create(
         new BesuNodeConfigurationBuilder().name(name).miningEnabled().jsonRpcConfiguration(
             node.createJsonRpcWithCrosschainEnabledConfig()).
             webSocketConfiguration(node.createWebSocketEnabledConfig()).devMode(false).
-            genesisConfigProvider(genesis::createCrosschainCbcIbft2GenesisConfig).build());
+            genesisConfigProvider(genesis::createCrosschainCoordinationBlockchainGenesisConfig).build());
+  }
+  public BesuNode createCrosschainBlockchain1Ibft2Node(final String name) throws IOException {
+    return create(
+        new BesuNodeConfigurationBuilder().name(name).miningEnabled().jsonRpcConfiguration(
+            node.createJsonRpcWithCrosschainEnabledConfig()).
+            webSocketConfiguration(node.createWebSocketEnabledConfig()).devMode(false).
+            genesisConfigProvider(genesis::createCrosschainBlockchain1GenesisConfig).build());
+  }
+  public BesuNode createCrosschainBlockchain2Ibft2Node(final String name) throws IOException {
+    return create(
+        new BesuNodeConfigurationBuilder().name(name).miningEnabled().jsonRpcConfiguration(
+            node.createJsonRpcWithCrosschainEnabledConfig()).
+            webSocketConfiguration(node.createWebSocketEnabledConfig()).devMode(false).
+            genesisConfigProvider(genesis::createCrosschainBlockchain2GenesisConfig).build());
   }
 
 

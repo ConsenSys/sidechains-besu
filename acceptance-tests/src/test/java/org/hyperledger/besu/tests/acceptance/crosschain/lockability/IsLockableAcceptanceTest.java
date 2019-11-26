@@ -15,35 +15,34 @@ package org.hyperledger.besu.tests.acceptance.crosschain.lockability;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+import org.hyperledger.besu.tests.acceptance.crosschain.CrosschainAcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable;
 import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockableCrosschain;
 import org.hyperledger.besu.tests.acceptance.dsl.AcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.node.BesuNode;
+import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.CrossIsLockableTransaction;
-import org.hyperledger.besu.tests.web3j.generated.SimpleStorage;
 import org.junit.Before;
 import org.junit.Test;
+import org.web3j.tx.CrosschainTransactionManager;
 
 import static org.junit.Assert.assertThat;
 
-public class IsLockableAcceptanceTest extends AcceptanceTestBase {
-
-  private BesuNode minerNode;
-
+public class IsLockableAcceptanceTest extends CrosschainAcceptanceTestBase {
   @Before
   public void setUp() throws Exception {
-    minerNode = besu.createCrosschainCbcIbft2Node("miner-node");
-    cluster.start(minerNode);
+    setUpCoordiantionChain();
+    setUpBlockchain1();
   }
 
   @Test
   public void normalDeployShouldBeNotLockable() {
     final SimpleIsLockable simpleContract =
-        minerNode.execute(contractTransactions.createSmartContract(SimpleIsLockable.class));
+        this.nodeOnBlockchain1.execute(contractTransactions.createSmartContract(SimpleIsLockable.class));
     final String contractAddress = simpleContract.getContractAddress();
 
     CrossIsLockableTransaction isLockableObj = crossTransactions.getIsLockable(contractAddress);
-    boolean isLockable = minerNode.execute(isLockableObj);
+    boolean isLockable = nodeOnBlockchain1.execute(isLockableObj);
 
     assertThat(isLockable).isFalse();
   }
@@ -51,11 +50,11 @@ public class IsLockableAcceptanceTest extends AcceptanceTestBase {
   @Test
   public void lockableDeployShouldBeLockable() {
     final SimpleIsLockableCrosschain simpleContract =
-        minerNode.execute(contractTransactions.createLockableSmartContract(SimpleIsLockableCrosschain.class));
+        nodeOnBlockchain1.execute(contractTransactions.createLockableSmartContract(SimpleIsLockableCrosschain.class, this.transactionManagerBlockchain1));
     final String contractAddress = simpleContract.getContractAddress();
 
     CrossIsLockableTransaction isLockableObj = crossTransactions.getIsLockable(contractAddress);
-    boolean isLockable = minerNode.execute(isLockableObj);
+    boolean isLockable = nodeOnBlockchain1.execute(isLockableObj);
 
     assertThat(isLockable).isTrue();
   }
