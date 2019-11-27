@@ -44,11 +44,11 @@ import org.web3j.tx.gas.ContractGasProvider;
 @SuppressWarnings("rawtypes")
 public class SimpleIsLockableCrosschain extends CrosschainContract {
   private static final String BINARY =
-      "608060405234801561001057600080fd5b5060ab8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80633fa4f2451460375780635524107714604f575b600080fd5b603d606b565b60408051918252519081900360200190f35b606960048036036020811015606357600080fd5b50356071565b005b60005481565b60005556fea265627a7a72305820c4808e009aa805380415222f9a4b7a2104c14551c284abf7e322ec02a76eddfa64736f6c634300050a0032";
-
-  public static final String FUNC_VALUE = "value";
+      "608060405234801561001057600080fd5b5060ab8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80633fa4f2451460375780635524107714604f575b600080fd5b603d606b565b60408051918252519081900360200190f35b606960048036036020811015606357600080fd5b50356071565b005b60005481565b60005556fea265627a7a7231582085b4718ede83406512a878c5039ad129e029619a4667751ee06d20415c29157764736f6c634300050c0032";
 
   public static final String FUNC_SETVALUE = "setValue";
+
+  public static final String FUNC_VALUE = "value";
 
   @Deprecated
   protected SimpleIsLockableCrosschain(
@@ -66,25 +66,6 @@ public class SimpleIsLockableCrosschain extends CrosschainContract {
       CrosschainTransactionManager crosschainTransactionManager,
       ContractGasProvider contractGasProvider) {
     super(BINARY, contractAddress, besu, crosschainTransactionManager, contractGasProvider);
-  }
-
-  public RemoteFunctionCall<BigInteger> value() {
-    final Function function =
-        new Function(
-            FUNC_VALUE,
-            Arrays.<Type>asList(),
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-    return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-  }
-
-  public byte[] value_AsSignedCrosschainSubordinateView(final CrosschainContext crosschainContext)
-      throws IOException {
-    final Function function =
-        new Function(
-            FUNC_VALUE,
-            Arrays.<Type>asList(),
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-    return createSignedSubordinateView(function, crosschainContext);
   }
 
   public RemoteFunctionCall<TransactionReceipt> setValue(BigInteger _val) {
@@ -114,6 +95,25 @@ public class SimpleIsLockableCrosschain extends CrosschainContract {
             Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)),
             Collections.<TypeReference<?>>emptyList());
     return executeRemoteCallCrosschainTransaction(function, crosschainContext);
+  }
+
+  public RemoteFunctionCall<BigInteger> value() {
+    final Function function =
+        new Function(
+            FUNC_VALUE,
+            Arrays.<Type>asList(),
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+    return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+  }
+
+  public byte[] value_AsSignedCrosschainSubordinateView(final CrosschainContext crosschainContext)
+      throws IOException {
+    final Function function =
+        new Function(
+            FUNC_VALUE,
+            Arrays.<Type>asList(),
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+    return createSignedSubordinateView(function, crosschainContext);
   }
 
   @Deprecated

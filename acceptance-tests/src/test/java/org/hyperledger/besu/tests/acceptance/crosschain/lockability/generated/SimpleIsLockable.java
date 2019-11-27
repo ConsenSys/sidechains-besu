@@ -43,11 +43,11 @@ import org.web3j.tx.gas.ContractGasProvider;
 @SuppressWarnings("rawtypes")
 public class SimpleIsLockable extends Contract {
   private static final String BINARY =
-      "608060405234801561001057600080fd5b5060ab8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80633fa4f2451460375780635524107714604f575b600080fd5b603d606b565b60408051918252519081900360200190f35b606960048036036020811015606357600080fd5b50356071565b005b60005481565b60005556fea265627a7a72305820c4808e009aa805380415222f9a4b7a2104c14551c284abf7e322ec02a76eddfa64736f6c634300050a0032";
-
-  public static final String FUNC_VALUE = "value";
+      "608060405234801561001057600080fd5b5060ab8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80633fa4f2451460375780635524107714604f575b600080fd5b603d606b565b60408051918252519081900360200190f35b606960048036036020811015606357600080fd5b50356071565b005b60005481565b60005556fea265627a7a7231582032e8b84fa896c900e0b8d06ebb2432a0757c7777188c6138271ca720fa43c2d064736f6c634300050c0032";
 
   public static final String FUNC_SETVALUE = "setValue";
+
+  public static final String FUNC_VALUE = "value";
 
   @Deprecated
   protected SimpleIsLockable(
@@ -85,15 +85,6 @@ public class SimpleIsLockable extends Contract {
     super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
   }
 
-  public RemoteFunctionCall<BigInteger> value() {
-    final Function function =
-        new Function(
-            FUNC_VALUE,
-            Arrays.<Type>asList(),
-            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-    return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-  }
-
   public RemoteFunctionCall<TransactionReceipt> setValue(BigInteger _val) {
     final Function function =
         new Function(
@@ -103,114 +94,77 @@ public class SimpleIsLockable extends Contract {
     return executeRemoteCallTransaction(function);
   }
 
-  @Deprecated
-  public static org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-          .SimpleIsLockable
-      load(
-          String contractAddress,
-          Web3j web3j,
-          Credentials credentials,
-          BigInteger gasPrice,
-          BigInteger gasLimit) {
-    return new org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-        .SimpleIsLockable(contractAddress, web3j, credentials, gasPrice, gasLimit);
+  public RemoteFunctionCall<BigInteger> value() {
+    final Function function =
+        new Function(
+            FUNC_VALUE,
+            Arrays.<Type>asList(),
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+    return executeRemoteCallSingleValueReturn(function, BigInteger.class);
   }
 
   @Deprecated
-  public static org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-          .SimpleIsLockable
-      load(
-          String contractAddress,
-          Web3j web3j,
-          TransactionManager transactionManager,
-          BigInteger gasPrice,
-          BigInteger gasLimit) {
-    return new org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-        .SimpleIsLockable(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
-  }
-
-  public static org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-          .SimpleIsLockable
-      load(
-          String contractAddress,
-          Web3j web3j,
-          Credentials credentials,
-          ContractGasProvider contractGasProvider) {
-    return new org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-        .SimpleIsLockable(contractAddress, web3j, credentials, contractGasProvider);
-  }
-
-  public static org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-          .SimpleIsLockable
-      load(
-          String contractAddress,
-          Web3j web3j,
-          TransactionManager transactionManager,
-          ContractGasProvider contractGasProvider) {
-    return new org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated
-        .SimpleIsLockable(contractAddress, web3j, transactionManager, contractGasProvider);
-  }
-
-  public static RemoteCall<
-          org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable>
-      deploy(Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
-    return deployRemoteCall(
-        org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable
-            .class,
-        web3j,
-        credentials,
-        contractGasProvider,
-        BINARY,
-        "");
+  public static SimpleIsLockable load(
+      String contractAddress,
+      Web3j web3j,
+      Credentials credentials,
+      BigInteger gasPrice,
+      BigInteger gasLimit) {
+    return new SimpleIsLockable(contractAddress, web3j, credentials, gasPrice, gasLimit);
   }
 
   @Deprecated
-  public static RemoteCall<
-          org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable>
-      deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
-    return deployRemoteCall(
-        org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable
-            .class,
-        web3j,
-        credentials,
-        gasPrice,
-        gasLimit,
-        BINARY,
-        "");
+  public static SimpleIsLockable load(
+      String contractAddress,
+      Web3j web3j,
+      TransactionManager transactionManager,
+      BigInteger gasPrice,
+      BigInteger gasLimit) {
+    return new SimpleIsLockable(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
   }
 
-  public static RemoteCall<
-          org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable>
-      deploy(
-          Web3j web3j,
-          TransactionManager transactionManager,
-          ContractGasProvider contractGasProvider) {
+  public static SimpleIsLockable load(
+      String contractAddress,
+      Web3j web3j,
+      Credentials credentials,
+      ContractGasProvider contractGasProvider) {
+    return new SimpleIsLockable(contractAddress, web3j, credentials, contractGasProvider);
+  }
+
+  public static SimpleIsLockable load(
+      String contractAddress,
+      Web3j web3j,
+      TransactionManager transactionManager,
+      ContractGasProvider contractGasProvider) {
+    return new SimpleIsLockable(contractAddress, web3j, transactionManager, contractGasProvider);
+  }
+
+  public static RemoteCall<SimpleIsLockable> deploy(
+      Web3j web3j, Credentials credentials, ContractGasProvider contractGasProvider) {
     return deployRemoteCall(
-        org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable
-            .class,
-        web3j,
-        transactionManager,
-        contractGasProvider,
-        BINARY,
-        "");
+        SimpleIsLockable.class, web3j, credentials, contractGasProvider, BINARY, "");
   }
 
   @Deprecated
-  public static RemoteCall<
-          org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable>
-      deploy(
-          Web3j web3j,
-          TransactionManager transactionManager,
-          BigInteger gasPrice,
-          BigInteger gasLimit) {
+  public static RemoteCall<SimpleIsLockable> deploy(
+      Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
     return deployRemoteCall(
-        org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable
-            .class,
-        web3j,
-        transactionManager,
-        gasPrice,
-        gasLimit,
-        BINARY,
-        "");
+        SimpleIsLockable.class, web3j, credentials, gasPrice, gasLimit, BINARY, "");
+  }
+
+  public static RemoteCall<SimpleIsLockable> deploy(
+      Web3j web3j, TransactionManager transactionManager, ContractGasProvider contractGasProvider) {
+    return deployRemoteCall(
+        SimpleIsLockable.class, web3j, transactionManager, contractGasProvider, BINARY, "");
+  }
+
+  @Deprecated
+  public static RemoteCall<SimpleIsLockable> deploy(
+      Web3j web3j,
+      TransactionManager transactionManager,
+      BigInteger gasPrice,
+      BigInteger gasLimit) {
+    return deployRemoteCall(
+        SimpleIsLockable.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, "");
   }
 }
