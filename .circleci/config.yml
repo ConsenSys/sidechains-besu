@@ -58,10 +58,6 @@ jobs:
     steps:
       - prepare
       - run:
-          name: DCO check
-          command: |
-            ./scripts/dco_check.sh
-      - run:
           name: Assemble
           command: |
             ./gradlew --no-daemon --parallel clean spotlessCheck compileJava compileTestJava assemble
