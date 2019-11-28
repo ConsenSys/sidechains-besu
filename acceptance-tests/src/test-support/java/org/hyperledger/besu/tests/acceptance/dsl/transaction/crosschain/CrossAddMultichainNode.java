@@ -12,16 +12,15 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.CrosschainIsLockable;
-import org.web3j.protocol.besu.response.crosschain.VoidResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.web3j.protocol.core.DefaultBlockParameterName.LATEST;
+import org.web3j.protocol.besu.response.crosschain.VoidResponse;
 
 public class CrossAddMultichainNode implements Transaction<Void> {
   private final BigInteger blockchainId;
@@ -35,7 +34,8 @@ public class CrossAddMultichainNode implements Transaction<Void> {
   @Override
   public Void execute(final NodeRequests node) {
     try {
-      final VoidResponse result = node.eth().crossAddMultichainNode(this.blockchainId, this.ipPort).send();
+      final VoidResponse result =
+          node.eth().crossAddMultichainNode(this.blockchainId, this.ipPort).send();
       assertThat(result).isNotNull();
       assertThat(result.hasError()).isFalse();
       return result.getResult();

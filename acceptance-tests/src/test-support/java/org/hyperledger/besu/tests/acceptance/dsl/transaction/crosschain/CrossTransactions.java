@@ -16,7 +16,8 @@ import java.math.BigInteger;
 
 public class CrossTransactions {
 
-  public CrossAddMultichainNode getAddMultichainNode(final BigInteger blockchainId, final String ipAddressAndPort) {
+  public CrossAddMultichainNode getAddMultichainNode(
+      final BigInteger blockchainId, final String ipAddressAndPort) {
     return new CrossAddMultichainNode(blockchainId, ipAddressAndPort);
   }
 
@@ -31,6 +32,4 @@ public class CrossTransactions {
   public CrossRemoveMultichainNode getRemoveMultichainNode(final BigInteger blockchainId) {
     return new CrossRemoveMultichainNode(blockchainId);
   }
-
-
 }

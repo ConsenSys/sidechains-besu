@@ -12,7 +12,6 @@
  */
 package org.hyperledger.besu.tests.acceptance.crosschain.common;
 
-import org.hyperledger.besu.Besu;
 import org.hyperledger.besu.tests.acceptance.crosschain.generated.CrosschainCoordinationV1;
 import org.hyperledger.besu.tests.acceptance.crosschain.generated.VotingAlgMajorityWhoVoted;
 import org.hyperledger.besu.tests.acceptance.dsl.AcceptanceTestBase;
@@ -21,7 +20,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.node.BesuNode;
 import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
 
 import java.math.BigInteger;
-import java.util.Collections;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.besu.JsonRpc2_0Besu;
@@ -111,5 +109,4 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     node.execute(crossTransactions.getAddMultichainNode(chainId, ipAddressAndPort));
   }
-
 }

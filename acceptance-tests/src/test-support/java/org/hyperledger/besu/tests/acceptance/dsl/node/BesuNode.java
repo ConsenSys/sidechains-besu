@@ -463,6 +463,7 @@ public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable 
       return Optional.empty();
     }
   }
+
   public String jsonRpcListenHost1() {
     if (isJsonRpcEnabled()) {
       return jsonRpcConfiguration().getHost();
@@ -477,6 +478,7 @@ public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable 
       return Optional.empty();
     }
   }
+
   public int jsonRpcListenPort1() {
     if (isJsonRpcEnabled()) {
       return jsonRpcConfiguration().getPort();
@@ -626,10 +628,10 @@ public class BesuNode implements NodeConfiguration, RunnableNode, AutoCloseable 
       throw new RuntimeException("No chain Id found in genesis file");
     }
     int offsetOfComa = genesisFile.indexOf(',', offsetOfChainId);
-    String chainIdValue = genesisFile.substring(offsetOfChainId + chainIdStr.length(), offsetOfComa);
+    String chainIdValue =
+        genesisFile.substring(offsetOfChainId + chainIdStr.length(), offsetOfComa);
     return new BigInteger(chainIdValue);
   }
-
 
   @Override
   public Optional<String> getGenesisConfig() {

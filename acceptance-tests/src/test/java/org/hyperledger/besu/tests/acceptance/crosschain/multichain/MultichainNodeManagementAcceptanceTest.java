@@ -12,17 +12,15 @@
  */
 package org.hyperledger.besu.tests.acceptance.crosschain.multichain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hyperledger.besu.tests.acceptance.crosschain.common.CrosschainAcceptanceTestBase;
-import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockable;
-import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockableCrosschain;
-import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.CrossIsLockableTransaction;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Before;
+import org.junit.Test;
 
 public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptanceTestBase {
   @Before
@@ -32,16 +30,16 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
     setUpBlockchain2();
   }
 
-  // TODO check that invalid IP address and port fail. This test would fail at the moment as there is no check for validity of IP and port.
-
-
+  // TODO check that invalid IP address and port fail. This test would fail at the moment as there
+  // is no check for validity of IP and port.
 
   @Test
   public void addOneNode() {
     BigInteger bcA = BigInteger.TEN;
 
     this.nodeOnBlockchain1.execute(crossTransactions.getAddMultichainNode(bcA, "127.0.0.1:8545"));
-    List<BigInteger> nodes = this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
+    List<BigInteger> nodes =
+        this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
     assertThat(nodes.size()).isEqualTo(1);
     assertThat(nodes.contains(bcA)).isTrue();
   }
@@ -53,12 +51,12 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
 
     this.nodeOnBlockchain1.execute(crossTransactions.getAddMultichainNode(bcA, "127.0.0.1:8545"));
     this.nodeOnBlockchain1.execute(crossTransactions.getAddMultichainNode(bcB, "127.0.0.1:8546"));
-    List<BigInteger> nodes = this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
+    List<BigInteger> nodes =
+        this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
     assertThat(nodes.size()).isEqualTo(2);
     assertThat(nodes.contains(bcA)).isTrue();
     assertThat(nodes.contains(bcB)).isTrue();
   }
-
 
   @Test
   public void removeNode() {
@@ -68,7 +66,8 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
     this.nodeOnBlockchain1.execute(crossTransactions.getAddMultichainNode(bcA, "127.0.0.1:8545"));
     this.nodeOnBlockchain1.execute(crossTransactions.getAddMultichainNode(bcB, "127.0.0.1:8546"));
     this.nodeOnBlockchain1.execute(crossTransactions.getRemoveMultichainNode(bcA));
-    List<BigInteger> nodes = this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
+    List<BigInteger> nodes =
+        this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
     assertThat(nodes.size()).isEqualTo(1);
     assertThat(nodes.contains(bcB)).isTrue();
   }
@@ -82,7 +81,8 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
 
   @Test
   public void listWhenEmpty() {
-    List<BigInteger> nodes = this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
+    List<BigInteger> nodes =
+        this.nodeOnBlockchain1.execute(crossTransactions.getListMultichainNodes());
     assertThat(nodes.size()).isEqualTo(0);
   }
 

@@ -12,14 +12,15 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.VoidResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.web3j.protocol.besu.response.crosschain.VoidResponse;
 
 public class CrossRemoveMultichainNode implements Transaction<Void> {
   private final BigInteger blockchainId;

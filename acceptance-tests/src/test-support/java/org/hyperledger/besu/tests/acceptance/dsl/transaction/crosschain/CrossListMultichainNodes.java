@@ -12,15 +12,16 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.CrossListMultichainNodesResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.web3j.protocol.besu.response.crosschain.CrossListMultichainNodesResponse;
 
 public class CrossListMultichainNodes implements Transaction<List<BigInteger>> {
   @Override
