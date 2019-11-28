@@ -45,7 +45,11 @@ public class MultichainManager {
     this.nodeMap.remove(blockchainId);
   }
 
-  /** List all of the blockchains that form this Multichain Node. */
+  /**
+   * List all of the blockchains that form this Multichain Node.
+   *
+   * @return The set of all of the nodes.
+   */
   public Set<BigInteger> listAllNodes() {
     return this.nodeMap.keySet();
   }
