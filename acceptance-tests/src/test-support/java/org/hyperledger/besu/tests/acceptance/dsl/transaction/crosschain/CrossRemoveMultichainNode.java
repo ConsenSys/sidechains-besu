@@ -20,9 +20,9 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.web3j.protocol.besu.response.crosschain.VoidResponse;
+import org.web3j.protocol.besu.response.crosschain.NoResponse;
 
-public class CrossRemoveMultichainNode implements Transaction<Void> {
+public class CrossRemoveMultichainNode implements Transaction<String> {
   private final BigInteger blockchainId;
 
   CrossRemoveMultichainNode(final BigInteger blockchainId) {
@@ -30,9 +30,9 @@ public class CrossRemoveMultichainNode implements Transaction<Void> {
   }
 
   @Override
-  public Void execute(final NodeRequests node) {
+  public String execute(final NodeRequests node) {
     try {
-      final VoidResponse result = node.eth().crossRemoveMultichainNode(this.blockchainId).send();
+      final NoResponse result = node.eth().crossRemoveMultichainNode(this.blockchainId).send();
       assertThat(result).isNotNull();
       assertThat(result.hasError()).isFalse();
       return result.getResult();
