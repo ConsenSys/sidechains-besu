@@ -133,7 +133,7 @@ jobs:
       - capture_test_results
 
   acceptanceTests:
-    executor: besu_executor_xlb
+    executor: besu_executor_xl
     steps:
       - prepare
       - attach_workspace:
