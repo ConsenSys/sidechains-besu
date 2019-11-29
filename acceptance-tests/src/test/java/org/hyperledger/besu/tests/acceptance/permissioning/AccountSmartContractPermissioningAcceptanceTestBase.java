@@ -24,10 +24,11 @@ import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.ClusterConfigurati
 import org.hyperledger.besu.tests.acceptance.dsl.node.configuration.permissioning.PermissionedNodeBuilder;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.perm.AccountSmartContractPermissioningTransactions;
-import org.junit.Ignore;
 
 import java.io.IOException;
 import java.util.List;
+
+import org.junit.Ignore;
 
 @Ignore
 class AccountSmartContractPermissioningAcceptanceTestBase extends AcceptanceTestBase {
