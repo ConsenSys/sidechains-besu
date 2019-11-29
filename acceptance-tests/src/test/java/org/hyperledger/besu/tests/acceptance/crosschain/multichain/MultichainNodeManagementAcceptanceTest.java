@@ -19,6 +19,7 @@ import org.hyperledger.besu.tests.acceptance.crosschain.common.CrosschainAccepta
 import java.math.BigInteger;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,6 +32,14 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
     setUpBlockchain1();
     setUpBlockchain2();
   }
+
+  @After
+  public void closeDown() throws Exception {
+    this.cluster.close();
+    this.clusterBc1.close();
+    this.clusterBc2.close();
+  }
+
 
   // TODO check that invalid IP address and port fail. This test would fail at the moment as there
   // is no check for validity of IP and port.
