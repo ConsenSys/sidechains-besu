@@ -32,17 +32,24 @@ public class CallSmartContractFunction implements Transaction<EthSendTransaction
       Credentials.create(Accounts.GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
 
   private final String functionName;
+  private final Function function;
   private final String contractAddress;
 
   public CallSmartContractFunction(final String functionName, final String contractAddress) {
     this.functionName = functionName;
+    this.function =
+        new Function(this.functionName, Collections.emptyList(), Collections.emptyList());
+    this.contractAddress = contractAddress;
+  }
+
+  public CallSmartContractFunction(final Function function, final String contractAddress) {
+    this.function = function;
+    this.functionName = function.getName();
     this.contractAddress = contractAddress;
   }
 
   @Override
   public EthSendTransaction execute(final NodeRequests node) {
-    final Function function =
-        new Function(functionName, Collections.emptyList(), Collections.emptyList());
     final RawTransactionManager transactionManager =
         new RawTransactionManager(node.eth(), BENEFACTOR_ONE);
     try {

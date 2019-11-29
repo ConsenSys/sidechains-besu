@@ -18,6 +18,7 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.DeployLo
 
 import java.math.BigInteger;
 
+import org.web3j.abi.datatypes.Function;
 import org.web3j.tx.Contract;
 import org.web3j.tx.CrosschainTransactionManager;
 
@@ -41,5 +42,10 @@ public class ContractTransactions {
   public CallSmartContractFunction callSmartContract(
       final String functionName, final String contractAddress) {
     return new CallSmartContractFunction(functionName, contractAddress);
+  }
+
+  public CallSmartContractFunction callLockableSmartContract(
+      final Function function, final String contractAddress) {
+    return new CallSmartContractFunction(function, contractAddress);
   }
 }
