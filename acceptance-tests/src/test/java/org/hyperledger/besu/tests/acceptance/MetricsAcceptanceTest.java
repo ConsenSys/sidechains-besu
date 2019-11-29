@@ -25,8 +25,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class MetricsAcceptanceTest extends AcceptanceTestBase {
 
   private BesuNode metricsNode;

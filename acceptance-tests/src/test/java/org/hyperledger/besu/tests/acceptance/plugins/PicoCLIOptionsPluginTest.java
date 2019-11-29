@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class PicoCLIOptionsPluginTest extends AcceptanceTestBase {
   private BesuNode node;
 

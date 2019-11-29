@@ -23,8 +23,10 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class NodesSmartContractPermissioningStaticNodesAcceptanceTest
     extends NodeSmartContractPermissioningAcceptanceTestBase {
 

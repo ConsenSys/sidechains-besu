@@ -23,8 +23,10 @@ import java.math.BigInteger;
 import java.util.Collections;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class AccountLocalConfigPermissioningAcceptanceTest extends AcceptanceTestBase {
 
   private Node node;

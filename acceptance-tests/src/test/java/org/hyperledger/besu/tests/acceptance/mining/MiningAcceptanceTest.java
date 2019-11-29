@@ -17,8 +17,10 @@ import org.hyperledger.besu.tests.acceptance.dsl.account.Account;
 import org.hyperledger.besu.tests.acceptance.dsl.node.Node;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class MiningAcceptanceTest extends AcceptanceTestBase {
 
   private Node minerNode;

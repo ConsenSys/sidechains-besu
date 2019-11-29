@@ -18,8 +18,10 @@ import org.hyperledger.besu.tests.acceptance.dsl.node.Node;
 import java.util.Collections;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class AccountSmartContractPermissioningAcceptanceTest
     extends AccountSmartContractPermissioningAcceptanceTestBase {
 
