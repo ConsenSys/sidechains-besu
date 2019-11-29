@@ -40,7 +40,6 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
     this.clusterBc2.close();
   }
 
-
   // TODO check that invalid IP address and port fail. This test would fail at the moment as there
   // is no check for validity of IP and port.
 
