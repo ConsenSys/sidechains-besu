@@ -28,9 +28,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.perm.AccountSmartCo
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.Ignore;
-
-@Ignore
 class AccountSmartContractPermissioningAcceptanceTestBase extends AcceptanceTestBase {
 
   private final AccountSmartContractPermissioningTransactions smartContractAccountPermissioning;

@@ -24,10 +24,8 @@ import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class BesuEventsPluginTest extends AcceptanceTestBase {
   private BesuNode pluginNode;
   private BesuNode minerNode;

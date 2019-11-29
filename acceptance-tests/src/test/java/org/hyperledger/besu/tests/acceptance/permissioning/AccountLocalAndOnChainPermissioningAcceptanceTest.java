@@ -20,10 +20,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class AccountLocalAndOnChainPermissioningAcceptanceTest
     extends AccountSmartContractPermissioningAcceptanceTestBase {
 

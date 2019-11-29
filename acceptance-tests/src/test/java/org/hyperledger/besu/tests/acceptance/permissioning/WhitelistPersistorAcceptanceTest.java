@@ -24,10 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class WhitelistPersistorAcceptanceTest extends AcceptanceTestBase {
 
   private static final String ENODE_ONE =

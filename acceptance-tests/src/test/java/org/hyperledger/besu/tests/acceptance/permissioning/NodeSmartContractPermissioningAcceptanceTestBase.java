@@ -30,9 +30,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.perm.NodeSmartContr
 import java.io.IOException;
 import java.math.BigInteger;
 
-import org.junit.Ignore;
-
-@Ignore
 class NodeSmartContractPermissioningAcceptanceTestBase extends AcceptanceTestBase {
 
   private final NodeSmartContractPermissioningTransactions smartContractNodePermissioning;

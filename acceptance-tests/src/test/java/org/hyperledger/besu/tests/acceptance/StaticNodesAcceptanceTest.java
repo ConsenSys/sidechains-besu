@@ -19,10 +19,8 @@ import org.hyperledger.besu.tests.acceptance.dsl.node.Node;
 import java.util.Arrays;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class StaticNodesAcceptanceTest extends AcceptanceTestBase {
 
   private Node otherNode;
