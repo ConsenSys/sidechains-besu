@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptanceTestBase {
   @Before
   public void setUp() throws Exception {
