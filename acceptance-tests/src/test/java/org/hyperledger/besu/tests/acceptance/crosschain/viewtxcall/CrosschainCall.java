@@ -114,10 +114,10 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
   @Test
   public void doCCTxCall() throws Exception {
     CrosschainContextGenerator ctxGenerator =
-            new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
+        new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
     CrosschainContext subordTxCtx =
-            ctxGenerator.createCrosschainContext(
-                    nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress());
+        ctxGenerator.createCrosschainContext(
+            nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress());
     byte[] subordTrans = fooCtrt.updateState_AsSignedCrosschainSubordinateTransaction(subordTxCtx);
     byte[][] subordTxAndViews = new byte[][] {subordTrans};
     CrosschainContext origTxCtx = ctxGenerator.createCrosschainContext(subordTxAndViews);
@@ -129,17 +129,17 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
     }
 
     CrossIsLockedResponse isLockedObj =
-            this.nodeOnBlockchain2
-                    .getJsonRpc()
-                    .crossIsLocked(fooCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
-                    .send();
+        this.nodeOnBlockchain2
+            .getJsonRpc()
+            .crossIsLocked(fooCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+            .send();
     while (isLockedObj.isLocked()) {
       Thread.sleep(100);
       isLockedObj =
-              this.nodeOnBlockchain2
-                      .getJsonRpc()
-                      .crossIsLocked(fooCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
-                      .send();
+          this.nodeOnBlockchain2
+              .getJsonRpc()
+              .crossIsLocked(fooCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+              .send();
     }
     assertThat(fooCtrt.fooFlag().send().longValue()).isEqualTo(1);
   }
