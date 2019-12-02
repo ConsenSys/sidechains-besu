@@ -10,13 +10,13 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.hyperledger.besu.tests.acceptance.crosschain.viewcall;
+package org.hyperledger.besu.tests.acceptance.crosschain.viewtxcall;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.tests.acceptance.crosschain.common.CrosschainAcceptanceTestBase;
-import org.hyperledger.besu.tests.acceptance.crosschain.viewcall.generated.BarCtrt;
-import org.hyperledger.besu.tests.acceptance.crosschain.viewcall.generated.FooCtrt;
+import org.hyperledger.besu.tests.acceptance.crosschain.viewtxcall.generated.BarCtrt;
+import org.hyperledger.besu.tests.acceptance.crosschain.viewtxcall.generated.FooCtrt;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,12 +30,19 @@ import org.web3j.tx.CrosschainContext;
 import org.web3j.tx.CrosschainContextGenerator;
 
 /*
- * This test makes a simple crosschain  view call. Two contracts - BarCtrt and FooCtrt are deployed on blockchains 1
- * and 2 respectively. FooCtrt has a simple view function called foo() that does nothing but returns 1. BarCtrt has a
- * function called bar() and a flag that is set to 0 while deploying (thanks to the constructor). bar() updates the
- * flag with the return value of foo(). The test checks if the flag is set to 1 after the crosschain view call.
+ * Makes a simple crosschain view call and a transaction call.
+ *
+ * Two contracts - BarCtrt and FooCtrt are deployed on blockchains 1 and 2 respectively. FooCtrt has a simple view
+ * function called foo() that does nothing but returns 1. BarCtrt has a function called bar() and a flag that is set
+ * to 0 while deploying (thanks to the constructor). bar() updates the flag with the return value of foo(). The test
+ * doCCViewCall checks if the flag is set to 1 after the crosschain view call.
+ *
+ * FooCtrt also has a updateState function that updates the state (fooFlag) to 1, and BarCtrt has a barUpdateState
+ * function call, that calls the FooCtrt's updateState function. The doCCTxCall tests this
+ * (BarCtrt.barUpdateState) crosschain transaction by checking if the fooFlag is set to 1 after the transaction.
  */
-public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
+
+public class CrosschainCall extends CrosschainAcceptanceTestBase {
   private final Logger LOG = LogManager.getLogger();
   private BarCtrt barCtrt;
   private FooCtrt fooCtrt;
@@ -93,7 +100,6 @@ public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
             .getJsonRpc()
             .crossIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
             .send();
-    ;
     while (isLockedObj.isLocked()) {
       Thread.sleep(100);
       isLockedObj =
@@ -103,5 +109,38 @@ public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
               .send();
     }
     assertThat(barCtrt.flag().send().longValue()).isEqualTo(1);
+  }
+
+  @Test
+  public void doCCTxCall() throws Exception {
+    CrosschainContextGenerator ctxGenerator =
+            new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
+    CrosschainContext subordTxCtx =
+            ctxGenerator.createCrosschainContext(
+                    nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress());
+    byte[] subordTrans = fooCtrt.updateState_AsSignedCrosschainSubordinateTransaction(subordTxCtx);
+    byte[][] subordTxAndViews = new byte[][] {subordTrans};
+    CrosschainContext origTxCtx = ctxGenerator.createCrosschainContext(subordTxAndViews);
+
+    TransactionReceipt txReceipt = barCtrt.barUpdateState_AsCrosschainTransaction(origTxCtx).send();
+    if (!txReceipt.isStatusOK()) {
+      LOG.info("txReceipt details " + txReceipt.toString());
+      throw new Error(txReceipt.getStatus());
+    }
+
+    CrossIsLockedResponse isLockedObj =
+            this.nodeOnBlockchain2
+                    .getJsonRpc()
+                    .crossIsLocked(fooCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+                    .send();
+    while (isLockedObj.isLocked()) {
+      Thread.sleep(100);
+      isLockedObj =
+              this.nodeOnBlockchain2
+                      .getJsonRpc()
+                      .crossIsLocked(fooCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+                      .send();
+    }
+    assertThat(fooCtrt.fooFlag().send().longValue()).isEqualTo(1);
   }
 }
