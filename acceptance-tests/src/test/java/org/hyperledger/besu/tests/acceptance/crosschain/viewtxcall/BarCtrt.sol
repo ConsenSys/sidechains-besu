@@ -35,4 +35,8 @@ contract BarCtrt is Crosschain {
     function barUpdateState() external {
         crosschainTransaction(calleeId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.updateState.selector) );
     }
+
+    function pureBar() external {
+        flag = crosschainViewUint256(calleeId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.pureFoo.selector) );
+    }
 }

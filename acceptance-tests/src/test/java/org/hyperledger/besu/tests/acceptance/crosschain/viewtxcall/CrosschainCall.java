@@ -143,4 +143,37 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
     }
     assertThat(fooCtrt.fooFlag().send().longValue()).isEqualTo(1);
   }
+
+  @Test
+  public void doCCPureCall() throws Exception {
+    CrosschainContextGenerator ctxGenerator =
+            new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
+    CrosschainContext subordTxCtx =
+            ctxGenerator.createCrosschainContext(
+                    nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress());
+    byte[] subordTrans = fooCtrt.pureFoo_AsSignedCrosschainSubordinateView(subordTxCtx);
+    byte[][] subordTxAndViews = new byte[][] {subordTrans};
+    CrosschainContext origTxCtx = ctxGenerator.createCrosschainContext(subordTxAndViews);
+
+    TransactionReceipt txReceipt = barCtrt.pureBar_AsCrosschainTransaction(origTxCtx).send();
+    if (!txReceipt.isStatusOK()) {
+      LOG.info("txReceipt details " + txReceipt.toString());
+      throw new Error(txReceipt.getStatus());
+    }
+
+    CrossIsLockedResponse isLockedObj =
+            this.nodeOnBlockchain1
+                    .getJsonRpc()
+                    .crossIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+                    .send();
+    while (isLockedObj.isLocked()) {
+      Thread.sleep(100);
+      isLockedObj =
+              this.nodeOnBlockchain1
+                      .getJsonRpc()
+                      .crossIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+                      .send();
+    }
+    assertThat(barCtrt.flag().send().longValue()).isEqualTo(2);
+  }
 }

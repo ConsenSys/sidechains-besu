@@ -27,4 +27,8 @@ contract FooCtrt is FooInt{
     function updateState() external {
         fooFlag = 1;
     }
+
+    function pureFoo() external pure returns (uint256) {
+        return 2;
+    }
 }
