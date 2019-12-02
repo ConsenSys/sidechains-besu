@@ -18,20 +18,23 @@ import org.hyperledger.besu.tests.acceptance.crosschain.common.CrosschainAccepta
 import org.hyperledger.besu.tests.acceptance.crosschain.viewcall.generated.BarCtrt;
 import org.hyperledger.besu.tests.acceptance.crosschain.viewcall.generated.FooCtrt;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.web3j.abi.datatypes.Function;
+import org.web3j.protocol.besu.response.crosschain.CrosschainIsLocked;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.CrosschainContext;
 import org.web3j.tx.CrosschainContextGenerator;
 
+/*
+ * This test makes a simple crosschain  view call. Two contracts - BarCtrt and FooCtrt are deployed on blockchains 1
+ * and 2 respectively. FooCtrt has a simple view function called foo() that does nothing but returns 1. BarCtrt has a
+ * function called bar() and a flag that is set to 0 while deploying (thanks to the constructor). bar() updates the
+ * flag with the return value of foo(). The test checks if the flag is set to 1 after the crosschain view call.
+ */
 public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
   private final Logger LOG = LogManager.getLogger();
   private BarCtrt barCtrt;
@@ -58,15 +61,7 @@ public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
                 FooCtrt.class, this.transactionManagerBlockchain2));
 
     // Calling a BooCtrt.setProperties, a regular intrachain function call
-    final Function function =
-        new Function(
-            "setProperties",
-            Arrays.asList(
-                new org.web3j.abi.datatypes.generated.Uint256(nodeOnBlockchain1.getChainId()),
-                new org.web3j.abi.datatypes.Address(160, fooCtrt.getContractAddress())),
-            Collections.emptyList());
-    nodeOnBlockchain1.execute(
-        contractTransactions.callLockableSmartContract(function, barCtrt.getContractAddress()));
+    barCtrt.setProperties(nodeOnBlockchain2.getChainId(), fooCtrt.getContractAddress()).send();
   }
 
   @After
@@ -83,7 +78,7 @@ public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
     CrosschainContext subordTxCtx =
         ctxGenerator.createCrosschainContext(
             nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress());
-    byte[] subordTrans = barCtrt.bar_AsSignedCrosschainSubordinateTransaction(subordTxCtx);
+    byte[] subordTrans = fooCtrt.foo_AsSignedCrosschainSubordinateView(subordTxCtx);
     byte[][] subordTxAndViews = new byte[][] {subordTrans};
     CrosschainContext origTxCtx = ctxGenerator.createCrosschainContext(subordTxAndViews);
 
@@ -91,6 +86,12 @@ public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
     if (!txReceipt.isStatusOK()) {
       LOG.info("txReceipt details " + txReceipt.toString());
       throw new Error(txReceipt.getStatus());
+    }
+
+    CrosschainIsLocked isLockedObj = this.nodeOnBlockchain1.getJsonRpc().crosschainIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest")).send();;
+    while(isLockedObj.isLocked()) {
+      Thread.sleep(100);
+      isLockedObj = this.nodeOnBlockchain1.getJsonRpc().crosschainIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest")).send();
     }
     assertThat(barCtrt.flag().send().longValue()).isEqualTo(1);
   }

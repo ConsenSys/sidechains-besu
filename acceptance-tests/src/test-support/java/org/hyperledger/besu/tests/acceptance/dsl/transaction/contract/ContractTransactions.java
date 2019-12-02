@@ -43,9 +43,4 @@ public class ContractTransactions {
       final String functionName, final String contractAddress) {
     return new CallSmartContractFunction(functionName, contractAddress);
   }
-
-  public CallSmartContractFunction callLockableSmartContract(
-      final Function function, final String contractAddress) {
-    return new CallSmartContractFunction(function, contractAddress);
-  }
 }

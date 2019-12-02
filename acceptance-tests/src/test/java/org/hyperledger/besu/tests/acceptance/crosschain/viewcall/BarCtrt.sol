@@ -15,7 +15,7 @@ import "./FooInt.sol";
 import "../common/Crosschain.sol";
 
 contract BarCtrt is Crosschain {
-    uint256 callerId;
+    uint256 calleeId;
     FooInt public fooCtrt;
     uint256 public flag;
 
@@ -23,12 +23,12 @@ contract BarCtrt is Crosschain {
         flag = 0;
     }
 
-    function setProperties(uint256 _callerId, address _fooCtrtAaddr) public {
-        callerId = _callerId;
+    function setProperties(uint256 _calleeId, address _fooCtrtAaddr) public {
+        calleeId = _calleeId;
         fooCtrt = FooInt(_fooCtrtAaddr);
     }
 
     function bar() external {
-        flag = crosschainViewUint256(callerId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.foo.selector) );
+        flag = crosschainViewUint256(calleeId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.foo.selector) );
     }
 }

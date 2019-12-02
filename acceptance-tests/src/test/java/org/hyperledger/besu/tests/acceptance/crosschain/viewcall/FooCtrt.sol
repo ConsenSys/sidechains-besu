@@ -15,7 +15,7 @@ import "./FooInt.sol";
 
 contract FooCtrt is FooInt{
 
-    function foo() external pure returns (uint256) {
+    function foo() external view returns (uint256) {
         return 1;
     }
 }

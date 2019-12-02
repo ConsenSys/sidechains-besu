@@ -13,5 +13,5 @@
 pragma solidity >=0.4.23;
 
 interface FooInt {
-    function foo() pure external returns (uint256);
+    function foo() view external returns (uint256);
 }

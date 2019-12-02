@@ -42,12 +42,6 @@ public class CallSmartContractFunction implements Transaction<EthSendTransaction
     this.contractAddress = contractAddress;
   }
 
-  public CallSmartContractFunction(final Function function, final String contractAddress) {
-    this.function = function;
-    this.functionName = function.getName();
-    this.contractAddress = contractAddress;
-  }
-
   @Override
   public EthSendTransaction execute(final NodeRequests node) {
     final RawTransactionManager transactionManager =
