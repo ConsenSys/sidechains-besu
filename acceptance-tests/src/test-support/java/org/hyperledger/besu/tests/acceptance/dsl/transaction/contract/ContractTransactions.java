@@ -18,7 +18,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.DeployLo
 
 import java.math.BigInteger;
 
-import org.web3j.abi.datatypes.Function;
 import org.web3j.tx.Contract;
 import org.web3j.tx.CrosschainTransactionManager;
 

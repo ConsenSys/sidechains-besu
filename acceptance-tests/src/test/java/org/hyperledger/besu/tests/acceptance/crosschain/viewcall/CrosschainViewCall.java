@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.web3j.protocol.besu.response.crosschain.CrosschainIsLocked;
+import org.web3j.protocol.besu.response.crosschain.CrossIsLockedResponse;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.CrosschainContext;
@@ -88,10 +88,19 @@ public class CrosschainViewCall extends CrosschainAcceptanceTestBase {
       throw new Error(txReceipt.getStatus());
     }
 
-    CrosschainIsLocked isLockedObj = this.nodeOnBlockchain1.getJsonRpc().crosschainIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest")).send();;
-    while(isLockedObj.isLocked()) {
+    CrossIsLockedResponse isLockedObj =
+        this.nodeOnBlockchain1
+            .getJsonRpc()
+            .crossIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+            .send();
+    ;
+    while (isLockedObj.isLocked()) {
       Thread.sleep(100);
-      isLockedObj = this.nodeOnBlockchain1.getJsonRpc().crosschainIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest")).send();
+      isLockedObj =
+          this.nodeOnBlockchain1
+              .getJsonRpc()
+              .crossIsLocked(barCtrt.getContractAddress(), DefaultBlockParameter.valueOf("latest"))
+              .send();
     }
     assertThat(barCtrt.flag().send().longValue()).isEqualTo(1);
   }
