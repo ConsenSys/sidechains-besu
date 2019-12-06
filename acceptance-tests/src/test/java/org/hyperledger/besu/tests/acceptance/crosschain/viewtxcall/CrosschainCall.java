@@ -428,14 +428,14 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
   public void doCCTxTxViewCallOn2Chains() throws Exception {
     // Deploying Bar2Ctrt on blockchain1
     bar2Ctrt =
-            nodeOnBlockchain1.execute(
-                    contractTransactions.createLockableSmartContract(
-                            Bar2Ctrt.class, this.transactionManagerBlockchain1));
+        nodeOnBlockchain1.execute(
+            contractTransactions.createLockableSmartContract(
+                Bar2Ctrt.class, this.transactionManagerBlockchain1));
 
     // Calling FooCtrt.setPropertiesForBar2, a regular intrachain function call
     fooCtrt
-            .setPropertiesForBar2(nodeOnBlockchain1.getChainId(), bar2Ctrt.getContractAddress())
-            .send();
+        .setPropertiesForBar2(nodeOnBlockchain1.getChainId(), bar2Ctrt.getContractAddress())
+        .send();
 
     // Making nodeOnBlockChain1 a 3-chain node
     addMultichainNode(nodeOnBlockchain1, nodeOnBlockchain3);
@@ -445,22 +445,22 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
     addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
 
     CrosschainContextGenerator ctxGen =
-            new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
+        new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
 
     // BarCtrt.viewfn() is called by FooCtrt.updateStateFromTxView()
     CrosschainContext ctx1 =
-            ctxGen.createCrosschainContext(
-                    nodeOnBlockchain2.getChainId(), fooCtrt.getContractAddress());
+        ctxGen.createCrosschainContext(
+            nodeOnBlockchain2.getChainId(), fooCtrt.getContractAddress());
     byte[] subView1 = barCtrt.viewfn_AsSignedCrosschainSubordinateView(ctx1);
     byte[] subTx1 = bar2Ctrt.updateState_AsSignedCrosschainSubordinateTransaction(ctx1);
 
     // FooCtrt.updateStateFromTxView() is called by BarCtrt.barttv()
     byte[][] subTxViews1 = new byte[][] {subView1, subTx1};
     CrosschainContext ctx2 =
-            ctxGen.createCrosschainContext(
-                    nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress(), subTxViews1);
+        ctxGen.createCrosschainContext(
+            nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress(), subTxViews1);
     byte[] subTxViews2 =
-            fooCtrt.updateStateFromTxView_AsSignedCrosschainSubordinateTransaction(ctx2);
+        fooCtrt.updateStateFromTxView_AsSignedCrosschainSubordinateTransaction(ctx2);
 
     byte[][] subordTxs = new byte[][] {subTxViews2};
     CrosschainContext origTxCtx = ctxGen.createCrosschainContext(subordTxs);
