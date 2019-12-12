@@ -31,3 +31,15 @@ $WEB3J solidity generate -cc -a=build/Bar2Int.abi -b=build/Bar2Int.bin -o=../../
 $WEB3J solidity generate -a=build/NonLockableCtrt.abi -b=build/NonLockableCtrt.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.viewtxcall.generated
 $WEB3J solidity generate -a=build/NonLockableCtrtInt.abi -b=build/NonLockableCtrtInt.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.viewtxcall.generated
 $WEB3J solidity generate -cc -a=build/LockableCtrt.abi -b=build/LockableCtrt.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.viewtxcall.generated
+
+# Testing GetInfo precompiles
+solc getinfo/Ctrt1.sol --allow-paths . --bin --abi --overwrite --optimize -o build
+solc getinfo/Ctrt2.sol --allow-paths . --bin --abi --overwrite --optimize -o build
+solc getinfo/Ctrt3.sol --allow-paths . --bin --abi --overwrite --optimize -o build
+solc getinfo/Ctrt2Int.sol --allow-paths . --bin --abi --overwrite --optimize -o build
+solc getinfo/Ctrt3Int.sol --allow-paths . --bin --abi --overwrite --optimize -o build
+$WEB3J solidity generate -cc -a=build/Ctrt1.abi -b=build/Ctrt1.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.getinfo.generated
+$WEB3J solidity generate -cc -a=build/Ctrt2.abi -b=build/Ctrt2.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.getinfo.generated
+$WEB3J solidity generate -cc -a=build/Ctrt3.abi -b=build/Ctrt3.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.getinfo.generated
+$WEB3J solidity generate -cc -a=build/Ctrt2Int.abi -b=build/Ctrt2Int.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.getinfo.generated
+$WEB3J solidity generate -cc -a=build/Ctrt3Int.abi -b=build/Ctrt3Int.bin -o=../../../../../../ -p=org.hyperledger.besu.tests.acceptance.crosschain.getinfo.generated
