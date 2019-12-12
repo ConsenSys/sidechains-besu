@@ -19,8 +19,16 @@ contract Ctrt3 is Crosschain, Ctrt3Int {
     uint256 public myChainId;
     uint256 public fromChainId;
     uint32 public myTxType;
+    uint32 public consTxType;
     uint256 public coordChainId;
     uint256 public origChainId;
+    uint256 public txId;
+    address public coordCtrtAddr;
+    address public fromAddr;
+
+    constructor () public {
+        consTxType = crosschainGetInfoTransactionType();
+    }
 
     function txfn() public {
         myChainId = crosschainGetInfoBlockchainId();
@@ -28,5 +36,8 @@ contract Ctrt3 is Crosschain, Ctrt3Int {
         coordChainId = crosschainGetInfoCoordinationBlockchainId();
         origChainId = crosschainGetInfoOriginatingBlockchainId();
         fromChainId = crosschainGetInfoFromBlockchainId();
+        txId = crosschainGetInfoCrosschainTransactionId();
+        coordCtrtAddr = crosschainGetInfoCoordinationContractAddress();
+        fromAddr = crosschainGetInfoFromAddress();
     }
 }

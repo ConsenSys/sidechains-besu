@@ -20,9 +20,13 @@ contract Ctrt1 is Crosschain {
     Ctrt2Int ctrt2;
 
     uint256 public myChainId;
-    uint32 public myTxType;
     uint256 public coordChainId;
-    uint256 public origChainId;
+    uint32 public consTxType;
+    address public coordCtrtAddr;
+
+    constructor () public {
+        consTxType = crosschainGetInfoTransactionType();
+    }
 
     function setCtrt2ChainId(uint256 _ctrt2ChainId) public {
         ctrt2ChainId = _ctrt2ChainId;
@@ -35,8 +39,7 @@ contract Ctrt1 is Crosschain {
     function callCtrt2() public {
         crosschainTransaction(ctrt2ChainId, address(ctrt2), abi.encodeWithSelector(ctrt2.callCtrt3.selector));
         myChainId = crosschainGetInfoBlockchainId();
-        myTxType = crosschainGetInfoTransactionType();
         coordChainId = crosschainGetInfoCoordinationBlockchainId();
-        origChainId = crosschainGetInfoOriginatingBlockchainId();
+        coordCtrtAddr = crosschainGetInfoCoordinationContractAddress();
     }
 }
