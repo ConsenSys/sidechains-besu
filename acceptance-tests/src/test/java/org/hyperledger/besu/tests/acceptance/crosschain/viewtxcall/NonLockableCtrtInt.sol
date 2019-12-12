@@ -12,7 +12,7 @@
  */
 pragma solidity >=0.4.0 <0.6.0;
 
-contract NonLockableCtrtInt {
+interface NonLockableCtrtInt {
     function viewfn() external view returns (uint256);
     function updateState() external;
 }

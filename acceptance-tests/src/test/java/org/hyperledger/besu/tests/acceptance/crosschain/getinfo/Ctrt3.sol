@@ -30,7 +30,7 @@ contract Ctrt3 is Crosschain, Ctrt3Int {
         consTxType = crosschainGetInfoTransactionType();
     }
 
-    function txfn() public {
+    function txfn() external {
         myChainId = crosschainGetInfoBlockchainId();
         myTxType = crosschainGetInfoTransactionType();
         coordChainId = crosschainGetInfoCoordinationBlockchainId();

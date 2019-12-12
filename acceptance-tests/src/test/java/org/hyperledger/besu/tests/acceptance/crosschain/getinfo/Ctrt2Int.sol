@@ -13,6 +13,6 @@
 
 pragma solidity >=0.4.0 <0.6.0;
 
-contract Ctrt2Int {
-    function callCtrt3() public;
+interface Ctrt2Int {
+    function callCtrt3() external;
 }

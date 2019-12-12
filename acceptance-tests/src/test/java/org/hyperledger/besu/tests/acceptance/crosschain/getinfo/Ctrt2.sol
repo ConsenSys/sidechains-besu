@@ -44,7 +44,7 @@ contract Ctrt2 is Crosschain, Ctrt2Int {
         ctrt3 = Ctrt3Int(_ctrt3Addr);
     }
 
-    function callCtrt3() public {
+    function callCtrt3() external {
         crosschainTransaction(ctrt3ChainId, address(ctrt3), abi.encodeWithSelector(ctrt3.txfn.selector));
         myChainId = crosschainGetInfoBlockchainId();
         myTxType = crosschainGetInfoTransactionType();
