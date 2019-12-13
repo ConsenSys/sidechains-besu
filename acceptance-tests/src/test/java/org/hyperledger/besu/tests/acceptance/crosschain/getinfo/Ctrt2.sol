@@ -55,4 +55,8 @@ contract Ctrt2 is Crosschain, Ctrt2Int {
         coordCtrtAddr = crosschainGetInfoCoordinationContractAddress();
         fromAddr = crosschainGetInfoFromAddress();
     }
+
+    function viewfn() external view returns (uint256) {
+        return crosschainGetInfoTransactionType();
+    }
 }

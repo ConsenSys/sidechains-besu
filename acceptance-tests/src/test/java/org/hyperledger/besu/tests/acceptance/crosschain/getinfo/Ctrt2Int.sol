@@ -15,4 +15,5 @@ pragma solidity >=0.4.0 <0.6.0;
 
 interface Ctrt2Int {
     function callCtrt3() external;
+    function viewfn() external view returns (uint256);
 }

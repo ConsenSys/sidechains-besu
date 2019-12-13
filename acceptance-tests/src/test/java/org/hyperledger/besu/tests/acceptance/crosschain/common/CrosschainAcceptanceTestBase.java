@@ -30,6 +30,7 @@ import org.web3j.tx.CrosschainTransactionManager;
 public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
   public static final int VOTING_TIME_OUT = 2;
   public static final long CROSSCHAIN_TRANSACTION_TIMEOUT = 10;
+  protected Credentials BENEFACTOR_ONE;
 
   protected Cluster clusterCoordinationBlockchain;
   protected BesuNode nodeOnCoordinationBlockchain;
@@ -72,7 +73,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     this.clusterBc1.start(nodeOnBlockchain1);
 
     JsonRpc2_0Besu blockchain1Web3j = this.nodeOnBlockchain1.getJsonRpc();
-    final Credentials BENEFACTOR_ONE = Credentials.create(Accounts.GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
+    BENEFACTOR_ONE = Credentials.create(Accounts.GENESIS_ACCOUNT_ONE_PRIVATE_KEY);
     JsonRpc2_0Besu coordinationWeb3j = this.nodeOnCoordinationBlockchain.getJsonRpc();
 
     this.transactionManagerBlockchain1 =

@@ -80,20 +80,23 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     // Constructing the crosschain transaction
     CrosschainContextGenerator ctxGen =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
-    CrosschainContext ctx =
+    CrosschainContext ctx1 =
         ctxGen.createCrosschainContext(nodeOnBlockchain2.getChainId(), ctrt2.getContractAddress());
-    byte[] subT1 = ctrt3.txfn_AsSignedCrosschainSubordinateTransaction(ctx);
+    byte[] subT1 = ctrt3.txfn_AsSignedCrosschainSubordinateTransaction(ctx1);
     byte[][] subTxV1 = new byte[][] {subT1};
 
-    ctx =
+    CrosschainContext ctx2 =
         ctxGen.createCrosschainContext(
             nodeOnBlockchain1.getChainId(), ctrt1.getContractAddress(), subTxV1);
-    byte[] subTx2 = ctrt2.callCtrt3_AsSignedCrosschainSubordinateTransaction(ctx);
-    byte[][] subTxV2 = new byte[][] {subTx2};
+    byte[] subTx2 = ctrt2.callCtrt3_AsSignedCrosschainSubordinateTransaction(ctx2);
 
-    ctx = ctxGen.createCrosschainContext(subTxV2);
+    CrosschainContext ctx3 =
+        ctxGen.createCrosschainContext(nodeOnBlockchain1.getChainId(), ctrt1.getContractAddress());
+    byte[] subV2 = ctrt2.viewfn_AsSignedCrosschainSubordinateView(ctx3);
+    byte[][] subTxV2 = new byte[][] {subTx2, subV2};
 
     // Executing the crosschain transaction
+    CrosschainContext ctx = ctxGen.createCrosschainContext(subTxV2);
     TransactionReceipt txReceipt = ctrt1.callCtrt2_AsCrosschainTransaction(ctx).send();
     if (!txReceipt.isStatusOK()) {
       LOG.info("txReceipt details " + txReceipt.toString());
@@ -105,12 +108,17 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     long chain3Id = nodeOnBlockchain3.getChainId().longValue();
     long cbcId = nodeOnCoordinationBlockchain.getChainId().longValue();
 
-    // TODO Tests related to TxType and TxId are not happening correctly. Need to fix.
+    // TODO Tests related to TxType are not happening correctly. Need to fix.
     waitForUnlock(ctrt1.getContractAddress(), nodeOnBlockchain1);
     assertThat(ctrt1.myChainId().send().longValue()).isEqualTo(chain1Id);
     assertThat(ctrt1.coordChainId().send().longValue()).isEqualTo(cbcId);
     assertThat(ctrt1.coordCtrtAddr().send()).isEqualTo(coordContract.getContractAddress());
+    // assertThat(ctrt1.fromChainId().send().longValue()).isEqualTo(chain1Id);
+    // assertThat(ctrt1.origChainId().send().longValue()).isEqualTo(chain1Id);
+    // assertThat(ctrt1.fromAddr().send()).isEqualTo(BENEFACTOR_ONE.getAddress());
+    // assertThat(ctrt1.viewTxType().send().longValue()).isEqualTo(2);
     // assertThat(ctrt1.consTxType().send().intValue()).isEqualTo(5);
+    // assertThat(ctrt1.myTxType().send().longValue()).isEqualTo(0);
 
     waitForUnlock(ctrt2.getContractAddress(), nodeOnBlockchain2);
     assertThat(ctrt2.myChainId().send().longValue()).isEqualTo(chain2Id);
@@ -120,8 +128,10 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     assertThat(ctrt2.myTxType().send().longValue()).isEqualTo(0);
     assertThat(ctrt2.coordCtrtAddr().send()).isEqualTo(coordContract.getContractAddress());
     assertThat(ctrt2.fromAddr().send()).isEqualTo(ctrt1.getContractAddress());
-    // assertThat(ctrt2.txId().send().longValue()).isEqualTo(txReceipt.getTransactionIndex().longValue());
+    assertThat(ctrt2.txId().send().longValue())
+        .isEqualTo(ctx2.getCrosschainTransactionId().longValue());
     // assertThat(ctrt2.consTxType().send().intValue()).isEqualTo(5);
+    // assertThat(ctrt2.myTxType().send().longValue()).isEqualTo(1);
 
     waitForUnlock(ctrt3.getContractAddress(), nodeOnBlockchain3);
     assertThat(ctrt3.myChainId().send().longValue()).isEqualTo(chain3Id);
@@ -130,9 +140,10 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     assertThat(ctrt3.fromChainId().send().longValue()).isEqualTo(chain2Id);
     assertThat(ctrt2.coordCtrtAddr().send()).isEqualTo(coordContract.getContractAddress());
     assertThat(ctrt3.fromAddr().send()).isEqualTo(ctrt2.getContractAddress());
-    // assertThat(ctrt3.txId().send().longValue()).isEqualTo(txReceipt.getTransactionIndex().longValue());
+    assertThat(ctrt3.txId().send().longValue())
+        .isEqualTo(ctx1.getCrosschainTransactionId().longValue());
     // assertThat(ctrt3.consTxType().send().intValue()).isEqualTo(5);
-    // assertThat(ctrt3.myTxType().send().longValue()).isEqualTo(1);
+    // assertThat(ctrt3.myTxType().send().longValue()).isEqualTo(2);
   }
 
   @After
