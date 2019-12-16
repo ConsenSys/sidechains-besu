@@ -49,7 +49,8 @@ public class CrossStartThresholdKeyGeneration implements JsonRpcMethod {
   @Override
   public JsonRpcResponse response(final JsonRpcRequest request) {
     if (request.getParamLength() != EXPECTED_NUM_PARAMS) {
-      LOG.error("JSON RPC {}: Expected {} parameters. Called with {} parameters",
+      LOG.error(
+          "JSON RPC {}: Expected {} parameters. Called with {} parameters",
           getName(),
           EXPECTED_NUM_PARAMS,
           request.getParamLength());
@@ -63,9 +64,7 @@ public class CrossStartThresholdKeyGeneration implements JsonRpcMethod {
     try {
       algorithm = BlsThresholdCryptoSystem.valueOf(algorithmStr);
     } catch (RuntimeException ex) {
-      LOG.error("JSON RPC {}: Invalid BLS Threshold Crypto Scheme: {}",
-          getName(),
-          algorithmStr);
+      LOG.error("JSON RPC {}: Invalid BLS Threshold Crypto Scheme: {}", getName(), algorithmStr);
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     }
     LOG.info("JSON RPC {}: Threshold: {}, Algorithm: {}", getName(), threshold, algorithm);
