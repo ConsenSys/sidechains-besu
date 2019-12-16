@@ -24,8 +24,8 @@ contract Ctrt1 is Crosschain {
     uint256 public myTxId;
     uint256 public fromChainId;
     uint256 public origChainId;
-    uint32 public consTxType;
-    uint32 public myTxType;
+    uint256 public consTxType;
+    uint256 public myTxType;
     uint256 public viewTxType;
     address public coordCtrtAddr;
     address public fromAddr;
