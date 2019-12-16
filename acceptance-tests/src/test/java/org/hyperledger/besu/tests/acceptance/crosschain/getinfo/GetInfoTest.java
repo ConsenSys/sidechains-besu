@@ -159,7 +159,6 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
         .isEqualTo(CrosschainTransaction.CrosschainTransactionType.SUBORDINATE_TRANSACTION.value);
   }
 
-
   @After
   public void closeDown() throws Exception {
     this.cluster.close();
