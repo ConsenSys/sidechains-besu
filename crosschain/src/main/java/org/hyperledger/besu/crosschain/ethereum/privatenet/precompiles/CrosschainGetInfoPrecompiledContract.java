@@ -84,6 +84,11 @@ public class CrosschainGetInfoPrecompiledContract extends AbstractPrecompiledCon
         return Bytes32.leftPad(tx.getCrosschainCoordinationContractAddress().orElse(Address.ZERO));
       case GET_INFO_ORIGINATING_BLOCKCHAIN_ID:
         maybeId = tx.getOriginatingSidechainId();
+        if (maybeId.isEmpty()
+            && tx.getType()
+                == CrosschainTransaction.CrosschainTransactionType.ORIGINATING_TRANSACTION) {
+          maybeId = tx.getChainId();
+        }
         id = maybeId.orElse(BigInteger.ZERO);
         return toBytes32(id);
       case GET_INFO_FROM_BLOCKCHAIN_ID:

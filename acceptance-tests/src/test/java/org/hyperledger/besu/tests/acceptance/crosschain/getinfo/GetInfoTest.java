@@ -77,6 +77,11 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
   }
 
   @Test
+  /**
+   * TODO - To test GetInfoGetTransactionType precompile for the transaction types
+   * ORIGINATING_LOCKABLE_CONTRACT_DEPLOY, UNLOCK_COMMIT_SIGNALLING_TRANSACTION,
+   * UNLOCK_IGNORE_SIGNALLING_TRANSACTION
+   */
   public void getInfoTest() throws Exception {
     // Constructing the crosschain transaction
     CrosschainContextGenerator ctxGen =
@@ -114,9 +119,7 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     assertThat(ctrt1.myChainId().send().longValue()).isEqualTo(chain1Id);
     assertThat(ctrt1.coordChainId().send().longValue()).isEqualTo(cbcId);
     assertThat(ctrt1.coordCtrtAddr().send()).isEqualTo(coordContract.getContractAddress());
-    // assertThat(ctrt1.fromChainId().send().longValue()).isEqualTo(chain1Id);
-    // assertThat(ctrt1.origChainId().send().longValue()).isEqualTo(chain1Id);
-    // assertThat(ctrt1.fromAddr().send()).isEqualTo(BENEFACTOR_ONE.getAddress());
+    assertThat(ctrt1.origChainId().send().longValue()).isEqualTo(chain1Id);
     assertThat(ctrt1.viewTxType().send().longValue())
         .isEqualTo(CrosschainTransaction.CrosschainTransactionType.SUBORDINATE_VIEW.value);
     assertThat(ctrt1.consTxType().send().intValue())
