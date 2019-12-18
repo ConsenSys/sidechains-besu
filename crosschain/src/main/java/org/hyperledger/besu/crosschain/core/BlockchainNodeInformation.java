@@ -10,18 +10,16 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.hyperledger.besu.crosschain.core.keys;
+package org.hyperledger.besu.crosschain.core;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigInteger;
 
-public class CrosschainKeyManagerStorage {
+public class BlockchainNodeInformation {
+  public BigInteger blockchainId;
+  public String ipAddressAndPort;
 
-  public static Map<Long, BlsThresholdCredentials> loadAllCredentials() {
-    return new HashMap<>();
+  BlockchainNodeInformation(final BigInteger blockchainId, final String ipAddressAndPort) {
+    this.blockchainId = blockchainId;
+    this.ipAddressAndPort = ipAddressAndPort;
   }
-
-  public static void addCredentials(final BlsThresholdCredentials credentials) {}
-
-  public static void switchActiveCredentials(final BlsThresholdCredentials credentials) {}
 }

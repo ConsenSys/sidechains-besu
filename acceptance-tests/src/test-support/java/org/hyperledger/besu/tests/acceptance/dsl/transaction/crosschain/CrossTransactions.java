@@ -16,20 +16,20 @@ import java.math.BigInteger;
 
 public class CrossTransactions {
 
-  public CrossAddMultichainNode getAddMultichainNode(
+  public CrossAddLinkedNode getAddMultichainNode(
       final BigInteger blockchainId, final String ipAddressAndPort) {
-    return new CrossAddMultichainNode(blockchainId, ipAddressAndPort);
+    return new CrossAddLinkedNode(blockchainId, ipAddressAndPort);
   }
 
   public CrossIsLockableTransaction getIsLockable(final String address) {
     return new CrossIsLockableTransaction(address);
   }
 
-  public CrossListMultichainNodes getListMultichainNodes() {
-    return new CrossListMultichainNodes();
+  public CrossListLinkedNodes getListMultichainNodes() {
+    return new CrossListLinkedNodes();
   }
 
-  public CrossRemoveMultichainNode getRemoveMultichainNode(final BigInteger blockchainId) {
-    return new CrossRemoveMultichainNode(blockchainId);
+  public CrossRemoveLinkedNode getRemoveMultichainNode(final BigInteger blockchainId) {
+    return new CrossRemoveLinkedNode(blockchainId);
   }
 }

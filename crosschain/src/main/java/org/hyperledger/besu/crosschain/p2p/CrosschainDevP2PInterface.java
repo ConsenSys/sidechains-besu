@@ -12,10 +12,14 @@
  */
 package org.hyperledger.besu.crosschain.p2p;
 
+import org.hyperledger.besu.util.bytes.BytesValue;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+
 
 public interface CrosschainDevP2PInterface {
 
@@ -30,18 +34,49 @@ public interface CrosschainDevP2PInterface {
   /**
    * Request other nodes start the Threshold Key Generation process.
    *
+   * Send from this node to all other nodes.
+   *
    * @param keyVersion The key version to be generated.
    */
   void requestStartNewKeyGeneration(final long keyVersion);
 
+  /**
+   * Send from this node to a specific node.
+   *
+   * @param myAddress
+   * @param nodeAddresses
+   * @param mySecretShares
+   */
   void sendPrivateValues(
       final BigInteger myAddress,
       final Set<BigInteger> nodeAddresses,
       final Map<BigInteger, BigInteger> mySecretShares);
 
   void setSecretShareCallback(final CrosschainPartSecretShareCallback implementation);
+  // TODO void setSigningRequestCallback(final CrosschainPartSecretShareCallback implementation);
+  // TODO void setSigningResponseCallback(final CrosschainPartSecretShareCallback implementation);
 
-  // ****** Everything below here is only needed for test implementations.
+  // **
+//   * Send from this node to a specific node.
+//   *
+//   * @param myAddress
+//   */
+//  void sendMessageSigningRequest(
+//      final BigInteger myAddress,
+//      final BytesValue message);
+
+//  /**
+//   * Send from this node to a specific node.
+//   *
+//   * @param myAddress
+//   */
+//  void sendMessageSigningResponse(
+//    final BigInteger myAddress,
+//    final Set<BigInteger> nodeAddresses,
+//    final BytesValue signedMessage);
+
+
+  // TODO ****** Everything below here is only needed for test implementations.
   void setMyNodeAddress(final BigInteger myNodeAddress);
 
   void clearSimulatedNodes();
