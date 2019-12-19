@@ -21,10 +21,6 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcError;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcErrorResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcResponse;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.response.JsonRpcSuccessResponse;
-import org.hyperledger.besu.util.bytes.BytesValue;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /** Return the Blockchain Public key, if such a key exists. */
 public class CrossGetBlockchainPublicKey extends AbstractCrossWithKeyVersionParam {
@@ -47,8 +43,7 @@ public class CrossGetBlockchainPublicKey extends AbstractCrossWithKeyVersionPara
     }
     BlsThresholdPublicKey publicKey;
     long keyVersion = getKeyVersionParameter(request);
-    publicKey =
-        this.crosschainController.getBlockchainPublicKey(keyVersion);
+    publicKey = this.crosschainController.getBlockchainPublicKey(keyVersion);
     LOG.info(
         "JSON RPC {}: Public key version: {}, encoded key: {}",
         getName(),
