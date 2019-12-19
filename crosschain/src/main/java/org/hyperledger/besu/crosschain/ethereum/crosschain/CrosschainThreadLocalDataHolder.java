@@ -45,5 +45,7 @@ public class CrosschainThreadLocalDataHolder {
     data.remove();
   }
 
-  public static void removeTransaction() {txData.remove();}
+  public static void removeTransaction() {
+    txData.remove();
+  }
 }
