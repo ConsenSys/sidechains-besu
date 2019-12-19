@@ -65,8 +65,10 @@ public class MultichainNodeManagementAcceptanceTest extends CrosschainAcceptance
     List<BlockchainNodeInformation> nodes =
         this.nodeOnBlockchain1.execute(crossTransactions.getListLinkedNodes());
     assertThat(nodes.size()).isEqualTo(2);
-    assertThat(nodes.get(0).blockchainId.equals(bcA) || nodes.get(0).blockchainId.equals(bcB) ).isTrue();
-    assertThat(nodes.get(1).blockchainId.equals(bcA) || nodes.get(1).blockchainId.equals(bcB) ).isTrue();
+    assertThat(nodes.get(0).blockchainId.equals(bcA) || nodes.get(0).blockchainId.equals(bcB))
+        .isTrue();
+    assertThat(nodes.get(1).blockchainId.equals(bcA) || nodes.get(1).blockchainId.equals(bcB))
+        .isTrue();
   }
 
   @Test
