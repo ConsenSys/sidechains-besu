@@ -289,15 +289,6 @@ public class CrosschainController {
   }
 
   /**
-   * Called by the JSON RPC Call cross_getBlockchainPublicKey
-   *
-   * @return The current public key and meta-data.
-   */
-  public BlsThresholdPublicKey getBlockchainPublicKey() {
-    return this.crosschainKeyManager.getActivePublicKey();
-  }
-
-  /**
    * Called by the JSON RPC Call cross_getBlockchainPublicKeyByVersion
    *
    * @param keyVersion to fetch key for.
