@@ -39,9 +39,9 @@ public interface CrosschainDevP2PInterface {
   /**
    * Send from this node to a specific node.
    *
-   * @param myAddress
-   * @param nodeAddresses
-   * @param mySecretShares
+   * @param myAddress The address of this node.
+   * @param nodeAddresses The address of nodes to send the secret shares to.
+   * @param mySecretShares The secret shares to send.
    */
   void sendPrivateValues(
       final BigInteger myAddress,
