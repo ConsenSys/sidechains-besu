@@ -116,6 +116,7 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
 
     // TODO Tests related to TxType are not happening correctly. Need to fix.
     waitForUnlock(ctrt1.getContractAddress(), nodeOnBlockchain1);
+    assertThat(ctrt1.nonCrossChainId().send().longValue()).isEqualTo(chain1Id);
     assertThat(ctrt1.myChainId().send().longValue()).isEqualTo(chain1Id);
     assertThat(ctrt1.coordChainId().send().longValue()).isEqualTo(cbcId);
     assertThat(ctrt1.coordCtrtAddr().send()).isEqualTo(coordContract.getContractAddress());

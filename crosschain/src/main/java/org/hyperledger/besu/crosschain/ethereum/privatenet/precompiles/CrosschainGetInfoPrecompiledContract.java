@@ -12,13 +12,19 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.privatenet.precompiles;
 
+import org.hyperledger.besu.config.CrosschainConfigOptions;
+import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.crosschain.ethereum.crosschain.CrosschainThreadLocalDataHolder;
+import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.EthChainId;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
 import org.hyperledger.besu.ethereum.core.Gas;
+import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.ethereum.mainnet.AbstractPrecompiledContract;
+import org.hyperledger.besu.ethereum.mainnet.ProtocolSchedule;
 import org.hyperledger.besu.ethereum.vm.GasCalculator;
 import org.hyperledger.besu.ethereum.vm.MessageFrame;
+import org.hyperledger.besu.ethereum.vm.operations.ChainIdOperation;
 import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
@@ -61,6 +67,17 @@ public class CrosschainGetInfoPrecompiledContract extends AbstractPrecompiledCon
 
     CrosschainTransaction tx = CrosschainThreadLocalDataHolder.getCrosschainTransaction();
     if (tx == null) {
+      if (option == 0) {
+        return toBytes32(BigInteger.ZERO);
+      } else if (option == 1) {
+        Transaction nonXTx = CrosschainThreadLocalDataHolder.getTransaction();
+        if(nonXTx != null) {
+          Optional<BigInteger> chId = nonXTx.getChainId();
+          if(chId.isPresent()) {
+            return toBytes32(chId.get());
+          }
+        }
+      }
       LOG.error("CrosschainGetInfo called without a crosschain transaction context");
       // Indicate execution failed unexpectedly by returning null.
       return null;
