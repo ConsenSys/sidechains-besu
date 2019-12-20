@@ -51,7 +51,8 @@ public class OriginatingBlockchainMessageProcessor {
     // If this is an originating transaction, then we are sure the optional fields will exist.
     BigInteger coordBcId = transaction.getCrosschainCoordinationBlockchainId().get();
     Address coordContractAddress = transaction.getCrosschainCoordinationContractAddress().get();
-    //BigInteger timeoutBlockNumber = transaction.getCrosschainTransactionTimeoutBlockNumber().get();
+    // BigInteger timeoutBlockNumber =
+    // transaction.getCrosschainTransactionTimeoutBlockNumber().get();
 
     String ipAndPort = this.coordContractManager.getIpAndPort(coordBcId, coordContractAddress);
     if (ipAndPort == null) {
