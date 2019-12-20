@@ -34,7 +34,7 @@ public class OriginatingBlockchainMessageProcessor {
   CoordContractManager coordContractManager;
 
   public OriginatingBlockchainMessageProcessor(
-      CrosschainKeyManager keyManager, CoordContractManager coordContractManager) {
+      final CrosschainKeyManager keyManager, final CoordContractManager coordContractManager) {
     this.keyManager = keyManager;
     this.coordContractManager = coordContractManager;
   }
@@ -47,11 +47,11 @@ public class OriginatingBlockchainMessageProcessor {
    *
    * @param transaction Originating (with enclosed subordinates) Transaction to kick off the start.
    */
-  public void doStartMessageMagic(CrosschainTransaction transaction) {
+  public void doStartMessageMagic(final CrosschainTransaction transaction) {
     // If this is an originating transaction, then we are sure the optional fields will exist.
     BigInteger coordBcId = transaction.getCrosschainCoordinationBlockchainId().get();
     Address coordContractAddress = transaction.getCrosschainCoordinationContractAddress().get();
-    BigInteger timeoutBlockNumber = transaction.getCrosschainTransactionTimeoutBlockNumber().get();
+    //BigInteger timeoutBlockNumber = transaction.getCrosschainTransactionTimeoutBlockNumber().get();
 
     String ipAndPort = this.coordContractManager.getIpAndPort(coordBcId, coordContractAddress);
     if (ipAndPort == null) {
