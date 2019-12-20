@@ -241,7 +241,4 @@ public class CrosschainKeyManager {
     return null;
   }
 
-  private BytesValue localSign(final long keyVersion, final BytesValue message) {
-    return null;
-  }
 }
