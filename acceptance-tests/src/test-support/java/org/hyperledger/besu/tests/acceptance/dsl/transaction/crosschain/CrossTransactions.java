@@ -32,4 +32,8 @@ public class CrossTransactions {
   public CrossRemoveLinkedNode getRemoveLinkedNode(final BigInteger blockchainId) {
     return new CrossRemoveLinkedNode(blockchainId);
   }
+
+  /*public CrossActivateKey activateKey(final long keyVersion) {
+    return new CrossActivateKey(keyVersion);
+  }*/
 }
