@@ -140,4 +140,3 @@ task acceptanceTest(type: Test) {
     showCauses = true
   }
 }
-
