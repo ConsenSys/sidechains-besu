@@ -21,24 +21,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.web3j.protocol.besu.crypto.crosschain.BlsThresholdCryptoSystem;
 import org.web3j.protocol.besu.response.crosschain.BlockchainNodeInformation;
+import org.web3j.protocol.besu.response.crosschain.CrossBlockchainPublicKeyResponse;
+import org.web3j.protocol.besu.response.crosschain.KeyStatus;
 
 /*
  * Two blockchains with one node are created. And all the crosschain API methods are then tested.
  */
 
 public class ApiTest extends CrosschainAcceptanceTestBase {
-  // private static final Logger LOG = LogManager.getLogger();
+  //private static final Logger LOG = LogManager.getLogger();
 
   @Before
   public void setUp() throws Exception {
-
     setUpCoordiantionChain();
     setUpBlockchain1();
-    setUpBlockchain2();
   }
 
   @Test
@@ -84,10 +87,59 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
     assertThat(chainIds).isEqualTo(expectedChainIds);
   }
 
+  @Test
+  /*
+   * Tests the APIs that are related to keys.
+   */
+  public void keyTest() throws Exception {
+    // There is no public key generated for this chain yet. So it returns a null response.
+    CrossBlockchainPublicKeyResponse pubKey =
+        this.nodeOnBlockchain1.execute(crossTransactions.getBlockchainPublicKey(1));
+    assertThat(pubKey.getRawResponse()).isNull();
+
+    // Because there are no keys, activating the key with version 1 should be ignored.
+    // 0 indicates no valid key present
+    this.nodeOnBlockchain1.execute(crossTransactions.activateKey(1));
+    BigInteger keyVersion = this.nodeOnBlockchain1.execute(crossTransactions.getActiveKeyVersion());
+    assertThat(keyVersion.longValue()).isEqualTo(0);
+
+    // Start the key generation process
+    keyVersion =
+        this.nodeOnBlockchain1.execute(
+            crossTransactions.startThresholdKeyGeneration(
+                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
+    assertThat(keyVersion.longValue()).isEqualTo(1);
+
+    // Get the key version from the API and check
+    // KeyStatus keyStatus = this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
+    // LOG.info("Key Status = {}", keyStatus.value);
+
+    this.nodeOnBlockchain1.execute(crossTransactions.activateKey(keyVersion.longValue()));
+    BigInteger keyVersionFromApi =
+        this.nodeOnBlockchain1.execute(crossTransactions.getActiveKeyVersion());
+    assertThat(keyVersionFromApi).isEqualTo(keyVersion);
+
+    // Generate the key once again
+    keyVersion =
+        this.nodeOnBlockchain1.execute(
+            crossTransactions.startThresholdKeyGeneration(
+                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
+    assertThat(keyVersion.longValue()).isEqualTo(2);
+
+    // Get the key version again from the API and check
+    this.nodeOnBlockchain1.execute(crossTransactions.activateKey(keyVersion.longValue()));
+    keyVersionFromApi = this.nodeOnBlockchain1.execute(crossTransactions.getActiveKeyVersion());
+    assertThat(keyVersionFromApi).isEqualTo(keyVersion);
+
+    // Activate the old version and check the key version from the API
+    this.nodeOnBlockchain1.execute(crossTransactions.activateKey(1));
+    keyVersion = this.nodeOnBlockchain1.execute(crossTransactions.getActiveKeyVersion());
+    assertThat(keyVersion.longValue()).isEqualTo(1);
+  }
+
   @After
   public void closeDown() throws Exception {
     this.cluster.close();
     this.clusterBc1.close();
-    this.clusterBc2.close();
   }
 }
