@@ -133,7 +133,7 @@ jobs:
       - capture_test_results
 
   acceptanceTests:
-    executor: besu_executor_2xl
+    executor: besu_executor_xl
     steps:
       - prepare
       - attach_workspace:
@@ -142,7 +142,7 @@ jobs:
           name: AcceptanceTests
           no_output_timeout: 40m
           command: |
-            ./gradlew --no-daemon --parallel acceptanceTest
+            ./gradlew --parallel acceptanceTest
       - capture_test_results
 
   buildDocker:
