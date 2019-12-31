@@ -55,4 +55,16 @@ public class CrossTransactions {
   public CrossGetKeyStatus getKeyStatus(final long keyVersion) {
     return new CrossGetKeyStatus(keyVersion);
   }
+
+  public CrossGetKeyActiveNodes getKeyActiveNodes(final long keyVersion) {
+    return new CrossGetKeyActiveNodes(keyVersion);
+  }
+
+  public CrossGetKeyGenFailureReason getKeyGenFailureReason(final long keyVersion) {
+    return new CrossGetKeyGenFailureReason(keyVersion);
+  }
+
+  public CrossGetKeyGenNodesDroppedOutOfKeyGeneration getKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
+    return new CrossGetKeyGenNodesDroppedOutOfKeyGeneration(keyVersion);
+  }
 }

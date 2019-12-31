@@ -17,8 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.hyperledger.besu.tests.acceptance.crosschain.common.CrosschainAcceptanceTestBase;
 
 import java.math.BigInteger;
+import java.security.Key;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +31,7 @@ import org.junit.Test;
 import org.web3j.protocol.besu.crypto.crosschain.BlsThresholdCryptoSystem;
 import org.web3j.protocol.besu.response.crosschain.BlockchainNodeInformation;
 import org.web3j.protocol.besu.response.crosschain.CrossBlockchainPublicKeyResponse;
+import org.web3j.protocol.besu.response.crosschain.KeyGenFailureToCompleteReason;
 import org.web3j.protocol.besu.response.crosschain.KeyStatus;
 
 /*
@@ -36,7 +39,7 @@ import org.web3j.protocol.besu.response.crosschain.KeyStatus;
  */
 
 public class ApiTest extends CrosschainAcceptanceTestBase {
-  //private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LogManager.getLogger();
 
   @Before
   public void setUp() throws Exception {
@@ -110,14 +113,38 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
                 1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
     assertThat(keyVersion.longValue()).isEqualTo(1);
 
-    // Get the key version from the API and check
-    // KeyStatus keyStatus = this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
-    // LOG.info("Key Status = {}", keyStatus.value);
+    // TODO: Check that the failure reason is SUCCESS
+    // KeyGenFailureToCompleteReason reason = this.nodeOnBlockchain1.execute(
+    //        crossTransactions.getKeyGenFailureReason(keyVersion.longValue()));
+    // assertThat(reason.value).isEqualTo(KeyGenFailureToCompleteReason.SUCCESS.value);
 
+    // Get the key version from the API and check
+    //KeyStatus keyStatus = this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
+    // TODO: Deserialising the response to KeyStatus is failing at the moment
+    // assertThat(keyStatus.value).isEqualTo(KeyStatus.KEY_GEN_COMPLETE.value);
+
+    // Activate the key of version 1 and check the APIs crossGetActiveKeyVersion and crossGetKeyStatus
     this.nodeOnBlockchain1.execute(crossTransactions.activateKey(keyVersion.longValue()));
     BigInteger keyVersionFromApi =
         this.nodeOnBlockchain1.execute(crossTransactions.getActiveKeyVersion());
     assertThat(keyVersionFromApi).isEqualTo(keyVersion);
+
+    // Check the API crossGetKeyActiveNodes
+    List<BigInteger> activeKeyNodes = this.nodeOnBlockchain1.execute(
+            crossTransactions.getKeyActiveNodes(keyVersion.longValue()));
+    assertThat(activeKeyNodes.size()).isEqualTo(1);
+    LOG.info("Active Key Nodes are: ");
+    for (BigInteger n : activeKeyNodes) {
+      LOG.info("{} ", n.longValue());
+    }
+
+    // Check the API crossGetKeyGenNodesDroppedOutOfKeyGeneration
+    Map<BigInteger, KeyGenFailureToCompleteReason> nodesReasons = this.nodeOnBlockchain1.execute(
+            crossTransactions.getKeyGenNodesDroppedOutOfKeyGeneration(keyVersion.longValue()));
+    assertThat(nodesReasons.size()).isEqualTo(0);
+
+    // keyStatus = this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
+    // assertThat(keyStatus.value).isEqualTo(KeyStatus.ACTIVE_KEY.value);
 
     // Generate the key once again
     keyVersion =
