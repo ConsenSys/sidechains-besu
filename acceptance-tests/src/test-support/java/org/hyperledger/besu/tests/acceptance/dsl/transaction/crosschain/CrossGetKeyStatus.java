@@ -23,23 +23,22 @@ import org.web3j.protocol.besu.response.crosschain.KeyStatus;
 import org.web3j.protocol.besu.response.crosschain.KeyStatusResponse;
 
 public class CrossGetKeyStatus implements Transaction<KeyStatus> {
-    private final long keyVersion;
+  private final long keyVersion;
 
-    CrossGetKeyStatus(final long keyVersion) {
-        this.keyVersion = keyVersion;
+  CrossGetKeyStatus(final long keyVersion) {
+    this.keyVersion = keyVersion;
+  }
+
+  @Override
+  public KeyStatus execute(final NodeRequests node) {
+    try {
+      final KeyStatusResponse result = node.eth().crossGetKeyStatus(keyVersion).send();
+      assertThat(result.hasError()).isFalse();
+      assertThat(result).isNotNull();
+      return result.getResult();
+
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
-
-    @Override
-    public KeyStatus execute(final NodeRequests node) {
-        try {
-            final KeyStatusResponse result =
-                    node.eth().crossGetKeyStatus(keyVersion).send();
-            assertThat(result.hasError()).isFalse();
-            assertThat(result).isNotNull();
-            return result.getResult();
-
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

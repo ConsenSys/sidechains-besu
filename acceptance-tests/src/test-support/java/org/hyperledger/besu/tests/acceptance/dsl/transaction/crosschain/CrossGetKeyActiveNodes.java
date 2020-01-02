@@ -16,30 +16,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.ListNodesResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.web3j.protocol.besu.response.crosschain.ListNodesResponse;
+
 public class CrossGetKeyActiveNodes implements Transaction<List<BigInteger>> {
-    private final long keyVersion;
+  private final long keyVersion;
 
-    CrossGetKeyActiveNodes(final long keyVersion) {
-        this.keyVersion = keyVersion;
+  CrossGetKeyActiveNodes(final long keyVersion) {
+    this.keyVersion = keyVersion;
+  }
+
+  @Override
+  public List<BigInteger> execute(final NodeRequests node) {
+    try {
+      final ListNodesResponse result = node.eth().crossGetKeyActiveNodes(keyVersion).send();
+      assertThat(result.hasError()).isFalse();
+      assertThat(result).isNotNull();
+      return result.getNodes();
+
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
-
-    @Override
-    public List<BigInteger> execute(final NodeRequests node) {
-        try {
-            final ListNodesResponse result =
-                    node.eth().crossGetKeyActiveNodes(keyVersion).send();
-            assertThat(result.hasError()).isFalse();
-            assertThat(result).isNotNull();
-            return result.getNodes();
-
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

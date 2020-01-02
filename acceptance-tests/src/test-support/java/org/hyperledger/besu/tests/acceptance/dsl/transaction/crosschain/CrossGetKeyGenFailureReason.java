@@ -16,29 +16,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.KeyGenFailureReasonResponse;
-import org.web3j.protocol.besu.response.crosschain.KeyGenFailureToCompleteReason;
 
 import java.io.IOException;
 
+import org.web3j.protocol.besu.response.crosschain.KeyGenFailureReasonResponse;
+import org.web3j.protocol.besu.response.crosschain.KeyGenFailureToCompleteReason;
+
 public class CrossGetKeyGenFailureReason implements Transaction<KeyGenFailureToCompleteReason> {
-    private final long keyVersion;
+  private final long keyVersion;
 
-    CrossGetKeyGenFailureReason(final long keyVersion) {
-        this.keyVersion = keyVersion;
+  CrossGetKeyGenFailureReason(final long keyVersion) {
+    this.keyVersion = keyVersion;
+  }
+
+  @Override
+  public KeyGenFailureToCompleteReason execute(final NodeRequests node) {
+    try {
+      final KeyGenFailureReasonResponse result =
+          node.eth().crossGetKeyGenFailureReason(keyVersion).send();
+      assertThat(result.hasError()).isFalse();
+      assertThat(result).isNotNull();
+      return result.getFailureReason();
+
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
-
-    @Override
-    public KeyGenFailureToCompleteReason execute(final NodeRequests node) {
-        try {
-            final KeyGenFailureReasonResponse result =
-                    node.eth().crossGetKeyGenFailureReason(keyVersion).send();
-            assertThat(result.hasError()).isFalse();
-            assertThat(result).isNotNull();
-            return result.getFailureReason();
-
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

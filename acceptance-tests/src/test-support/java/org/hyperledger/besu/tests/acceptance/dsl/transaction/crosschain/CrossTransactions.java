@@ -64,7 +64,8 @@ public class CrossTransactions {
     return new CrossGetKeyGenFailureReason(keyVersion);
   }
 
-  public CrossGetKeyGenNodesDroppedOutOfKeyGeneration getKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
+  public CrossGetKeyGenNodesDroppedOutOfKeyGeneration getKeyGenNodesDroppedOutOfKeyGeneration(
+      final long keyVersion) {
     return new CrossGetKeyGenNodesDroppedOutOfKeyGeneration(keyVersion);
   }
 
@@ -73,12 +74,12 @@ public class CrossTransactions {
   }
 
   public CrossAddCoordinationContract addCoordinationContract(
-          final BigInteger blockchainId, final String address, final String ipAddressAndPort) {
+      final BigInteger blockchainId, final String address, final String ipAddressAndPort) {
     return new CrossAddCoordinationContract(blockchainId, address, ipAddressAndPort);
   }
 
   public CrossRemoveCoordinationContract removeCoordinationContract(
-          final BigInteger blockchainId, final String address) {
+      final BigInteger blockchainId, final String address) {
     return new CrossRemoveCoordinationContract(blockchainId, address);
   }
 }

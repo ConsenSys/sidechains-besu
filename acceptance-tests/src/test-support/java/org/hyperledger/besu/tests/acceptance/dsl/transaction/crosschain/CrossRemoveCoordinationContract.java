@@ -23,25 +23,25 @@ import java.math.BigInteger;
 import org.web3j.protocol.besu.response.crosschain.NoResponse;
 
 public class CrossRemoveCoordinationContract implements Transaction<String> {
-    private final BigInteger blockchainId;
-    private final String address;
+  private final BigInteger blockchainId;
+  private final String address;
 
-    CrossRemoveCoordinationContract(final BigInteger blockchainId, final String address) {
-        this.blockchainId = blockchainId;
-        this.address = address;
+  CrossRemoveCoordinationContract(final BigInteger blockchainId, final String address) {
+    this.blockchainId = blockchainId;
+    this.address = address;
+  }
+
+  @Override
+  public String execute(final NodeRequests node) {
+    try {
+      final NoResponse result =
+          node.eth().crossRemoveCoordinationContract(blockchainId, address).send();
+      assertThat(result).isNotNull();
+      assertThat(result.hasError()).isFalse();
+      return result.getResult();
+
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
-
-    @Override
-    public String execute(final NodeRequests node) {
-        try {
-            final NoResponse result =
-                    node.eth().crossRemoveCoordinationContract(blockchainId, address).send();
-            assertThat(result).isNotNull();
-            assertThat(result.hasError()).isFalse();
-            return result.getResult();
-
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

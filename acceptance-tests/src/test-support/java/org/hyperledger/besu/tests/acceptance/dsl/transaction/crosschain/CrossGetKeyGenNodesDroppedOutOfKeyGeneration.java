@@ -16,33 +16,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
-import org.web3j.protocol.besu.response.crosschain.KeyGenFailureReasonResponse;
-import org.web3j.protocol.besu.response.crosschain.KeyGenFailureToCompleteReason;
-import org.web3j.protocol.besu.response.crosschain.KeyGenNodesDroppedOutOfKeyGenerationResponse;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Map;
 
-public class CrossGetKeyGenNodesDroppedOutOfKeyGeneration implements
-        Transaction<Map<BigInteger, KeyGenFailureToCompleteReason>> {
-    private final long keyVersion;
+import org.web3j.protocol.besu.response.crosschain.KeyGenFailureToCompleteReason;
+import org.web3j.protocol.besu.response.crosschain.KeyGenNodesDroppedOutOfKeyGenerationResponse;
 
-    CrossGetKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
-        this.keyVersion = keyVersion;
+public class CrossGetKeyGenNodesDroppedOutOfKeyGeneration
+    implements Transaction<Map<BigInteger, KeyGenFailureToCompleteReason>> {
+  private final long keyVersion;
+
+  CrossGetKeyGenNodesDroppedOutOfKeyGeneration(final long keyVersion) {
+    this.keyVersion = keyVersion;
+  }
+
+  @Override
+  public Map<BigInteger, KeyGenFailureToCompleteReason> execute(final NodeRequests node) {
+    try {
+      final KeyGenNodesDroppedOutOfKeyGenerationResponse result =
+          node.eth().crossGetKeyGenNodesDroppedOutOfKeyGeneration(keyVersion).send();
+      assertThat(result.hasError()).isFalse();
+      assertThat(result).isNotNull();
+      return result.getResult();
+
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
-
-    @Override
-    public Map<BigInteger, KeyGenFailureToCompleteReason> execute(final NodeRequests node) {
-        try {
-            final KeyGenNodesDroppedOutOfKeyGenerationResponse result =
-                    node.eth().crossGetKeyGenNodesDroppedOutOfKeyGeneration(keyVersion).send();
-            assertThat(result.hasError()).isFalse();
-            assertThat(result).isNotNull();
-            return result.getResult();
-
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }

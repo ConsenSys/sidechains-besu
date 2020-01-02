@@ -18,24 +18,24 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.NodeRequests;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.Transaction;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 
 import org.web3j.protocol.besu.response.crosschain.CoordinationContractInformation;
 import org.web3j.protocol.besu.response.crosschain.ListCoordinationContractsResponse;
-import org.web3j.protocol.besu.response.crosschain.LongResponse;
 
-public class CrossListCoordinationContracts implements Transaction<List<CoordinationContractInformation>> {
-    @Override
-    public List<CoordinationContractInformation> execute(final NodeRequests node) {
-        try {
-            final ListCoordinationContractsResponse result = node.eth().crossListCoordinationContracts().send();
-            assertThat(result).isNotNull();
-            assertThat(result.hasError()).isFalse();
-            return result.getInfo();
+public class CrossListCoordinationContracts
+    implements Transaction<List<CoordinationContractInformation>> {
+  @Override
+  public List<CoordinationContractInformation> execute(final NodeRequests node) {
+    try {
+      final ListCoordinationContractsResponse result =
+          node.eth().crossListCoordinationContracts().send();
+      assertThat(result).isNotNull();
+      assertThat(result.hasError()).isFalse();
+      return result.getInfo();
 
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+    } catch (final IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 }
