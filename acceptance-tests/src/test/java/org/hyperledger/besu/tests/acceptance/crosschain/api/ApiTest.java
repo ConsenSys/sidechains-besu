@@ -149,7 +149,7 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
 
     keyStatus =
         this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
-    assertThat(keyStatus.value).isEqualTo(KeyStatus.KEY_GEN_COMPLETE.value);
+    assertThat(keyStatus.value).isEqualTo(KeyStatus.ACTIVE_KEY.value);
 
     // Generate the key once again
     keyVersion =

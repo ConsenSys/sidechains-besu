@@ -315,6 +315,8 @@ public class ThresholdKeyGeneration {
     return this.keyGenerationStatus;
   }
 
+  public void setKeyStatusToActive() {this.keyGenerationStatus = KeyStatus.ACTIVE_KEY; }
+
   public KeyGenFailureToCompleteReason getFailureReason() {
     return this.failureReason;
   }
