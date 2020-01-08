@@ -12,8 +12,8 @@
  */
 package org.hyperledger.besu.controller;
 
-import static org.hyperledger.besu.ethereum.eth.manager.MonitoredExecutors.newScheduledThreadPool;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.config.IbftConfigOptions;
 import org.hyperledger.besu.consensus.common.BlockInterface;
 import org.hyperledger.besu.consensus.common.EpochManager;
@@ -46,6 +46,8 @@ import org.hyperledger.besu.consensus.ibft.statemachine.IbftController;
 import org.hyperledger.besu.consensus.ibft.statemachine.IbftFinalState;
 import org.hyperledger.besu.consensus.ibft.statemachine.IbftRoundFactory;
 import org.hyperledger.besu.consensus.ibft.validation.MessageValidatorFactory;
+import org.hyperledger.besu.crosschain.protocol.CrosschainProtocolManager;
+import org.hyperledger.besu.crosschain.protocol.CrosschainSubProtocol;
 import org.hyperledger.besu.ethereum.ProtocolContext;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethodFactory;
 import org.hyperledger.besu.ethereum.blockcreation.MiningCoordinator;
@@ -69,8 +71,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static org.hyperledger.besu.ethereum.eth.manager.MonitoredExecutors.newScheduledThreadPool;
 
 public class IbftBesuControllerBuilder extends BesuControllerBuilder<IbftContext> {
   private static final Logger LOG = LogManager.getLogger();
@@ -96,7 +97,8 @@ public class IbftBesuControllerBuilder extends BesuControllerBuilder<IbftContext
       final EthProtocolManager ethProtocolManager) {
     return new SubProtocolConfiguration()
         .withSubProtocol(EthProtocol.get(), ethProtocolManager)
-        .withSubProtocol(IbftSubProtocol.get(), new IbftProtocolManager(ibftEventQueue, peers));
+        .withSubProtocol(IbftSubProtocol.get(), new IbftProtocolManager(ibftEventQueue, peers))
+        .withSubProtocol(CrosschainSubProtocol.get(), new CrosschainProtocolManager(peers));
   }
 
   @Override
