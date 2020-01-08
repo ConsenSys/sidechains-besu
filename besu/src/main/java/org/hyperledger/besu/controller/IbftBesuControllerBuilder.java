@@ -20,6 +20,7 @@ import org.hyperledger.besu.consensus.common.EpochManager;
 import org.hyperledger.besu.consensus.common.VoteProposer;
 import org.hyperledger.besu.consensus.common.VoteTallyCache;
 import org.hyperledger.besu.consensus.common.VoteTallyUpdater;
+import org.hyperledger.besu.consensus.common.network.ValidatorPeers;
 import org.hyperledger.besu.consensus.ibft.BlockTimer;
 import org.hyperledger.besu.consensus.ibft.EthSynchronizerUpdater;
 import org.hyperledger.besu.consensus.ibft.EventMultiplexer;
@@ -36,7 +37,6 @@ import org.hyperledger.besu.consensus.ibft.blockcreation.IbftBlockCreatorFactory
 import org.hyperledger.besu.consensus.ibft.blockcreation.IbftMiningCoordinator;
 import org.hyperledger.besu.consensus.ibft.blockcreation.ProposerSelector;
 import org.hyperledger.besu.consensus.ibft.jsonrpc.IbftJsonRpcMethodsFactory;
-import org.hyperledger.besu.consensus.ibft.network.ValidatorPeers;
 import org.hyperledger.besu.consensus.ibft.payload.MessageFactory;
 import org.hyperledger.besu.consensus.ibft.protocol.IbftProtocolManager;
 import org.hyperledger.besu.consensus.ibft.protocol.IbftSubProtocol;
