@@ -45,7 +45,7 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
 
   @Before
   public void setUp() throws Exception {
-    setUpCoordiantionChain();
+    setUpCoordinationChain();
     setUpBlockchain1();
   }
 

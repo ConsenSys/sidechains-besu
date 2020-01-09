@@ -50,7 +50,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
   protected BesuNode nodeOnBlockchain3;
   protected CrosschainTransactionManager transactionManagerBlockchain3;
 
-  public void setUpCoordiantionChain() throws Exception {
+  public void setUpCoordinationChain() throws Exception {
     nodeOnCoordinationBlockchain =
         besu.createCrosschainCoordinationBlockchainIbft2Node("coord-node");
     this.clusterCoordinationBlockchain = new Cluster(this.net);
@@ -87,6 +87,16 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.nodeOnCoordinationBlockchain.getChainId(),
             this.coordContract.getContractAddress(),
             CROSSCHAIN_TRANSACTION_TIMEOUT);
+
+    // Adding the coordination contract
+    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
+    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
+    String ipAddressAndPort = ipAddress + ":" + port;
+    this.nodeOnBlockchain1.execute(
+        crossTransactions.addCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress(),
+            ipAddressAndPort));
   }
 
   public void setUpBlockchain2() throws Exception {
@@ -109,6 +119,16 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.nodeOnCoordinationBlockchain.getChainId(),
             this.coordContract.getContractAddress(),
             CROSSCHAIN_TRANSACTION_TIMEOUT);
+
+    // Adding the coordination contract
+    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
+    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
+    String ipAddressAndPort = ipAddress + ":" + port;
+    this.nodeOnBlockchain2.execute(
+        crossTransactions.addCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress(),
+            ipAddressAndPort));
   }
 
   public void setUpBlockchain3() throws Exception {
@@ -131,6 +151,16 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.nodeOnCoordinationBlockchain.getChainId(),
             this.coordContract.getContractAddress(),
             CROSSCHAIN_TRANSACTION_TIMEOUT);
+
+    // Adding the coordination contract
+    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
+    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
+    String ipAddressAndPort = ipAddress + ":" + port;
+    this.nodeOnBlockchain3.execute(
+        crossTransactions.addCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress(),
+            ipAddressAndPort));
   }
 
   public void addMultichainNode(final BesuNode node, final BesuNode nodeToAdd) {
