@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.protocol;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.consensus.common.network.PeerConnectionTracker;
 import org.hyperledger.besu.consensus.common.network.ValidatorPeers;
 import org.hyperledger.besu.crosschain.messagedata.CrosschainMessageCodes;
@@ -30,6 +28,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CrosschainProtocolManager implements ProtocolManager {
   private static final Logger LOG = LogManager.getLogger();
