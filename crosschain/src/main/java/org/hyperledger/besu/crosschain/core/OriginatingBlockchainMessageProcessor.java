@@ -51,9 +51,8 @@ public class OriginatingBlockchainMessageProcessor {
     // If this is an originating transaction, then we are sure the optional fields will exist.
     BigInteger coordBcId = transaction.getCrosschainCoordinationBlockchainId().get();
     Address coordContractAddress = transaction.getCrosschainCoordinationContractAddress().get();
-    // BigInteger timeoutBlockNumber =
-    // transaction.getCrosschainTransactionTimeoutBlockNumber().get();
 
+    // We must trust the Crosschain Coordination Contract to proceed.
     String ipAndPort = this.coordContractManager.getIpAndPort(coordBcId, coordContractAddress);
     if (ipAndPort == null) {
       String msg =
@@ -63,18 +62,24 @@ public class OriginatingBlockchainMessageProcessor {
               + ", Address: "
               + coordContractAddress.getHexString();
       LOG.error(msg);
-      return;
-      // TODO throw error to stop the JSON RPC call
-      //      throw new RuntimeException(msg);
+      throw new RuntimeException(msg);
     }
 
-    // TODO get block number from Coordination blockchain and check.
+    // TODO We could get block number from Coordination blockchain, and get the timeout block
+    // number from the transaction, and check whether there will be enough time to execute the
+    // transaction. A simpler approach could be to just specify that there must be at least
+    // a certain number of blocks between when the message is submitted to the Coordination Blockchain
+    // and when it is executed.
 
     // Create message to be signed.
     ThresholdSignedMessage message = new CrosschainTransactionStartMessage(transaction);
 
-    // Have the message threshold signed.
-    // TODO more to do here.
-    this.keyManager.thresholdSign(message);
+    // Cooperate with other nodes to threshold sign the message.
+    ThresholdSignedMessage signedMessage = this.keyManager.thresholdSign(message);
+
+    OutwardBoundConnectionManager.post(ipAndPort, )
+
+
+    // TODO submit message to Coordination Contract.
   }
 }

@@ -12,6 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.core.messages;
 
+import org.hyperledger.besu.ethereum.core.Address;
+import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.util.bytes.BytesValue;
@@ -19,6 +21,45 @@ import org.hyperledger.besu.util.bytes.BytesValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.math.BigInteger;
+
+/**
+ * The message format is:
+ *
+ * Core Message:
+ *   Message Type
+ *   Coordination Blockchain Id
+ *   Coordination Contract Address
+ *   Originating Blockchain Id
+ *   Crosschain Transaction Id
+ *   Message Digest of the part of the Crosschain Transaction being processed.  This includes any
+ *     subordinate transactions or views below the current transaction or view.
+ *   Message specific field.
+ *
+ * Signed Core Message:
+ *   Core Message
+ *   Key Version used to sign
+ *   Signature of the RLP of the Core Message.
+ *
+ * Message
+ *   Core Message
+ *   Part of the Crosschain Transaction being processed
+ *
+ * Signed Message
+ *   Signed Core Message
+ *   Part of the Crosschain Transaction being processed
+ *
+ * The message specific field is:
+ *   Start: Transaction Time-out Block Number
+ *   Commit: Nothing
+ *   Ignore: Nothing
+ *   Transaction Ready: Blockchain Id that Subordinate Transaction was executed on.
+ *   View Result:
+ *      Blockchain Id that Subordinate View was executed on.
+ *      Block number when view was executed.
+ *      RLP encoded result
+ *
+ */
 public interface ThresholdSignedMessage {
   Logger LOG = LogManager.getLogger();
 
@@ -45,7 +86,29 @@ public interface ThresholdSignedMessage {
     }
   }
 
+  void setSignature(long keyVersion, BytesValue signature);
+
   ThresholdSignedMessageType getType();
 
+  BigInteger getCoordinationBlockchainId();
+
+  Address getCoordinationContractAddress();
+
+  BigInteger getOriginatingBlockchainId();
+
+  BigInteger getCrosschainTransactionId();
+
+  BytesValue getCrosschainTransactionHash();
+
+  long getKeyVersion();
+
+  BytesValue getSignature();
+
+  CrosschainTransaction getTransaction();
+
+  // Create a message to be signed.
+  BytesValue getEncodedCoreMessage();
+
+  // Create the blob to be sent to other nodes so they have enough information to know whether they should sign.
   BytesValue getEncodedMessage();
 }

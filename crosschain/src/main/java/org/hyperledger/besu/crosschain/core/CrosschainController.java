@@ -294,7 +294,7 @@ public class CrosschainController {
   /**
    * Called by JSON RPC call: cross_getActiveKeyVersion
    *
-   * @return The key that is currently active. -1 is returned if no key is active.
+   * @return The key that is currently active. 0 is returned if no key is active.
    */
   public long getActiveKeyVersion() {
     return this.crosschainKeyManager.getActiveKeyVersion();

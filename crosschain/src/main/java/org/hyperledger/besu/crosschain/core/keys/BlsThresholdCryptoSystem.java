@@ -14,6 +14,9 @@ package org.hyperledger.besu.crosschain.core.keys;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
+import org.hyperledger.besu.crosschain.crypto.threshold.scheme.ThresholdScheme;
+import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
 
 public enum BlsThresholdCryptoSystem {
   ALT_BN_128_WITH_KECCAK256(Constants.ALT_BN_128_WITH_KECCAK256);
@@ -40,4 +43,19 @@ public enum BlsThresholdCryptoSystem {
         throw new RuntimeException(error);
     }
   }
+
+  public BlsCryptoProvider getCryptoProvider() {
+    switch (this.value) {
+      case Constants.ALT_BN_128_WITH_KECCAK256:
+        return BlsCryptoProvider.getInstance(
+            BlsCryptoProvider.CryptoProviderTypes.LOCAL_ALT_BN_128,
+            BlsCryptoProvider.DigestAlgorithm.KECCAK256);
+
+      default:
+        String error = "Unknown BlsThresholdCryptoSystem: " + this.value;
+        LOG.error(error);
+        throw new RuntimeException(error);
+    }
+  }
+
 }

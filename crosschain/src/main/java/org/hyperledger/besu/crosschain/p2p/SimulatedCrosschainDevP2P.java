@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
   protected static final Logger LOG = LogManager.getLogger();
@@ -87,6 +88,15 @@ public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
   public void setSecretShareCallback(final CrosschainPartSecretShareCallback implementation) {
     this.cb = implementation;
   }
+
+  @Override
+  public void sendMessageSigningRequest(
+      final BigInteger myAddress,
+      final BytesValue message) {
+    LOG.error("not implemented yet");
+    throw new Error("not implemented yet");
+  }
+
 
   @Override
   public void clearSimulatedNodes() {}

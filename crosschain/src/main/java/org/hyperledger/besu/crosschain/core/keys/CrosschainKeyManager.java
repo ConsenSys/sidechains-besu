@@ -16,7 +16,9 @@ import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompl
 import org.hyperledger.besu.crosschain.core.keys.generation.SimulatedThresholdKeyGenContractWrapper;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGeneration;
+import org.hyperledger.besu.crosschain.core.keys.signatures.ThresholdSigning;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
+import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
 import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
 import org.hyperledger.besu.crypto.SECP256K1;
@@ -30,6 +32,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 public class CrosschainKeyManager {
   protected static final Logger LOG = LogManager.getLogger();
@@ -64,7 +67,6 @@ public class CrosschainKeyManager {
 
   ThresholdKeyGenContractInterface thresholdKeyGenContract;
   CrosschainDevP2PInterface p2p;
-
   BigInteger blockchainId;
 
   // TODO add key generation contract address
@@ -80,6 +82,7 @@ public class CrosschainKeyManager {
       final CrosschainDevP2PInterface p2p) {
     this.thresholdKeyGenContract = thresholdKeyGenContract;
     this.p2p = p2p;
+
 
     this.credentials = CrosschainKeyManagerStorage.loadAllCredentials();
     if (this.credentials.size() != 0) {
@@ -233,10 +236,21 @@ public class CrosschainKeyManager {
    * @return The signed message.
    */
   public ThresholdSignedMessage thresholdSign(final ThresholdSignedMessage message) {
-    // TODO this is going to need to be re-written assuming asynchronous signature results
+    if (this.activeKeyVersion == NO_ACTIVE_VERSION) {
+      String msg = "Attempted to threshold sign message (" +
+          message.getType() +
+          ") when no active key version";
+      LOG.error(msg);
+      throw new Error(msg);
+    }
 
-    // TODO use ThresholdSigning.
+    BytesValue toBeSigned = message.getEncodedCoreMessage();
 
-    return null;
+    ThresholdSigning signer = new ThresholdSigning(this.p2p, this.credentials.get(this.activeKeyVersion));
+    BlsPoint point = signer.sign(toBeSigned.extractArray(), message.getEncodedMessage());
+
+    ThresholdSignedMessage result = message;
+    result.setSignature(this.activeKeyVersion, BytesValue.wrap(point.store()));
+    return result;
   }
 }
