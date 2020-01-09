@@ -27,8 +27,8 @@ public class PongMessageData extends AbstractMessageData {
     return new PongMessageData(data);
   }
 
-  public static PongMessageData create() {
-    return new PongMessageData(null);
+  public static PongMessageData create(final int i) { //dummy value
+    return new PongMessageData(BytesValue.of(i));
   }
 
   @Override

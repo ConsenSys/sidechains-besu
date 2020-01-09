@@ -77,7 +77,8 @@ public class IbftBesuControllerBuilder extends BesuControllerBuilder<IbftContext
   private static final Logger LOG = LogManager.getLogger();
   private IbftEventQueue ibftEventQueue;
   private IbftConfigOptions ibftConfig;
-  private ValidatorPeers peers;
+  private ValidatorPeers peersIBFT;
+  private ValidatorPeers peersCC;
   private final BlockInterface blockInterface = new IbftBlockInterface();
 
   @Override
@@ -97,8 +98,8 @@ public class IbftBesuControllerBuilder extends BesuControllerBuilder<IbftContext
       final EthProtocolManager ethProtocolManager) {
     return new SubProtocolConfiguration()
         .withSubProtocol(EthProtocol.get(), ethProtocolManager)
-        .withSubProtocol(IbftSubProtocol.get(), new IbftProtocolManager(ibftEventQueue, peers))
-        .withSubProtocol(CrosschainSubProtocol.get(), new CrosschainProtocolManager(peers));
+        .withSubProtocol(CrosschainSubProtocol.get(), new CrosschainProtocolManager(peersCC))
+        .withSubProtocol(IbftSubProtocol.get(), new IbftProtocolManager(ibftEventQueue, peersIBFT));
   }
 
   @Override
@@ -126,10 +127,11 @@ public class IbftBesuControllerBuilder extends BesuControllerBuilder<IbftContext
     // NOTE: peers should not be used for accessing the network as it does not enforce the
     // "only send once" filter applied by the UniqueMessageMulticaster.
     final VoteTallyCache voteTallyCache = protocolContext.getConsensusState().getVoteTallyCache();
-    peers = new ValidatorPeers(voteTallyCache);
+    peersIBFT = new ValidatorPeers(voteTallyCache, IbftSubProtocol.NAME);
+    peersCC = new ValidatorPeers(voteTallyCache, CrosschainSubProtocol.NAME);
 
     final UniqueMessageMulticaster uniqueMessageMulticaster =
-        new UniqueMessageMulticaster(peers, ibftConfig.getGossipedHistoryLimit());
+        new UniqueMessageMulticaster(peersIBFT, ibftConfig.getGossipedHistoryLimit());
 
     final IbftGossip gossiper = new IbftGossip(uniqueMessageMulticaster);
 

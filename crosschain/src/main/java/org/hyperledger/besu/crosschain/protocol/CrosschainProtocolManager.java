@@ -15,6 +15,7 @@ package org.hyperledger.besu.crosschain.protocol;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.consensus.common.network.PeerConnectionTracker;
+import org.hyperledger.besu.consensus.common.network.ValidatorPeers;
 import org.hyperledger.besu.crosschain.messagedata.CrosschainMessageCodes;
 import org.hyperledger.besu.crosschain.messagedata.PingMessageData;
 import org.hyperledger.besu.crosschain.messagedata.PongMessageData;
@@ -26,12 +27,17 @@ import org.hyperledger.besu.ethereum.p2p.rlpx.wire.messages.DisconnectMessage.Di
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class CrosschainProtocolManager implements ProtocolManager {
   private static final Logger LOG = LogManager.getLogger();
 
   private final PeerConnectionTracker peers;
 
+  private final ScheduledExecutorService peerConnectionScheduler =
+      Executors.newSingleThreadScheduledExecutor();
   /**
    * Constructor for the crosschain protocol manager
    *
@@ -39,6 +45,19 @@ public class CrosschainProtocolManager implements ProtocolManager {
    */
   public CrosschainProtocolManager(final PeerConnectionTracker peers) {
     this.peers = peers;
+    LOG.debug("Initial peers :{}",((ValidatorPeers)peers).getLatestValidators());
+    int initialDelay = (int) (Math.random() * 5.0) +2 ;
+    LOG.debug("Pinger runs in {} secs", initialDelay);
+    peerConnectionScheduler.scheduleAtFixedRate(this::pinger, initialDelay, 10, TimeUnit.SECONDS);
+    //peerConnectionScheduler.schedule(this::pinger, initialDelay, TimeUnit.SECONDS);
+
+
+  }
+
+  void pinger() {
+    LOG.info("Sending PINGs");
+    ValidatorPeers vp = (ValidatorPeers) peers;
+    vp.send(PingMessageData.create(10));
   }
 
   @Override
@@ -65,31 +84,23 @@ public class CrosschainProtocolManager implements ProtocolManager {
    */
   @Override
   public void processMessage(final Capability cap, final Message message) {
-    LOG.info("Received CCH message: cap {}, msg {}", cap.toString(), message.getData().getData());
+    LOG.debug("Received CCH message: cap {}, msg {}", cap.toString(), message.getData().getData());
     int code = message.getData().getCode();
-    switch (code){
+    switch (code) {
       case CrosschainMessageCodes.PING:
-        try{
-          LOG.info("PING!");
-          Thread.sleep(5000);
-          LOG.info("Sending PONG...");
-          message.getConnection().send(CrosschainSubProtocol.CCH, PingMessageData.create());
-        } catch (Exception e){
-          LOG.error("Exception",e);
+        try {
+          LOG.info("Received PING from {}, sending PONG",message.getConnection().getRemoteAddress());
+          //Thread.sleep(1000);
+          message.getConnection().send(CrosschainSubProtocol.CCH, PongMessageData.create(2));
+        } catch (Exception e) {
+          LOG.error("Exception", e);
         }
         break;
       case CrosschainMessageCodes.PONG:
-        try{
-          LOG.info("PONG!");
-          Thread.sleep(3000);
-          LOG.info("Sending PiNG...");
-          message.getConnection().send(CrosschainSubProtocol.CCH, PongMessageData.create());
-        } catch (Exception e){
-          LOG.error("Exception",e);
-        }
+          LOG.info("Received PONG!");
         break;
       default:
-        LOG.error("Received CCH message with unexpected code {}",code);
+        LOG.error("Received CCH message with unexpected code {}", code);
     }
   }
 
@@ -97,15 +108,14 @@ public class CrosschainProtocolManager implements ProtocolManager {
   public void handleNewConnection(final PeerConnection peerConnection) {
     peers.add(peerConnection);
     String ps = peerConnection.getPeerInfo().toString();
-    LOG.info("Added new peer: {}", ps);
-    try {
-      Thread.sleep(3000);
-      LOG.info("Pinging peer {}", ps);
-      peerConnection.send(CrosschainSubProtocol.CCH, PingMessageData.create());
-    } catch (Exception e) {
-      LOG.error("Exception",e);
-    }
-    //todo react to ping with log, small delay and pong. React to pong with log, small delay and ping
+    LOG.debug("Added new peer: {}", ps);
+//    try {
+//      //Thread.sleep(3000);
+//      LOG.info("Pinging peer {}", ps);
+//      peerConnection.send(CrosschainSubProtocol.CCH, PingMessageData.create("pingggg"));
+//    } catch (Exception e) {
+//      LOG.error("Exception", e);
+//    }
   }
 
   @Override
@@ -114,7 +124,11 @@ public class CrosschainProtocolManager implements ProtocolManager {
       final DisconnectReason disconnectReason,
       final boolean initiatedByPeer) {
     String ps = peerConnection.getPeerInfo().toString();
-    LOG.info("Disconnected peer {}, reason {}, by peer? {}", ps, disconnectReason.toString(), initiatedByPeer);
+    LOG.debug(
+        "Disconnected peer {}, reason {}, by peer? {}",
+        ps,
+        disconnectReason.toString(),
+        initiatedByPeer);
     peers.remove(peerConnection);
   }
 }

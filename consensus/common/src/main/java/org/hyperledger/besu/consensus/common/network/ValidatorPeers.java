@@ -36,15 +36,16 @@ public class ValidatorPeers implements ValidatorMulticaster, PeerConnectionTrack
 
   private static final Logger LOG = LogManager.getLogger();
 
-  private static final String PROTOCOL_NAME = "IBF";
+  private String capabilityCode;
 
   // It's possible for multiple connections between peers to exist for brief periods, so map each
   // address to a set of connections
   private final Map<Address, Set<PeerConnection>> connectionsByAddress = new ConcurrentHashMap<>();
   private final VoteTallyCache voteTallyCache;
 
-  public ValidatorPeers(final VoteTallyCache voteTallyCache) {
+  public ValidatorPeers(final VoteTallyCache voteTallyCache, final String capabilityCode) {
     this.voteTallyCache = voteTallyCache;
+    this.capabilityCode = capabilityCode;
   }
 
   @Override
@@ -91,7 +92,7 @@ public class ValidatorPeers implements ValidatorMulticaster, PeerConnectionTrack
         .forEach(
             connection -> {
               try {
-                connection.sendForProtocol(PROTOCOL_NAME, message);
+                connection.sendForProtocol(capabilityCode, message);
               } catch (final PeerNotConnected peerNotConnected) {
                 LOG.trace(
                     "Lost connection to a validator. remoteAddress={} peerInfo={}",
@@ -101,7 +102,7 @@ public class ValidatorPeers implements ValidatorMulticaster, PeerConnectionTrack
             });
   }
 
-  private Collection<Address> getLatestValidators() {
+  public Collection<Address> getLatestValidators() {
     return voteTallyCache.getVoteTallyAtHead().getValidators();
   }
 }
