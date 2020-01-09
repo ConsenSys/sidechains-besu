@@ -14,23 +14,26 @@ package org.hyperledger.besu.tests.acceptance.crosschain.viewtxcallArgs;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class CallSimulator {
   List<BigInteger> arg;
   BigInteger magicNum;
   BigInteger fooFlag;
-  String str;
+  String str, barstr;
+  byte[] a;
 
-  void bar() {
+  void bar(final byte[] a, final String barstr) {
+    this.barstr = barstr;
+    this.a = Arrays.copyOf(a, 32);
     arg = new ArrayList<BigInteger>();
     arg.add(BigInteger.valueOf(3));
-    System.out.println("ARG is " + arg + " Length is " + arg.size());
-    foo(arg);
+    foo(arg, a, barstr);
   }
 
-  BigInteger foo(final List<BigInteger> args1) {
-    return args1.get((args1.size() - 1));
+  BigInteger foo(final List<BigInteger> args1, final byte[] a, final String barstr) {
+    return BigInteger.valueOf(args1.get((args1.size() - 1)).longValue() + new BigInteger(a).longValue());
   }
 
   void barUpdateState() {

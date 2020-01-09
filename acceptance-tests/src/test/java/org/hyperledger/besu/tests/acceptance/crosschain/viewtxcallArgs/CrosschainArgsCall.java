@@ -27,6 +27,9 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.CrosschainContext;
 import org.web3j.tx.CrosschainContextGenerator;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /*
  * Two contracts - BarArgsCtrt and FooArgsCtrt are deployed on blockchains 1 and 2 respectively. Many tests are created
  * to check crosschain transactions happening between views, pure functions and transactions. Nesting the calls
@@ -75,25 +78,30 @@ public class CrosschainArgsCall extends CrosschainAcceptanceTestBase {
 
   @Test
   public void doCCViewCall() throws Exception {
+    final byte[] BYTEARRAY_PARAM = javax.xml.bind.DatatypeConverter.parseHexBinary(
+            "0000000000000000000000000000000000000000000000000000000000000100");
+    final String STR_PARAM = "magic";
+
     CallSimulator sim = new CallSimulator();
-    sim.bar();
+    sim.bar(BYTEARRAY_PARAM, STR_PARAM);
+
     CrosschainContextGenerator ctxGenerator =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
     CrosschainContext subordTxCtx =
         ctxGenerator.createCrosschainContext(
             nodeOnBlockchain1.getChainId(), barCtrt.getContractAddress());
-    byte[] subordTrans = fooCtrt.foo_AsSignedCrosschainSubordinateView(sim.arg, subordTxCtx);
+    byte[] subordTrans = fooCtrt.foo_AsSignedCrosschainSubordinateView(sim.arg, sim.a, sim.barstr, subordTxCtx);
     byte[][] subordTxAndViews = new byte[][] {subordTrans};
     CrosschainContext origTxCtx = ctxGenerator.createCrosschainContext(subordTxAndViews);
 
-    TransactionReceipt txReceipt = barCtrt.bar_AsCrosschainTransaction(origTxCtx).send();
+    TransactionReceipt txReceipt = barCtrt.bar_AsCrosschainTransaction(sim.a, sim.barstr, origTxCtx).send();
     if (!txReceipt.isStatusOK()) {
       LOG.info("txReceipt details " + txReceipt.toString());
       throw new Error(txReceipt.getStatus());
     }
 
     waitForUnlock(barCtrt.getContractAddress(), nodeOnBlockchain1);
-    assertThat(barCtrt.flag().send().longValue()).isEqualTo(3);
+    assertThat(barCtrt.flag().send().longValue()).isEqualTo(264);
   }
 
   /*

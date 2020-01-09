@@ -31,8 +31,8 @@ contract FooArgsCtrt is Crosschain, FooArgsInt {
         barCtrt = BarArgsInt(_barCtrtAddress);
     }
 
-    function foo(uint256[] calldata arg1) external view returns (uint256) {
-        return arg1[arg1.length-1];
+    function foo(uint256[] calldata arg1, bytes32 a, string calldata str) external view returns (uint256) {
+        return arg1[arg1.length-1] + uint256(a) + bytes(str).length;
     }
 
     function updateState(uint256 magicNum, string calldata str) external {

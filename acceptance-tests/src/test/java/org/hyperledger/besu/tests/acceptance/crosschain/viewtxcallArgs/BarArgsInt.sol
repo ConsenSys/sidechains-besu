@@ -14,6 +14,6 @@
 pragma solidity >=0.4.0 <0.6.0;
 
 interface BarArgsInt {
-    function bar() external;
+    function bar(bytes32 a, string calldata str) external;
     function barUpdateState() external;
 }

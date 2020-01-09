@@ -20,7 +20,7 @@ import "./BarArgsInt.sol";
 contract BarArgsCtrt is Crosschain, BarArgsInt {
     uint256 public fooChainId;
     FooArgsInt public fooCtrt;
-    uint256[] a ;
+    uint256[] arr;
 
     uint256 public flag;
 
@@ -33,9 +33,9 @@ contract BarArgsCtrt is Crosschain, BarArgsInt {
         fooCtrt = FooArgsInt(_fooCtrtAaddr);
     }
 
-    function bar() external {
-        a.push(3);
-        flag = crosschainViewUint256(fooChainId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.foo.selector, a));
+    function bar(bytes32 a, string calldata str) external {
+        arr.push(3);
+        flag = crosschainViewUint256(fooChainId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.foo.selector, arr, a, str));
     }
 
     function barUpdateState() external {
