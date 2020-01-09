@@ -45,12 +45,11 @@ public class CrosschainProtocolManager implements ProtocolManager {
    */
   public CrosschainProtocolManager(final PeerConnectionTracker peers) {
     this.peers = peers;
-    LOG.debug("Initial peers :{}",((ValidatorPeers)peers).getLatestValidators());
-    int initialDelay = (int) (Math.random() * 5.0) +2 ;
+    LOG.debug("Initial peers :{}", ((ValidatorPeers) peers).getLatestValidators());
+    int initialDelay = (int) (Math.random() * 5.0) + 2;
     LOG.debug("Pinger runs in {} secs", initialDelay);
     peerConnectionScheduler.scheduleAtFixedRate(this::pinger, initialDelay, 10, TimeUnit.SECONDS);
-    //peerConnectionScheduler.schedule(this::pinger, initialDelay, TimeUnit.SECONDS);
-
+    // peerConnectionScheduler.schedule(this::pinger, initialDelay, TimeUnit.SECONDS);
 
   }
 
@@ -89,15 +88,16 @@ public class CrosschainProtocolManager implements ProtocolManager {
     switch (code) {
       case CrosschainMessageCodes.PING:
         try {
-          LOG.info("Received PING from {}, sending PONG",message.getConnection().getRemoteAddress());
-          //Thread.sleep(1000);
+          LOG.info(
+              "Received PING from {}, sending PONG", message.getConnection().getRemoteAddress());
+          // Thread.sleep(1000);
           message.getConnection().send(CrosschainSubProtocol.CCH, PongMessageData.create(2));
         } catch (Exception e) {
           LOG.error("Exception", e);
         }
         break;
       case CrosschainMessageCodes.PONG:
-          LOG.info("Received PONG!");
+        LOG.info("Received PONG!");
         break;
       default:
         LOG.error("Received CCH message with unexpected code {}", code);
@@ -109,13 +109,13 @@ public class CrosschainProtocolManager implements ProtocolManager {
     peers.add(peerConnection);
     String ps = peerConnection.getPeerInfo().toString();
     LOG.debug("Added new peer: {}", ps);
-//    try {
-//      //Thread.sleep(3000);
-//      LOG.info("Pinging peer {}", ps);
-//      peerConnection.send(CrosschainSubProtocol.CCH, PingMessageData.create("pingggg"));
-//    } catch (Exception e) {
-//      LOG.error("Exception", e);
-//    }
+    //    try {
+    //      //Thread.sleep(3000);
+    //      LOG.info("Pinging peer {}", ps);
+    //      peerConnection.send(CrosschainSubProtocol.CCH, PingMessageData.create("pingggg"));
+    //    } catch (Exception e) {
+    //      LOG.error("Exception", e);
+    //    }
   }
 
   @Override

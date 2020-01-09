@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.consensus.ibft.protocol;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.consensus.common.network.PeerConnectionTracker;
 import org.hyperledger.besu.consensus.ibft.IbftEventQueue;
 import org.hyperledger.besu.consensus.ibft.ibftevent.IbftEvent;
@@ -26,6 +24,9 @@ import org.hyperledger.besu.ethereum.p2p.rlpx.wire.messages.DisconnectMessage.Di
 
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class IbftProtocolManager implements ProtocolManager {
 

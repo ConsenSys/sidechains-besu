@@ -12,10 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import org.hyperledger.besu.crosschain.ethereum.crosschain.CrosschainThreadLocalDataHolder;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
@@ -45,7 +43,10 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Optional;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CrosschainProcessor {
   protected static final Logger LOG = LogManager.getLogger();

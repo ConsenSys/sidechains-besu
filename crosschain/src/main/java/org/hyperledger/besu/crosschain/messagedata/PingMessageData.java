@@ -23,7 +23,7 @@ public class PingMessageData extends AbstractMessageData {
     super(data);
   }
 
-  public static PingMessageData create(final int i) { //dummy value
+  public static PingMessageData create(final int i) { // dummy value
     return new PingMessageData(BytesValue.of(i));
   }
 
