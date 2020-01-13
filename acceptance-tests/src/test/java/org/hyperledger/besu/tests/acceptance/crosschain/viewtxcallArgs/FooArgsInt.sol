@@ -14,5 +14,5 @@ pragma solidity >=0.4.23;
 
 interface FooArgsInt {
     function foo(uint256[] calldata arg1, bytes32 a, string calldata str) external view returns (uint256);
-    function updateState(uint256 magciNum, string calldata str) external;
+    function updateState(uint256[] calldata magciNumArr, string calldata str) external;
 }

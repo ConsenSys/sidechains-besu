@@ -33,14 +33,18 @@ contract BarArgsCtrt is Crosschain, BarArgsInt {
         fooCtrt = FooArgsInt(_fooCtrtAaddr);
     }
 
-    function bar(bytes32 a, string calldata str) external {
-        arr.push(3);
+    function bar(bytes32 a, string calldata str, bool cond) external {
+        if(cond) {
+            arr.push(3);
+        } else {
+            arr.push(6);
+        }
         flag = crosschainViewUint256(fooChainId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.foo.selector, arr, a, str));
     }
 
     function barUpdateState() external {
-        uint256 magicNum = 256;
+        uint256[3] memory magicNumArr = [uint256(256), 257, 258];
         string memory str = "magic";
-        crosschainTransaction(fooChainId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.updateState.selector, magicNum, str));
+        crosschainTransaction(fooChainId, address(fooCtrt), abi.encodeWithSelector(fooCtrt.updateState.selector, magicNumArr, str));
     }
 }

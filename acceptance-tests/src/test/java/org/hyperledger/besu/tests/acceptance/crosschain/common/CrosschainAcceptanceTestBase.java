@@ -65,6 +65,16 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
                 CrosschainCoordinationV1.class,
                 votingContract.getContractAddress(),
                 BigInteger.valueOf(VOTING_TIME_OUT)));
+
+    // Adding the coordination contract
+    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
+    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
+    String ipAddressAndPort = ipAddress + ":" + port;
+    this.nodeOnCoordinationBlockchain.execute(
+            crossTransactions.addCoordinationContract(
+                    this.nodeOnCoordinationBlockchain.getChainId(),
+                    this.coordContract.getContractAddress(),
+                    ipAddressAndPort));
   }
 
   public void setUpBlockchain1() throws Exception {

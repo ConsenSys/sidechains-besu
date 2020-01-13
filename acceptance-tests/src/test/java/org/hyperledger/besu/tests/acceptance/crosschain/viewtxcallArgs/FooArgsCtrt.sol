@@ -35,7 +35,7 @@ contract FooArgsCtrt is Crosschain, FooArgsInt {
         return arg1[arg1.length-1] + uint256(a) + bytes(str).length;
     }
 
-    function updateState(uint256 magicNum, string calldata str) external {
-        fooFlag = magicNum + bytes(str).length;
+    function updateState(uint256[] calldata magicNumArr, string calldata str) external {
+        fooFlag = magicNumArr[0] + bytes(str).length;
     }
 }
