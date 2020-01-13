@@ -61,6 +61,7 @@ public class KeyValueStorageProviderBuilder {
         new LimitedInMemoryKeyValueStorage(DEFAULT_WORLD_STATE_PRE_IMAGE_CACHE_SIZE);
 
     return new KeyValueStorageProvider(
+            storageFactory.create()
         storageFactory.create(BLOCKCHAIN, commonConfiguration, metricsSystem),
         storageFactory.create(WORLD_STATE, commonConfiguration, metricsSystem),
         worldStatePreImageStorage,

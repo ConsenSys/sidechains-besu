@@ -27,6 +27,10 @@ public class LinkedNodeManager {
 
   private Map<BigInteger, String> nodeMap = new HashMap<>();
 
+  public void init() {
+
+  }
+
   /**
    * Add a node. If the node already exists, update the IP Address and Port information.
    *
