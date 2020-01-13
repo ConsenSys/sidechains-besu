@@ -187,16 +187,16 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
 
     // Removing a coordination contract
     this.nodeOnBlockchain1.execute(
-            crossTransactions.removeCoordinationContract(
-                    this.nodeOnCoordinationBlockchain.getChainId(),
-                    this.coordContract.getContractAddress()));
+        crossTransactions.removeCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress()));
     coordCtrtList = this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
     assertThat(coordCtrtList.size()).isEqualTo(0);
 
     this.nodeOnCoordinationBlockchain.execute(
-            crossTransactions.removeCoordinationContract(
-                    this.nodeOnCoordinationBlockchain.getChainId(),
-                    this.coordContract.getContractAddress()));
+        crossTransactions.removeCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress()));
     coordCtrtList = this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
     assertThat(coordCtrtList.size()).isEqualTo(0);
 
@@ -237,7 +237,6 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
           coordCtrt.coordinationBlockchainId,
           coordCtrt.ipAddressAndPort);
     }
-
   }
 
   @After

@@ -71,10 +71,10 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
     String ipAddressAndPort = ipAddress + ":" + port;
     this.nodeOnCoordinationBlockchain.execute(
-            crossTransactions.addCoordinationContract(
-                    this.nodeOnCoordinationBlockchain.getChainId(),
-                    this.coordContract.getContractAddress(),
-                    ipAddressAndPort));
+        crossTransactions.addCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress(),
+            ipAddressAndPort));
   }
 
   public void setUpBlockchain1() throws Exception {
