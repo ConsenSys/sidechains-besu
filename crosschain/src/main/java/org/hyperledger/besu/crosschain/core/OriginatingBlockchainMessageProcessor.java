@@ -88,5 +88,6 @@ public class OriginatingBlockchainMessageProcessor {
     boolean startedOK =
         new OutwardBoundConnectionManager(this.nodeKeys)
             .coordContractStart(ipAndPort, coordContractAddress, signedMessage);
+    LOG.info("started OK {}", startedOK);
   }
 }

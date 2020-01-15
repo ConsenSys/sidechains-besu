@@ -68,6 +68,7 @@ public class CrosschainTransactionStartMessage extends AbstractThresholdSignedMe
         });
   }
 
+  @Override
   protected void decode(final RLPInput in) {
     this.transaction = CrosschainTransaction.readFrom(in);
     this.keyVersion = in.readLongScalar();
