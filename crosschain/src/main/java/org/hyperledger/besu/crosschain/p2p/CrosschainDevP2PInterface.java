@@ -54,16 +54,12 @@ public interface CrosschainDevP2PInterface {
   // TODO void setSigningRequestCallback(final CrosschainPartSecretShareCallback implementation);
   // TODO void setSigningResponseCallback(final CrosschainPartSecretShareCallback implementation);
 
-   /**
-     * Send from this node to all nodes.
-     *
-    * @param myAddress The address of this node.
-     */
-    void sendMessageSigningRequest(
-        final BigInteger myAddress,
-        final BytesValue message);
-
-
+  /**
+   * Send from this node to all nodes.
+   *
+   * @param myAddress The address of this node.
+   */
+  void sendMessageSigningRequest(final BigInteger myAddress, final BytesValue message);
 
   //  /**
   //   * Send from this node to a specific node.

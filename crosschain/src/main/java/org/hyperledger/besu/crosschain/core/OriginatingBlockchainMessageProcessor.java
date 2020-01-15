@@ -43,7 +43,6 @@ public class OriginatingBlockchainMessageProcessor {
 
   public void init(final SECP256K1.KeyPair nodeKeys) {
     this.nodeKeys = nodeKeys;
-
   }
 
   /**
@@ -75,7 +74,8 @@ public class OriginatingBlockchainMessageProcessor {
     // TODO We could get block number from Coordination blockchain, and get the timeout block
     // number from the transaction, and check whether there will be enough time to execute the
     // transaction. A simpler approach could be to just specify that there must be at least
-    // a certain number of blocks between when the message is submitted to the Coordination Blockchain
+    // a certain number of blocks between when the message is submitted to the Coordination
+    // Blockchain
     // and when it is executed.
 
     // Create message to be signed.
@@ -85,7 +85,8 @@ public class OriginatingBlockchainMessageProcessor {
     ThresholdSignedMessage signedMessage = this.keyManager.thresholdSign(message);
 
     // Submit message to Coordination Contract.
-    boolean startedOK = new OutwardBoundConnectionManager(this.nodeKeys).coordContractStart(ipAndPort, coordContractAddress, signedMessage);
-
+    boolean startedOK =
+        new OutwardBoundConnectionManager(this.nodeKeys)
+            .coordContractStart(ipAndPort, coordContractAddress, signedMessage);
   }
 }

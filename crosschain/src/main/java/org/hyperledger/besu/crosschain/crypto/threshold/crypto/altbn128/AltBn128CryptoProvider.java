@@ -22,7 +22,6 @@ import org.hyperledger.besu.crypto.altbn128.AltBn128Point;
 import org.hyperledger.besu.crypto.altbn128.Fq12;
 import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
-import org.hyperledger.besu.util.bytes.BytesValues;
 
 import java.math.BigInteger;
 
@@ -80,13 +79,12 @@ public class AltBn128CryptoProvider extends CryptoProviderBase implements BlsCry
 
   /**
    * Map a byte array to a point on the curve by converting the byte array to an integer and then
-   * scalar multiplying the base point by the integer. Use this approach rather than those
-   * specified in https://tools.ietf.org/html/draft-irtf-cfrg-hash-to-curve-04 as the map
-   * to curve function needs to match something that can be implemented in Solidity.
+   * scalar multiplying the base point by the integer. Use this approach rather than those specified
+   * in https://tools.ietf.org/html/draft-irtf-cfrg-hash-to-curve-04 as the map to curve function
+   * needs to match something that can be implemented in Solidity.
    *
    * @data value to map to a point
    * @return point on E1
-   *
    */
   private BlsPoint mapToCurveE1(final byte[] data) {
     BigInteger q = getPrimeModulus();
@@ -230,5 +228,4 @@ public class AltBn128CryptoProvider extends CryptoProviderBase implements BlsCry
 
     return result1.equals(result2);
   }
-
 }

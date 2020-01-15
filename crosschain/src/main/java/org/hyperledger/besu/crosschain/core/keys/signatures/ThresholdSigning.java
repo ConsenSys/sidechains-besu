@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.core.keys.signatures;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCredentials;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdCryptoSystem;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
@@ -26,13 +24,17 @@ import org.hyperledger.besu.util.bytes.BytesValue;
 import java.math.BigInteger;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class ThresholdSigning {
   protected static final Logger LOG = LogManager.getLogger();
 
   final BlsThresholdCredentials credentials;
   final CrosschainDevP2PInterface p2p;
 
-  public ThresholdSigning(final CrosschainDevP2PInterface p2p, final BlsThresholdCredentials credentials) {
+  public ThresholdSigning(
+      final CrosschainDevP2PInterface p2p, final BlsThresholdCredentials credentials) {
     this.p2p = p2p;
     this.credentials = credentials;
   }
@@ -44,17 +46,18 @@ public class ThresholdSigning {
     ThresholdScheme thresholdScheme = new ThresholdScheme(cryptoProvider, threshold);
 
     // If there is only one node, then just locally sign.
-    // The result of Lagrange Interpolation for one point is the point. As such, just return the point.
+    // The result of Lagrange Interpolation for one point is the point. As such, just return the
+    // point.
     if (threshold == 1) {
       return localSign(cryptoProvider, data);
-    }
-    else {
+    } else {
       Set<BigInteger> otherNodes = this.p2p.getAllPeers();
       if (otherNodes.size() < threshold) {
-        String msg = "Not enough nodes to threshold sign. Threshold: " +
-            threshold +
-            ", and number of connected nodes: " +
-            otherNodes.size();
+        String msg =
+            "Not enough nodes to threshold sign. Threshold: "
+                + threshold
+                + ", and number of connected nodes: "
+                + otherNodes.size();
         LOG.error(msg);
         throw new Error(msg);
       }
@@ -64,15 +67,14 @@ public class ThresholdSigning {
       // Send message to all nodes.
       this.p2p.sendMessageSigningRequest(credentials.getMyNodeAddress(), message);
 
-
       // TODO a more complex implementation is needed, which sends to all nodes, and then only
       // TODO uses threshold of them.
       BlsPoint[] sigShares = new BlsPoint[threshold];
       sigShares[0] = localSign(cryptoProvider, data);
 
-
       // Add all of the points for each of the x values.
-      // TODO the x values will be returned in the callback as the address of the node that sent the partial signature share.
+      // TODO the x values will be returned in the callback as the address of the node that sent the
+      // partial signature share.
       BigInteger[] xValues = null;
 
       BlsPointSecretShare[] shares = new BlsPointSecretShare[threshold];
@@ -85,13 +87,11 @@ public class ThresholdSigning {
     }
   }
 
-    private BlsPoint localSign(final BlsCryptoProvider cryptoProvider, final byte[] data) {
-      return cryptoProvider.sign(this.credentials.getPrivateKeyShare(), data);
-    }
+  private BlsPoint localSign(final BlsCryptoProvider cryptoProvider, final byte[] data) {
+    return cryptoProvider.sign(this.credentials.getPrivateKeyShare(), data);
+  }
 
-  public boolean verify(
-      final byte[] dataToBeVerified,
-      final BlsPoint signature) {
+  public boolean verify(final byte[] dataToBeVerified, final BlsPoint signature) {
     BlsThresholdCryptoSystem cryptoSystem = this.credentials.getAlgorithm();
     BlsCryptoProvider cryptoProvider = cryptoSystem.getCryptoProvider();
     return cryptoProvider.verify(this.credentials.getPublicKey(), dataToBeVerified, signature);

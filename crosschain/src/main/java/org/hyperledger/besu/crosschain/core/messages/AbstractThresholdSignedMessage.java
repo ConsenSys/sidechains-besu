@@ -20,7 +20,6 @@ import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
 
-
 public abstract class AbstractThresholdSignedMessage implements ThresholdSignedMessage {
   protected long keyVersion = 0;
   protected BytesValue signature = null;
@@ -49,14 +48,13 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
     this.signature = sig;
   }
 
-
   @Override
   public BigInteger getCoordinationBlockchainId() {
     return this.transaction.getCrosschainCoordinationBlockchainId().get();
   }
 
   @Override
-  public Address getCoordinationContractAddress(){
+  public Address getCoordinationContractAddress() {
     return this.transaction.getCrosschainCoordinationContractAddress().get();
   }
 
@@ -95,7 +93,6 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
     throw new Error("not implemented yet");
   }
 
-
   @Override
   public BytesValue getEncodedMessage() {
     throw new Error("not implemented yet");
@@ -113,6 +110,4 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
   protected void decode(final RLPInput in) {
     throw new Error("not implemented yet");
   }
-
-
 }

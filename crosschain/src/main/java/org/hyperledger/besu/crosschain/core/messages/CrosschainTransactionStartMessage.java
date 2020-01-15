@@ -54,8 +54,6 @@ public class CrosschainTransactionStartMessage extends AbstractThresholdSignedMe
         });
   }
 
-
-
   @Override
   public BytesValue getEncodedMessage() {
     return RLP.encode(
@@ -80,5 +78,4 @@ public class CrosschainTransactionStartMessage extends AbstractThresholdSignedMe
       this.signature = sig;
     }
   }
-
 }

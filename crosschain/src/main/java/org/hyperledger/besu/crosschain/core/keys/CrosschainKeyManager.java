@@ -23,6 +23,7 @@ import org.hyperledger.besu.crosschain.p2p.CrosschainDevP2PInterface;
 import org.hyperledger.besu.crosschain.p2p.SimulatedCrosschainDevP2P;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -32,7 +33,6 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hyperledger.besu.util.bytes.BytesValue;
 
 public class CrosschainKeyManager {
   protected static final Logger LOG = LogManager.getLogger();
@@ -82,7 +82,6 @@ public class CrosschainKeyManager {
       final CrosschainDevP2PInterface p2p) {
     this.thresholdKeyGenContract = thresholdKeyGenContract;
     this.p2p = p2p;
-
 
     this.credentials = CrosschainKeyManagerStorage.loadAllCredentials();
     if (this.credentials.size() != 0) {
@@ -238,16 +237,18 @@ public class CrosschainKeyManager {
    */
   public ThresholdSignedMessage thresholdSign(final ThresholdSignedMessage message) {
     if (this.activeKeyVersion == NO_ACTIVE_VERSION) {
-      String msg = "Attempted to threshold sign message (" +
-          message.getType() +
-          ") when no active key version";
+      String msg =
+          "Attempted to threshold sign message ("
+              + message.getType()
+              + ") when no active key version";
       LOG.error(msg);
       throw new Error(msg);
     }
 
     BytesValue toBeSigned = message.getEncodedCoreMessage();
 
-    ThresholdSigning signer = new ThresholdSigning(this.p2p, this.credentials.get(this.activeKeyVersion));
+    ThresholdSigning signer =
+        new ThresholdSigning(this.p2p, this.credentials.get(this.activeKeyVersion));
     BlsPoint point = signer.sign(toBeSigned.extractArray(), message.getEncodedMessage());
 
     ThresholdSignedMessage result = message;

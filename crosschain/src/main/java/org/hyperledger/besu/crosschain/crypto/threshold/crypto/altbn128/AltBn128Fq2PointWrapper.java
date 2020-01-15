@@ -117,9 +117,9 @@ public class AltBn128Fq2PointWrapper implements BlsPoint {
     byte[] xBytesReal = new byte[WORD_LEN];
     System.arraycopy(data, WORD_LEN, xBytesReal, 0, WORD_LEN);
     byte[] yBytesImaginary = new byte[WORD_LEN];
-    System.arraycopy(data, WORD_LEN+WORD_LEN, yBytesImaginary, 0, WORD_LEN);
+    System.arraycopy(data, WORD_LEN + WORD_LEN, yBytesImaginary, 0, WORD_LEN);
     byte[] yBytesReal = new byte[WORD_LEN];
-    System.arraycopy(data, WORD_LEN+WORD_LEN+WORD_LEN, yBytesReal, 0, WORD_LEN);
+    System.arraycopy(data, WORD_LEN + WORD_LEN + WORD_LEN, yBytesReal, 0, WORD_LEN);
 
     Fq2 x = Fq2.create(new BigInteger(xBytesReal), new BigInteger(xBytesImaginary));
     Fq2 y = Fq2.create(new BigInteger(yBytesReal), new BigInteger(yBytesImaginary));

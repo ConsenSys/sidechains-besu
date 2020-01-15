@@ -1,7 +1,19 @@
+/*
+ * Copyright 2020 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.hyperledger.besu.crosschain.core;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
 import org.hyperledger.besu.crypto.SECP256K1;
@@ -16,24 +28,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- * This class will manage all outward bound connections. For the moment, this is just JSON RPC.
- */
+/** This class will manage all outward bound connections. For the moment, this is just JSON RPC. */
 public class OutwardBoundConnectionManager {
   private static final Logger LOG = LogManager.getLogger();
 
   final SECP256K1.KeyPair credentials;
 
-  /**
-   *
-   * @param credentials Credentials to use when interacting with Coordination Contract.
-   */
+  /** @param credentials Credentials to use when interacting with Coordination Contract. */
   public OutwardBoundConnectionManager(final SECP256K1.KeyPair credentials) {
     this.credentials = credentials;
   }
-
 
   // TODO this should be implemented as a Vertx HTTPS Client. We should probably submit all
   // TODO Subordinate Views together, and wait for them to all return, and submit all
@@ -47,10 +54,10 @@ public class OutwardBoundConnectionManager {
     http.setDoOutput(true);
     byte[] out =
         ("{\"jsonrpc\":\"2.0\",\"method\":\""
-            + method
-            + "\",\"params\":[\""
-            + params
-            + "\"],\"id\":1}")
+                + method
+                + "\",\"params\":[\""
+                + params
+                + "\"],\"id\":1}")
             .getBytes(UTF_8);
     int length = out.length;
     http.setFixedLengthStreamingMode(length);
@@ -70,8 +77,10 @@ public class OutwardBoundConnectionManager {
     return response;
   }
 
-
-  public boolean coordContractStart(final String ipAddressPort, final Address contractAddress, final ThresholdSignedMessage message) {
+  public boolean coordContractStart(
+      final String ipAddressPort,
+      final Address contractAddress,
+      final ThresholdSignedMessage message) {
     if (!(message instanceof CrosschainTransactionStartMessage)) {
       String msg = "Should be called with start message. Called with: " + message.getType();
       LOG.error(msg);
@@ -95,5 +104,4 @@ public class OutwardBoundConnectionManager {
 
     return true;
   }
-
 }

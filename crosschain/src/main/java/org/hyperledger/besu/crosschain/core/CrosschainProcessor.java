@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import org.hyperledger.besu.crosschain.ethereum.crosschain.CrosschainThreadLocalDataHolder;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
@@ -33,13 +31,7 @@ import org.hyperledger.besu.ethereum.transaction.TransactionSimulatorResult;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,7 +120,8 @@ public class CrosschainProcessor {
         String response = null;
         LOG.debug("Sending Crosschain Transaction or view to chain at " + ipAddress);
         try {
-          response = OutwardBoundConnectionManager.post(ipAddress, method, signedTransaction.toString());
+          response =
+              OutwardBoundConnectionManager.post(ipAddress, method, signedTransaction.toString());
           LOG.debug("Crosschain Response: " + response);
         } catch (Exception e) {
           LOG.error("Exception during crosschain happens here: " + e.getMessage());
