@@ -33,6 +33,7 @@ import org.hyperledger.besu.ethereum.mainnet.ValidationResult;
 import org.hyperledger.besu.ethereum.transaction.TransactionSimulator;
 import org.hyperledger.besu.ethereum.transaction.TransactionSimulatorResult;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
+import org.hyperledger.besu.services.kvstore.CrosschainNodeStorage;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
@@ -59,6 +60,7 @@ public class CrosschainController {
   TransactionPool transactionPool;
   Blockchain blockchain;
   WorldStateArchive worldStateArchive;
+  CrosschainNodeStorage nodeStorage;
 
   CrosschainProcessor processor;
   OriginatingBlockchainMessageProcessor origMsgProcessor;
@@ -83,7 +85,8 @@ public class CrosschainController {
       final BigInteger sidechainId,
       final SECP256K1.KeyPair nodeKeys,
       final Blockchain blockchain,
-      final WorldStateArchive worldStateArchive) {
+      final WorldStateArchive worldStateArchive,
+      final CrosschainNodeStorage nodeStorage) {
     this.processor.init(
         transactionSimulator,
         transactionPool,
@@ -96,6 +99,7 @@ public class CrosschainController {
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;
+    this.nodeStorage = nodeStorage;
   }
 
   /**
@@ -330,10 +334,12 @@ public class CrosschainController {
 
   public void addLinkedNode(final BigInteger blockchainId, final String ipAddressAndPort) {
     this.linkedNodeManager.addNode(blockchainId, ipAddressAndPort);
+    nodeStorage.updater().putLinkedNode(blockchainId, ipAddressAndPort);
   }
 
   public void removeLinkedNode(final BigInteger blockchainId) {
     this.linkedNodeManager.removeNode(blockchainId);
+    nodeStorage.updater().removeLinkedNode(blockchainId);
   }
 
   public Set<BlockchainNodeInformation> listLinkedNodes() {

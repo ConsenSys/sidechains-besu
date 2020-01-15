@@ -308,7 +308,8 @@ public abstract class BesuControllerBuilder<C> {
         chainId.get(),
         this.nodeKeys,
         blockchain,
-        protocolContext.getWorldStateArchive());
+        protocolContext.getWorldStateArchive(),
+        this.storageProvider.createNodeStorage());
 
     final MiningCoordinator miningCoordinator =
         createMiningCoordinator(

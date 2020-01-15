@@ -19,6 +19,7 @@ import org.hyperledger.besu.ethereum.privacy.PrivateTransactionStorage;
 import org.hyperledger.besu.ethereum.worldstate.WorldStatePreimageStorage;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
+import org.hyperledger.besu.services.kvstore.CrosschainNodeStorage;
 
 import java.io.Closeable;
 
@@ -35,6 +36,8 @@ public interface StorageProvider extends Closeable {
   PrivateStateStorage createPrivateStateStorage();
 
   KeyValueStorage createPruningStorage();
+
+  CrosschainNodeStorage createNodeStorage();
 
   boolean isWorldStateIterable();
 }

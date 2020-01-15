@@ -23,6 +23,7 @@ import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.worldstate.WorldStatePreimageStorage;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
+import org.hyperledger.besu.services.kvstore.CrosschainNodeStorage;
 
 import java.io.IOException;
 
@@ -34,6 +35,7 @@ public class KeyValueStorageProvider implements StorageProvider {
   private final KeyValueStorage privateTransactionStorage;
   private final KeyValueStorage privateStateStorage;
   private final KeyValueStorage pruningStorage;
+  private final KeyValueStorage nodeStorage;
   private final boolean isWorldStateIterable;
 
   public KeyValueStorageProvider(
@@ -43,6 +45,7 @@ public class KeyValueStorageProvider implements StorageProvider {
       final KeyValueStorage privateTransactionStorage,
       final KeyValueStorage privateStateStorage,
       final KeyValueStorage pruningStorage,
+      final KeyValueStorage nodeStorage,
       final boolean isWorldStateIterable) {
     this.blockchainStorage = blockchainStorage;
     this.worldStateStorage = worldStateStorage;
@@ -50,6 +53,7 @@ public class KeyValueStorageProvider implements StorageProvider {
     this.privateTransactionStorage = privateTransactionStorage;
     this.privateStateStorage = privateStateStorage;
     this.pruningStorage = pruningStorage;
+    this.nodeStorage = nodeStorage;
     this.isWorldStateIterable = isWorldStateIterable;
   }
 
@@ -85,6 +89,11 @@ public class KeyValueStorageProvider implements StorageProvider {
   }
 
   @Override
+  public CrosschainNodeStorage createNodeStorage() {
+    return new CrosschainNodeStorage(nodeStorage);
+  }
+
+  @Override
   public boolean isWorldStateIterable() {
     return isWorldStateIterable;
   }
@@ -96,5 +105,6 @@ public class KeyValueStorageProvider implements StorageProvider {
     privateTransactionStorage.close();
     privateStateStorage.close();
     pruningStorage.close();
+    nodeStorage.close();
   }
 }
