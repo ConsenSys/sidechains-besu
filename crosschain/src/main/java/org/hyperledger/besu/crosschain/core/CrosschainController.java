@@ -92,6 +92,7 @@ public class CrosschainController {
         blockchain,
         worldStateArchive);
     this.crosschainKeyManager.init(sidechainId, nodeKeys);
+    this.origMsgProcessor.init(nodeKeys);
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;

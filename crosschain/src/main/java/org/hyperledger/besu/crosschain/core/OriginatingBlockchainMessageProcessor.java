@@ -15,6 +15,7 @@ package org.hyperledger.besu.crosschain.core;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
+import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
 
@@ -32,11 +33,17 @@ public class OriginatingBlockchainMessageProcessor {
 
   CrosschainKeyManager keyManager;
   CoordContractManager coordContractManager;
+  SECP256K1.KeyPair nodeKeys;
 
   public OriginatingBlockchainMessageProcessor(
       final CrosschainKeyManager keyManager, final CoordContractManager coordContractManager) {
     this.keyManager = keyManager;
     this.coordContractManager = coordContractManager;
+  }
+
+  public void init(final SECP256K1.KeyPair nodeKeys) {
+    this.nodeKeys = nodeKeys;
+
   }
 
   /**
@@ -77,9 +84,8 @@ public class OriginatingBlockchainMessageProcessor {
     // Cooperate with other nodes to threshold sign the message.
     ThresholdSignedMessage signedMessage = this.keyManager.thresholdSign(message);
 
-    OutwardBoundConnectionManager.post(ipAndPort, )
+    // Submit message to Coordination Contract.
+    boolean startedOK = new OutwardBoundConnectionManager(this.nodeKeys).coordContractStart(ipAndPort, coordContractAddress, signedMessage);
 
-
-    // TODO submit message to Coordination Contract.
   }
 }
