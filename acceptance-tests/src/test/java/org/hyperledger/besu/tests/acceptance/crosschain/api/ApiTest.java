@@ -32,9 +32,12 @@ import org.web3j.protocol.besu.response.crosschain.BlockchainNodeInformation;
 import org.web3j.protocol.besu.response.crosschain.CoordinationContractInformation;
 import org.web3j.protocol.besu.response.crosschain.CrossBlockchainPublicKeyResponse;
 import org.web3j.protocol.besu.response.crosschain.KeyGenFailureToCompleteReason;
+import org.web3j.protocol.besu.response.crosschain.KeyStatus;
 
 /*
  * Two blockchains with one node are created. And all the crosschain API methods are then tested.
+ * KeyGeneration is not well tested, because we do not currently support multiple nodes in a blockchain.
+ * DevP2P for crosschain is WIP. TODO Testing all aspects of Key Generation and various ways it can fail.
  */
 
 public class ApiTest extends CrosschainAcceptanceTestBase {
@@ -42,7 +45,7 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
 
   @Before
   public void setUp() throws Exception {
-    setUpCoordiantionChain();
+    setUpCoordinationChain();
     setUpBlockchain1();
   }
 
@@ -112,16 +115,15 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
                 1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
     assertThat(keyVersion.longValue()).isEqualTo(1);
 
-    // TODO: Check that the failure reason is SUCCESS
-    // KeyGenFailureToCompleteReason reason = this.nodeOnBlockchain1.execute(
-    //        crossTransactions.getKeyGenFailureReason(keyVersion.longValue()));
-    // assertThat(reason.value).isEqualTo(KeyGenFailureToCompleteReason.SUCCESS.value);
+    KeyGenFailureToCompleteReason reason =
+        this.nodeOnBlockchain1.execute(
+            crossTransactions.getKeyGenFailureReason(keyVersion.longValue()));
+    assertThat(reason.value).isEqualTo(KeyGenFailureToCompleteReason.SUCCESS.value);
 
     // Get the key version from the API and check
-    // KeyStatus keyStatus =
-    // this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
-    // TODO: Deserialising the response to KeyStatus is failing at the moment
-    // assertThat(keyStatus.value).isEqualTo(KeyStatus.KEY_GEN_COMPLETE.value);
+    KeyStatus keyStatus =
+        this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
+    assertThat(keyStatus.value).isEqualTo(KeyStatus.KEY_GEN_COMPLETE.value);
 
     // Activate the key of version 1 and check the APIs crossGetActiveKeyVersion and
     // crossGetKeyStatus
@@ -145,9 +147,9 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
             crossTransactions.getKeyGenNodesDroppedOutOfKeyGeneration(keyVersion.longValue()));
     assertThat(nodesReasons.size()).isEqualTo(0);
 
-    // keyStatus =
-    // this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
-    // assertThat(keyStatus.value).isEqualTo(KeyStatus.ACTIVE_KEY.value);
+    keyStatus =
+        this.nodeOnBlockchain1.execute(crossTransactions.getKeyStatus(keyVersion.longValue()));
+    assertThat(keyStatus.value).isEqualTo(KeyStatus.ACTIVE_KEY.value);
 
     // Generate the key once again
     keyVersion =
@@ -173,15 +175,29 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
    */
   public void coordTest() throws Exception {
 
-    // There are no coordination contracts on Blockchain1
     List<CoordinationContractInformation> coordCtrtList =
         this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
-    assertThat(coordCtrtList.size()).isEqualTo(0);
+    assertThat(coordCtrtList.size()).isEqualTo(1);
 
     // There is one coordination contract on a separate chain called coordination chain
     coordCtrtList =
         this.nodeOnCoordinationBlockchain.execute(crossTransactions.listCoordinationContracts());
     // I thought there is one. Surprised to learn there isn't any. Need to explicitly add.
+    assertThat(coordCtrtList.size()).isEqualTo(1);
+
+    // Removing a coordination contract
+    this.nodeOnBlockchain1.execute(
+        crossTransactions.removeCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress()));
+    coordCtrtList = this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
+    assertThat(coordCtrtList.size()).isEqualTo(0);
+
+    this.nodeOnCoordinationBlockchain.execute(
+        crossTransactions.removeCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress()));
+    coordCtrtList = this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
     assertThat(coordCtrtList.size()).isEqualTo(0);
 
     // Adding a coordination contract
@@ -221,21 +237,6 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
           coordCtrt.coordinationBlockchainId,
           coordCtrt.ipAddressAndPort);
     }
-
-    // Removing a coordination contract
-    this.nodeOnBlockchain1.execute(
-        crossTransactions.removeCoordinationContract(
-            this.nodeOnCoordinationBlockchain.getChainId(),
-            this.coordContract.getContractAddress()));
-    coordCtrtList = this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
-    assertThat(coordCtrtList.size()).isEqualTo(0);
-
-    this.nodeOnCoordinationBlockchain.execute(
-        crossTransactions.removeCoordinationContract(
-            this.nodeOnCoordinationBlockchain.getChainId(),
-            this.coordContract.getContractAddress()));
-    coordCtrtList = this.nodeOnBlockchain1.execute(crossTransactions.listCoordinationContracts());
-    assertThat(coordCtrtList.size()).isEqualTo(0);
   }
 
   @After

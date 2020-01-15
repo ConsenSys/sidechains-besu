@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys AG.
+ * Copyright 2020 ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,16 +10,10 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.hyperledger.besu.consensus.ibft.network;
 
-import org.hyperledger.besu.ethereum.core.Address;
-import org.hyperledger.besu.ethereum.p2p.rlpx.wire.MessageData;
+pragma solidity >=0.4.0 <0.6.0;
 
-import java.util.Collection;
-
-public interface ValidatorMulticaster {
-
-  void send(final MessageData message);
-
-  void send(final MessageData message, final Collection<Address> blackList);
+interface BarArgsInt {
+    function bar(bytes32 a, string calldata str, bool cond) external;
+    function barUpdateState() external;
 }
