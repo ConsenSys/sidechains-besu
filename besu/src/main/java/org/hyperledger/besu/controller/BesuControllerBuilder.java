@@ -18,6 +18,7 @@ import static org.hyperledger.besu.controller.KeyPairUtil.loadKeyPair;
 
 import org.hyperledger.besu.config.GenesisConfigFile;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
+import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1.KeyPair;
 import org.hyperledger.besu.ethereum.ProtocolContext;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethodFactory;
@@ -309,7 +310,7 @@ public abstract class BesuControllerBuilder<C> {
         this.nodeKeys,
         blockchain,
         protocolContext.getWorldStateArchive(),
-        this.storageProvider.createNodeStorage());
+        new CrosschainNodeStorage(storageProvider.getNodeStorage()));
 
     final MiningCoordinator miningCoordinator =
         createMiningCoordinator(

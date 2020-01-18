@@ -23,7 +23,6 @@ import org.hyperledger.besu.ethereum.storage.StorageProvider;
 import org.hyperledger.besu.ethereum.worldstate.WorldStatePreimageStorage;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
-import org.hyperledger.besu.services.kvstore.CrosschainNodeStorage;
 
 import java.io.IOException;
 
@@ -89,8 +88,8 @@ public class KeyValueStorageProvider implements StorageProvider {
   }
 
   @Override
-  public CrosschainNodeStorage createNodeStorage() {
-    return new CrosschainNodeStorage(nodeStorage);
+  public KeyValueStorage getNodeStorage() {
+    return nodeStorage;
   }
 
   @Override

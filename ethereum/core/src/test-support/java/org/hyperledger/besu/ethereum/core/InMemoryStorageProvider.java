@@ -32,7 +32,6 @@ import org.hyperledger.besu.ethereum.worldstate.WorldStatePreimageStorage;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
-import org.hyperledger.besu.services.kvstore.CrosschainNodeStorage;
 import org.hyperledger.besu.services.kvstore.InMemoryKeyValueStorage;
 
 public class InMemoryStorageProvider implements StorageProvider {
@@ -94,8 +93,8 @@ public class InMemoryStorageProvider implements StorageProvider {
   }
 
   @Override
-  public CrosschainNodeStorage createNodeStorage() {
-    return new CrosschainNodeStorage(new InMemoryKeyValueStorage());
+  public KeyValueStorage getNodeStorage() {
+    return new InMemoryKeyValueStorage();
   }
 
   @Override

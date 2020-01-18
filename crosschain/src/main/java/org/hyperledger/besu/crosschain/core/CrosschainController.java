@@ -17,6 +17,7 @@ import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
+import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
@@ -33,7 +34,6 @@ import org.hyperledger.besu.ethereum.mainnet.ValidationResult;
 import org.hyperledger.besu.ethereum.transaction.TransactionSimulator;
 import org.hyperledger.besu.ethereum.transaction.TransactionSimulatorResult;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
-import org.hyperledger.besu.services.kvstore.CrosschainNodeStorage;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
@@ -100,6 +100,7 @@ public class CrosschainController {
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;
     this.nodeStorage = nodeStorage;
+    nodeStorage.restoreLinkedNodes(linkedNodeManager);
   }
 
   /**
@@ -334,12 +335,16 @@ public class CrosschainController {
 
   public void addLinkedNode(final BigInteger blockchainId, final String ipAddressAndPort) {
     this.linkedNodeManager.addNode(blockchainId, ipAddressAndPort);
-    nodeStorage.updater().putLinkedNode(blockchainId, ipAddressAndPort);
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    updater.putLinkedNode(blockchainId, ipAddressAndPort);
+    updater.commit();
   }
 
   public void removeLinkedNode(final BigInteger blockchainId) {
     this.linkedNodeManager.removeNode(blockchainId);
-    nodeStorage.updater().removeLinkedNode(blockchainId);
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    updater.removeLinkedNode(blockchainId);
+    updater.commit();
   }
 
   public Set<BlockchainNodeInformation> listLinkedNodes() {
