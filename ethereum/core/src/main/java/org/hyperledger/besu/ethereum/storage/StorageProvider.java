@@ -21,6 +21,7 @@ import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 
 import java.io.Closeable;
+import java.util.ArrayList;
 
 public interface StorageProvider extends Closeable {
 
@@ -36,7 +37,7 @@ public interface StorageProvider extends Closeable {
 
   KeyValueStorage createPruningStorage();
 
-  KeyValueStorage getNodeStorage();
+  ArrayList<KeyValueStorage> getCrosschainNodeStorage();
 
   boolean isWorldStateIterable();
 }

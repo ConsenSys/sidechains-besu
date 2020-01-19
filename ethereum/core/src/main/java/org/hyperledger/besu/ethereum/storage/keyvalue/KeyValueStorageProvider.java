@@ -25,6 +25,7 @@ import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class KeyValueStorageProvider implements StorageProvider {
 
@@ -34,7 +35,7 @@ public class KeyValueStorageProvider implements StorageProvider {
   private final KeyValueStorage privateTransactionStorage;
   private final KeyValueStorage privateStateStorage;
   private final KeyValueStorage pruningStorage;
-  private final KeyValueStorage nodeStorage;
+  private final ArrayList<KeyValueStorage> ccNodeStorage;
   private final boolean isWorldStateIterable;
 
   public KeyValueStorageProvider(
@@ -44,7 +45,7 @@ public class KeyValueStorageProvider implements StorageProvider {
       final KeyValueStorage privateTransactionStorage,
       final KeyValueStorage privateStateStorage,
       final KeyValueStorage pruningStorage,
-      final KeyValueStorage nodeStorage,
+      final ArrayList<KeyValueStorage> ccNodeStorage,
       final boolean isWorldStateIterable) {
     this.blockchainStorage = blockchainStorage;
     this.worldStateStorage = worldStateStorage;
@@ -52,7 +53,7 @@ public class KeyValueStorageProvider implements StorageProvider {
     this.privateTransactionStorage = privateTransactionStorage;
     this.privateStateStorage = privateStateStorage;
     this.pruningStorage = pruningStorage;
-    this.nodeStorage = nodeStorage;
+    this.ccNodeStorage = ccNodeStorage;
     this.isWorldStateIterable = isWorldStateIterable;
   }
 
@@ -88,8 +89,8 @@ public class KeyValueStorageProvider implements StorageProvider {
   }
 
   @Override
-  public KeyValueStorage getNodeStorage() {
-    return nodeStorage;
+  public ArrayList<KeyValueStorage> getCrosschainNodeStorage() {
+    return ccNodeStorage;
   }
 
   @Override
@@ -104,6 +105,7 @@ public class KeyValueStorageProvider implements StorageProvider {
     privateTransactionStorage.close();
     privateStateStorage.close();
     pruningStorage.close();
-    nodeStorage.close();
+    ccNodeStorage.get(0).close();
+    ccNodeStorage.get(1).close();
   }
 }

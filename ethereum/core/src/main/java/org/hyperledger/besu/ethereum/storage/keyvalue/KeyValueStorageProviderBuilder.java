@@ -14,7 +14,8 @@ package org.hyperledger.besu.ethereum.storage.keyvalue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.BLOCKCHAIN;
-import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.NODE_STATE;
+import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.COORDINATION_STATE;
+import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.LINKEDNODE_STATE;
 import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.PRIVATE_STATE;
 import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.PRIVATE_TRANSACTIONS;
 import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.PRUNING_STATE;
@@ -25,6 +26,8 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorageFactory;
 import org.hyperledger.besu.services.kvstore.LimitedInMemoryKeyValueStorage;
+
+import java.util.ArrayList;
 
 public class KeyValueStorageProviderBuilder {
 
@@ -61,6 +64,12 @@ public class KeyValueStorageProviderBuilder {
     final KeyValueStorage worldStatePreImageStorage =
         new LimitedInMemoryKeyValueStorage(DEFAULT_WORLD_STATE_PRE_IMAGE_CACHE_SIZE);
 
+    ArrayList<KeyValueStorage> crosschainNodeStorage = new ArrayList<KeyValueStorage>();
+    crosschainNodeStorage.add(
+        storageFactory.create(LINKEDNODE_STATE, commonConfiguration, metricsSystem));
+    crosschainNodeStorage.add(
+        storageFactory.create(COORDINATION_STATE, commonConfiguration, metricsSystem));
+
     return new KeyValueStorageProvider(
         storageFactory.create(BLOCKCHAIN, commonConfiguration, metricsSystem),
         storageFactory.create(WORLD_STATE, commonConfiguration, metricsSystem),
@@ -68,7 +77,7 @@ public class KeyValueStorageProviderBuilder {
         storageFactory.create(PRIVATE_TRANSACTIONS, commonConfiguration, metricsSystem),
         storageFactory.create(PRIVATE_STATE, commonConfiguration, metricsSystem),
         storageFactory.create(PRUNING_STATE, commonConfiguration, metricsSystem),
-        storageFactory.create(NODE_STATE, commonConfiguration, metricsSystem),
+        crosschainNodeStorage,
         storageFactory.isSegmentIsolationSupported());
   }
 }

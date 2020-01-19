@@ -100,20 +100,20 @@ public class CrosschainController {
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;
     this.nodeStorage = nodeStorage;
-    nodeStorage.restoreLinkedNodes(linkedNodeManager);
+    nodeStorage.restoreNodeData(linkedNodeManager, coordContractManager);
   }
 
   /**
    * Execute a subordinate transaction.
    *
    * @param transaction Subordinate Transaction to execute.
-   * @return Validaiton result.
+   * @return Validation result.
    */
   /**
    * Execute a subordinate transaction.
    *
    * @param transaction Subordinate Transaction to execute.
-   * @return Validaiton result.
+   * @return Validation result.
    */
   public ValidationResult<TransactionValidator.TransactionInvalidReason> addLocalTransaction(
       final CrosschainTransaction transaction) {
@@ -323,10 +323,18 @@ public class CrosschainController {
   public void addCoordinationContract(
       final BigInteger blockchainId, final Address address, final String ipAddressAndPort) {
     this.coordContractManager.addCoordinationContract(blockchainId, address, ipAddressAndPort);
+    CrosschainNodeStorage.Updater updater =
+        nodeStorage.updater(CrosschainNodeStorage.CoordinationData.coordinationKV);
+    updater.putCoordCtrt(blockchainId, address, ipAddressAndPort);
+    updater.commit();
   }
 
   public void removeCoordinationContract(final BigInteger blockchainId, final Address address) {
     this.coordContractManager.removeCoordinationContract(blockchainId, address);
+    CrosschainNodeStorage.Updater updater =
+        nodeStorage.updater(CrosschainNodeStorage.CoordinationData.coordinationKV);
+    updater.removeCoordCtrt(blockchainId, address);
+    updater.commit();
   }
 
   public Collection<CoordinationContractInformation> listCoordinationContracts() {
@@ -335,14 +343,16 @@ public class CrosschainController {
 
   public void addLinkedNode(final BigInteger blockchainId, final String ipAddressAndPort) {
     this.linkedNodeManager.addNode(blockchainId, ipAddressAndPort);
-    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    CrosschainNodeStorage.Updater updater =
+        nodeStorage.updater(CrosschainNodeStorage.LinkedNodeData.linkedNodesKV);
     updater.putLinkedNode(blockchainId, ipAddressAndPort);
     updater.commit();
   }
 
   public void removeLinkedNode(final BigInteger blockchainId) {
     this.linkedNodeManager.removeNode(blockchainId);
-    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    CrosschainNodeStorage.Updater updater =
+        nodeStorage.updater(CrosschainNodeStorage.LinkedNodeData.linkedNodesKV);
     updater.removeLinkedNode(blockchainId);
     updater.commit();
   }

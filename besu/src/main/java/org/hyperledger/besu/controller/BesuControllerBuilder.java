@@ -51,6 +51,7 @@ import org.hyperledger.besu.ethereum.worldstate.Pruner;
 import org.hyperledger.besu.ethereum.worldstate.PruningConfiguration;
 import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
 import org.hyperledger.besu.metrics.ObservableMetricsSystem;
+import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 
 import java.io.File;
 import java.io.IOException;
@@ -303,6 +304,13 @@ public abstract class BesuControllerBuilder<C> {
     final TransactionSimulator transactionSimulator =
         new TransactionSimulator(
             blockchain, protocolContext.getWorldStateArchive(), protocolSchedule);
+
+    ArrayList<KeyValueStorage> ccNodeStorage = storageProvider.getCrosschainNodeStorage();
+    if (ccNodeStorage.size() != 2) {
+      LOG.error(
+          "Number of KeyValueStores used for persistence of crosschain node information is NOT correct.");
+    }
+
     this.crosschainController.init(
         transactionSimulator,
         transactionPool,
@@ -310,7 +318,7 @@ public abstract class BesuControllerBuilder<C> {
         this.nodeKeys,
         blockchain,
         protocolContext.getWorldStateArchive(),
-        new CrosschainNodeStorage(storageProvider.getNodeStorage()));
+        new CrosschainNodeStorage(ccNodeStorage.get(0), ccNodeStorage.get(1)));
 
     final MiningCoordinator miningCoordinator =
         createMiningCoordinator(

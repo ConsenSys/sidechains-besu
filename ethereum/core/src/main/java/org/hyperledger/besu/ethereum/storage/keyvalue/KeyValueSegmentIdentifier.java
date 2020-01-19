@@ -20,7 +20,8 @@ public enum KeyValueSegmentIdentifier implements SegmentIdentifier {
   PRIVATE_TRANSACTIONS((byte) 3),
   PRIVATE_STATE((byte) 4),
   PRUNING_STATE((byte) 5),
-  NODE_STATE((byte) 6);
+  LINKEDNODE_STATE((byte) 6),
+  COORDINATION_STATE((byte) 7);
 
   private final byte[] id;
 
