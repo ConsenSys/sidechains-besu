@@ -25,7 +25,6 @@ import org.hyperledger.besu.ethereum.worldstate.WorldStateStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class KeyValueStorageProvider implements StorageProvider {
 
@@ -35,7 +34,7 @@ public class KeyValueStorageProvider implements StorageProvider {
   private final KeyValueStorage privateTransactionStorage;
   private final KeyValueStorage privateStateStorage;
   private final KeyValueStorage pruningStorage;
-  private final ArrayList<KeyValueStorage> ccNodeStorage;
+  // private final KeyValueStorage ccNodeStore;
   private final boolean isWorldStateIterable;
 
   public KeyValueStorageProvider(
@@ -45,7 +44,7 @@ public class KeyValueStorageProvider implements StorageProvider {
       final KeyValueStorage privateTransactionStorage,
       final KeyValueStorage privateStateStorage,
       final KeyValueStorage pruningStorage,
-      final ArrayList<KeyValueStorage> ccNodeStorage,
+      // final KeyValueStorage ccNodeStore,
       final boolean isWorldStateIterable) {
     this.blockchainStorage = blockchainStorage;
     this.worldStateStorage = worldStateStorage;
@@ -53,7 +52,7 @@ public class KeyValueStorageProvider implements StorageProvider {
     this.privateTransactionStorage = privateTransactionStorage;
     this.privateStateStorage = privateStateStorage;
     this.pruningStorage = pruningStorage;
-    this.ccNodeStorage = ccNodeStorage;
+    // this.ccNodeStore = ccNodeStore;
     this.isWorldStateIterable = isWorldStateIterable;
   }
 
@@ -88,11 +87,11 @@ public class KeyValueStorageProvider implements StorageProvider {
     return pruningStorage;
   }
 
-  @Override
-  public ArrayList<KeyValueStorage> getCrosschainNodeStorage() {
-    return ccNodeStorage;
-  }
-
+  /*@Override
+    public KeyValueStorage getCrosschainNodeStorage() {
+      return ccNodeStore;
+    }
+  */
   @Override
   public boolean isWorldStateIterable() {
     return isWorldStateIterable;
@@ -105,7 +104,6 @@ public class KeyValueStorageProvider implements StorageProvider {
     privateTransactionStorage.close();
     privateStateStorage.close();
     pruningStorage.close();
-    ccNodeStorage.get(0).close();
-    ccNodeStorage.get(1).close();
+    // ccNodeStore.close();
   }
 }

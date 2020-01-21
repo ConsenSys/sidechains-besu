@@ -34,8 +34,6 @@ import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 import org.hyperledger.besu.services.kvstore.InMemoryKeyValueStorage;
 
-import java.util.ArrayList;
-
 public class InMemoryStorageProvider implements StorageProvider {
 
   public static MutableBlockchain createInMemoryBlockchain(final Block genesisBlock) {
@@ -94,14 +92,11 @@ public class InMemoryStorageProvider implements StorageProvider {
     return new InMemoryKeyValueStorage();
   }
 
-  @Override
-  public ArrayList<KeyValueStorage> getCrosschainNodeStorage() {
-    ArrayList<KeyValueStorage> ccNodeStorage = new ArrayList<KeyValueStorage>();
-    ccNodeStorage.add(new InMemoryKeyValueStorage());
-    ccNodeStorage.add(new InMemoryKeyValueStorage());
-    return ccNodeStorage;
-  }
-
+  /* @Override
+    public KeyValueStorage getCrosschainNodeStorage() {
+      return new InMemoryKeyValueStorage();
+    }
+  */
   @Override
   public boolean isWorldStateIterable() {
     return true;

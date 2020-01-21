@@ -73,6 +73,9 @@ public class RocksDBKeyValueStorageFactory implements KeyValueStorageFactory {
     if (requiresInit()) {
       init(commonConfiguration, metricsSystem);
     }
+    LOG.info(
+        "****** STORAGE ******* Inside RocksDBKVSF.create() after init. Segment = {}",
+        segment.getName());
 
     return isSegmentIsolationSupported
         ? new SegmentedKeyValueStorageAdapter<>(segment, segmentedStorage)
@@ -117,6 +120,8 @@ public class RocksDBKeyValueStorageFactory implements KeyValueStorageFactory {
 
     if (isSegmentIsolationSupported) {
       this.unsegmentedStorage = null;
+      LOG.info(
+          "******* STORAGE ********* Inside RocksDBKVSF.init SEGMENTS size = {}", segments.size());
       this.segmentedStorage =
           new RocksDBColumnarKeyValueStorage(rocksDBConfiguration, segments, metricsSystem);
     } else {

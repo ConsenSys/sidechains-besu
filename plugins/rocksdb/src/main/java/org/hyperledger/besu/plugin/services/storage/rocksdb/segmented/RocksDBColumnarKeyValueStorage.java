@@ -86,6 +86,7 @@ public class RocksDBColumnarKeyValueStorage
               new ColumnFamilyOptions()
                   .setTableFormatConfig(createBlockBasedTableConfig(configuration))));
 
+      LOG.info("AAAAA");
       final Statistics stats = new Statistics();
       options =
           new DBOptions()
@@ -98,6 +99,15 @@ public class RocksDBColumnarKeyValueStorage
                   Env.getDefault().setBackgroundThreads(configuration.getBackgroundThreadCount()));
 
       txOptions = new TransactionDBOptions();
+      LOG.info(
+          "BBBBBB COl-Desc-SIze = {}, DB Dir = {}, Segments size = {}",
+          columnDescriptors.size(),
+          configuration.getDatabaseDir().toString(),
+          segments.size());
+      for (int i = 0; i < columnDescriptors.size(); i++) {
+        LOG.info("****** COL = {}", columnDescriptors.get(i).getName());
+      }
+
       final List<ColumnFamilyHandle> columnHandles = new ArrayList<>(columnDescriptors.size());
       db =
           TransactionDB.open(
@@ -106,12 +116,17 @@ public class RocksDBColumnarKeyValueStorage
               configuration.getDatabaseDir().toString(),
               columnDescriptors,
               columnHandles);
+      LOG.info("YYYYYYY");
       metrics = RocksDBMetrics.of(metricsSystem, configuration, db, stats);
+
+      LOG.info("XXXXXX");
       final Map<BytesValue, String> segmentsById =
           segments.stream()
               .collect(
                   Collectors.toMap(
                       segment -> BytesValue.wrap(segment.getId()), SegmentIdentifier::getName));
+
+      LOG.info("CCCCCC");
 
       final ImmutableMap.Builder<String, ColumnFamilyHandle> builder = ImmutableMap.builder();
 
@@ -121,7 +136,10 @@ public class RocksDBColumnarKeyValueStorage
                 segmentsById.get(BytesValue.wrap(columnHandle.getName())), DEFAULT_COLUMN);
         builder.put(segmentName, columnHandle);
       }
+      LOG.info("DDDDDD");
+
       columnHandlesByName = builder.build();
+      LOG.info("EEEEEE");
 
     } catch (final RocksDBException e) {
       throw new StorageException(e);

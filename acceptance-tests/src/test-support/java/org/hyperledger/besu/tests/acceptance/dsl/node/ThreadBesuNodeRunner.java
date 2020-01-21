@@ -124,12 +124,14 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
     final BesuControllerBuilder<?> builder =
         new BesuController.Builder().fromEthNetworkConfig(ethNetworkConfig);
 
+    LOG.info("******* STORAGE ***** ROCKSDB Initialization");
     final KeyValueStorageProvider storageProvider =
         new KeyValueStorageProviderBuilder()
             .withStorageFactory(storageService.getByName("rocksdb").get())
             .withCommonConfiguration(commonPluginConfiguration)
             .withMetricsSystem(metricsSystem)
             .build();
+    LOG.info("******* STORAGE ***** ROCKSDB Initialized");
 
     final BesuController<?> besuController;
     try {

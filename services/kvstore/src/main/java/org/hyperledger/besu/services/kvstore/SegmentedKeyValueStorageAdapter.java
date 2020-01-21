@@ -21,14 +21,19 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class SegmentedKeyValueStorageAdapter<S> implements KeyValueStorage {
 
+  private static final Logger LOG = LogManager.getLogger();
   private final S segmentHandle;
   private final SegmentedKeyValueStorage<S> storage;
 
   public SegmentedKeyValueStorageAdapter(
       final SegmentIdentifier segment, final SegmentedKeyValueStorage<S> storage) {
     this.segmentHandle = storage.getSegmentIdentifierByName(segment);
+    LOG.info("****** STORAGE ****** Inside SegmentedKVSA constructor");
     this.storage = storage;
   }
 
