@@ -12,7 +12,7 @@
  */
 package org.hyperledger.besu.tests.acceptance.crosschain.common;
 
-import org.hyperledger.besu.tests.acceptance.crosschain.generated.CrosschainCoordinationV1;
+import org.hyperledger.besu.crosschain.core.coordination.generated.CrosschainCoordinationV1;
 import org.hyperledger.besu.tests.acceptance.crosschain.generated.VotingAlgMajorityWhoVoted;
 import org.hyperledger.besu.tests.acceptance.dsl.AcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;

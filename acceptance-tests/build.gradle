@@ -102,6 +102,7 @@ dependencies {
 
 
 
+  testImplementation project(':crosschain')
   testImplementation project(':ethereum:api')
   testImplementation project(':enclave')
   testImplementation 'org.awaitility:awaitility'
