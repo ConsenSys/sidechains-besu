@@ -18,9 +18,7 @@ import org.hyperledger.besu.crosschain.core.coordination.CoordinationContractWra
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
 import org.hyperledger.besu.crypto.SECP256K1;
-import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.core.Address;
-import org.hyperledger.besu.ethereum.core.Hash;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -32,10 +30,6 @@ import java.net.URLConnection;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.besu.Besu;
-import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.RawTransactionManager;
 
 /** This class will manage all outward bound connections. For the moment, this is just JSON RPC. */
 public class OutwardBoundConnectionManager {
@@ -64,8 +58,6 @@ public class OutwardBoundConnectionManager {
                 + "\",\"params\":[\""
                 + params
                 + "\"],\"id\":1}")
-
-
             .getBytes(UTF_8);
     int length = out.length;
     http.setFixedLengthStreamingMode(length);
@@ -97,6 +89,7 @@ public class OutwardBoundConnectionManager {
       throw new Error(msg);
     }
 
-    return this.wrapper.start(ipAddressPort, blockchainId, contractAddress, (CrosschainTransactionStartMessage) message);
+    return this.wrapper.start(
+        ipAddressPort, blockchainId, contractAddress, (CrosschainTransactionStartMessage) message);
   }
 }
