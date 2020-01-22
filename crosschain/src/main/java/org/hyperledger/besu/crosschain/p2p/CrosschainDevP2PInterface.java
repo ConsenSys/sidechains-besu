@@ -58,6 +58,7 @@ public interface CrosschainDevP2PInterface {
    * Send from this node to all nodes.
    *
    * @param myAddress The address of this node.
+   * @param message The message to be signed.
    */
   void sendMessageSigningRequest(final BigInteger myAddress, final BytesValue message);
 
