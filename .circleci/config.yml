@@ -23,6 +23,11 @@ commands:
     steps:
       - checkout
       - run:
+          name: Check out Web3j
+          command: |
+            git clone https://github.com/PegaSysEng/sidechains-web3j.git ../sidechains-web3j
+            git --git-dir=../sidechains-web3j/.git rev-parse HEAD > ../sidechains-web3j/headcommit
+      - run:
           name: Install Packages - LibSodium
           command: |
             sudo apt-get update
@@ -33,6 +38,11 @@ commands:
             - deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
             - deps-{{ checksum "build.gradle" }}
             - deps-
+      - restore_cache:
+          name: Restore cached Web3j gradle dependencies
+          keys:
+            - deps-web3j-{{ checksum "../sidechains-web3j/build.gradle" }}
+            - deps-web3j
 
   capture_test_results:
     description: "Capture test results"
@@ -60,17 +70,28 @@ jobs:
       - run:
           name: Assemble
           command: |
-            ./gradlew --no-daemon --parallel clean spotlessCheck compileJava compileTestJava assemble
+            pushd .
+            # Build our Web3j
+            cd ../sidechains-web3j
+            ./gradlew --parallel --stacktrace --info installDist
+            popd
+            ./gradlew --parallel clean spotlessCheck compileJava compileTestJava assemble
       - save_cache:
           name: Caching gradle dependencies
           key: deps-{{ checksum "build.gradle" }}-{{ .Branch }}-{{ .Revision }}
           paths:
             - .gradle
             - ~/.gradle
-      - persist_to_workspace:
-          root: ~/project
+      - save_cache:
+          name: Caching Web3j gradle dependencies
+          key: deps-web3j-{{ checksum "../sidechains-web3j/build.gradle" }}
           paths:
-            - ./
+            - ../sidechains-web3j/.gradle
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - ./project
+            - ./sidechains-web3j
       - store_artifacts:
           name: Distribution artifacts
           path:  build/distributions
