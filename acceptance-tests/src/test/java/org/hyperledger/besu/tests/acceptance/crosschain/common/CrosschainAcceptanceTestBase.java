@@ -21,7 +21,6 @@ import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
 
 import java.math.BigInteger;
 
-import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.CrossStartThresholdKeyGeneration;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.besu.crypto.crosschain.BlsThresholdCryptoSystem;
@@ -112,8 +111,10 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     // TODO need to call addBlockchain on Crosschain Coordination Contract to add this blockchain.
 
-    BigInteger keyVersionGenerated = this.nodeOnBlockchain1.execute(
-        crossTransactions.startThresholdKeyGeneration(1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
+    BigInteger keyVersionGenerated =
+        this.nodeOnBlockchain1.execute(
+            crossTransactions.startThresholdKeyGeneration(
+                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
     System.out.println("Key version generated: " + keyVersionGenerated);
 
     // TODO we now need to get the public key from the node
@@ -123,8 +124,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     // Once the action vote it final on the coordination chain...
     // Finally, activate the key.
-    this.nodeOnBlockchain1.execute(
-        crossTransactions.activateKey(keyVersionGenerated.longValue()));
+    this.nodeOnBlockchain1.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
   }
 
   public void setUpBlockchain2() throws Exception {
@@ -160,8 +160,10 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     // TODO need to call addBlockchain on Crosschain Coordination Contract to add this blockchain.
 
-    BigInteger keyVersionGenerated = this.nodeOnBlockchain2.execute(
-        crossTransactions.startThresholdKeyGeneration(1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
+    BigInteger keyVersionGenerated =
+        this.nodeOnBlockchain2.execute(
+            crossTransactions.startThresholdKeyGeneration(
+                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
     System.out.println("Key version generated: " + keyVersionGenerated);
 
     // TODO we now need to get the public key from the node
@@ -171,8 +173,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     // Once the action vote it final on the coordination chain...
     // Finally, activate the key.
-    this.nodeOnBlockchain2.execute(
-        crossTransactions.activateKey(keyVersionGenerated.longValue()));
+    this.nodeOnBlockchain2.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
   }
 
   public void setUpBlockchain3() throws Exception {
