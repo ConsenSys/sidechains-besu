@@ -38,14 +38,7 @@ dependencies {
   implementation 'io.vertx:vertx-core'
 
   // Web3J related stuff
-  implementation files('../acceptance-tests/libs/web3j-abi.jar')
-  implementation files('../acceptance-tests/libs/web3j-besu.jar')
-  implementation files('../acceptance-tests/libs/web3j-core.jar')
-  implementation files('../acceptance-tests/libs/web3j-crypto.jar')
-  implementation files('../acceptance-tests/libs/web3j-eea.jar')
-  implementation files('../acceptance-tests/libs/web3j-rlp.jar')
-  implementation files('../acceptance-tests/libs/web3j-tuples.jar')
-  implementation files('../acceptance-tests/libs/web3j-utils.jar')
+  implementation fileTree('../../sidechains-web3j') {include '**/build/libs/*SNAPSHOT.jar'}
   implementation "org.bouncycastle:bcprov-jdk15on"
   implementation "com.fasterxml.jackson.core:jackson-databind"
   implementation "com.github.jnr:jnr-unixsocket"
