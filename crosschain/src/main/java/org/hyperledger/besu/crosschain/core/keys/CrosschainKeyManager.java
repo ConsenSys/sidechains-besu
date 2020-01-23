@@ -107,14 +107,14 @@ public class CrosschainKeyManager {
    * @param credentials
    * @param activeKeyVersion
    */
-  /*public void restore(
+  public void restore(
       final Map<Long, ThresholdKeyGeneration> activeKeyGenerations,
       final Map<Long, BlsThresholdCredentials> credentials,
       final long activeKeyVersion) {
     this.credentials = credentials;
     this.activeKeyGenerations = activeKeyGenerations;
     this.activeKeyVersion = activeKeyVersion;
-  }*/
+  }
 
   public void setKeyGenerationContractAddress(final Address address) {
     // TODO

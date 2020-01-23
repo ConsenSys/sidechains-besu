@@ -22,18 +22,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class StorageServiceImpl implements StorageService {
 
-  private static final Logger LOG = LogManager.getLogger();
   private final List<SegmentIdentifier> segments;
   private final Map<String, KeyValueStorageFactory> factories;
 
   public StorageServiceImpl() {
     this.segments = List.of(KeyValueSegmentIdentifier.values());
-    LOG.info("****** STORAGE **** StorageServiceImpl constructor");
     this.factories = new ConcurrentHashMap<>();
   }
 

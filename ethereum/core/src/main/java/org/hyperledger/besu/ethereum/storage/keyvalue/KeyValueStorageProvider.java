@@ -34,7 +34,7 @@ public class KeyValueStorageProvider implements StorageProvider {
   private final KeyValueStorage privateTransactionStorage;
   private final KeyValueStorage privateStateStorage;
   private final KeyValueStorage pruningStorage;
-  // private final KeyValueStorage ccNodeStore;
+  private final KeyValueStorage ccNodeStore;
   private final boolean isWorldStateIterable;
 
   public KeyValueStorageProvider(
@@ -44,7 +44,7 @@ public class KeyValueStorageProvider implements StorageProvider {
       final KeyValueStorage privateTransactionStorage,
       final KeyValueStorage privateStateStorage,
       final KeyValueStorage pruningStorage,
-      // final KeyValueStorage ccNodeStore,
+      final KeyValueStorage ccNodeStore,
       final boolean isWorldStateIterable) {
     this.blockchainStorage = blockchainStorage;
     this.worldStateStorage = worldStateStorage;
@@ -52,7 +52,7 @@ public class KeyValueStorageProvider implements StorageProvider {
     this.privateTransactionStorage = privateTransactionStorage;
     this.privateStateStorage = privateStateStorage;
     this.pruningStorage = pruningStorage;
-    // this.ccNodeStore = ccNodeStore;
+    this.ccNodeStore = ccNodeStore;
     this.isWorldStateIterable = isWorldStateIterable;
   }
 
@@ -87,11 +87,11 @@ public class KeyValueStorageProvider implements StorageProvider {
     return pruningStorage;
   }
 
-  /*@Override
-    public KeyValueStorage getCrosschainNodeStorage() {
-      return ccNodeStore;
-    }
-  */
+  @Override
+  public KeyValueStorage getCrosschainNodeStorage() {
+    return ccNodeStore;
+  }
+
   @Override
   public boolean isWorldStateIterable() {
     return isWorldStateIterable;

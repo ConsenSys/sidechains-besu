@@ -17,6 +17,7 @@ import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
+import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
@@ -59,7 +60,7 @@ public class CrosschainController {
   TransactionPool transactionPool;
   Blockchain blockchain;
   WorldStateArchive worldStateArchive;
-  // CrosschainNodeStorage nodeStorage;
+  CrosschainNodeStorage nodeStorage;
 
   CrosschainProcessor processor;
   OriginatingBlockchainMessageProcessor origMsgProcessor;
@@ -84,8 +85,8 @@ public class CrosschainController {
       final BigInteger sidechainId,
       final SECP256K1.KeyPair nodeKeys,
       final Blockchain blockchain,
-      final WorldStateArchive worldStateArchive /*,
-      final CrosschainNodeStorage nodeStorage*/) {
+      final WorldStateArchive worldStateArchive,
+      final CrosschainNodeStorage nodeStorage) {
     this.processor.init(
         transactionSimulator,
         transactionPool,
@@ -98,8 +99,8 @@ public class CrosschainController {
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;
-    // this.nodeStorage = nodeStorage;
-    // nodeStorage.restoreNodeData(linkedNodeManager, coordContractManager, crosschainKeyManager);
+    this.nodeStorage = nodeStorage;
+    nodeStorage.restoreNodeData(linkedNodeManager, coordContractManager, crosschainKeyManager);
   }
 
   /**
@@ -322,16 +323,16 @@ public class CrosschainController {
   public void addCoordinationContract(
       final BigInteger blockchainId, final Address address, final String ipAddressAndPort) {
     this.coordContractManager.addCoordinationContract(blockchainId, address, ipAddressAndPort);
-    /*CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
     updater.putCoordCtrt(blockchainId, address, ipAddressAndPort);
-    updater.commit();*/
+    updater.commit();
   }
 
   public void removeCoordinationContract(final BigInteger blockchainId, final Address address) {
     this.coordContractManager.removeCoordinationContract(blockchainId, address);
-    /*CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
     updater.removeCoordCtrt(blockchainId, address);
-    updater.commit();*/
+    updater.commit();
   }
 
   public Collection<CoordinationContractInformation> listCoordinationContracts() {
@@ -340,16 +341,16 @@ public class CrosschainController {
 
   public void addLinkedNode(final BigInteger blockchainId, final String ipAddressAndPort) {
     this.linkedNodeManager.addNode(blockchainId, ipAddressAndPort);
-    /*CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
     updater.putLinkedNode(blockchainId, ipAddressAndPort);
-    updater.commit();*/
+    updater.commit();
   }
 
   public void removeLinkedNode(final BigInteger blockchainId) {
     this.linkedNodeManager.removeNode(blockchainId);
-    /*CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
     updater.removeLinkedNode(blockchainId);
-    updater.commit();*/
+    updater.commit();
   }
 
   public Set<BlockchainNodeInformation> listLinkedNodes() {

@@ -1038,8 +1038,6 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   public BesuControllerBuilder<?> getControllerBuilder() {
     try {
       addConfigurationService();
-      logger.info(
-          "***** STORAGE ******** INSIDE getControllerBuilder KVSN = {}", keyValueStorageName);
       return controllerBuilderFactory
           .fromEthNetworkConfig(updateNetworkConfig(getNetwork()), genesisConfigOverrides)
           .synchronizerConfiguration(buildSyncConfig())
@@ -1308,7 +1306,6 @@ public class BesuCommand implements DefaultCommandValues, Runnable {
   }
 
   private KeyValueStorageProvider keyStorageProvider(final String name) {
-    logger.info("********* STORAGE ******* INSIDE keyStorageProvider");
     return new KeyValueStorageProviderBuilder()
         .withStorageFactory(
             storageService

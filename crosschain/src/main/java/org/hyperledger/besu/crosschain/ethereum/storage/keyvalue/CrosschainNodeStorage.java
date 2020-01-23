@@ -36,6 +36,7 @@ import java.util.OptionalLong;
 import com.google.common.primitives.Bytes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 /**
  * This class persists the information of a node that is related to crosschain transactions. There
@@ -124,7 +125,7 @@ public class CrosschainNodeStorage {
       ByteBuffer buf = ByteBuffer.wrap(stream);
       BigInteger chainId = BigInteger.valueOf(buf.getLong());
       String[] data = new String(buf.array(), Charset.defaultCharset()).split("#", 2);
-      Address coordCtrtAddr = Address.fromHexString(data[1]);
+      Address coordCtrtAddr = Address.wrap(BytesValue.wrap(data[1].getBytes(Charset.defaultCharset())));
       return new CoordinationData(chainId, data[0], coordCtrtAddr);
     }
   }
@@ -229,7 +230,6 @@ public class CrosschainNodeStorage {
       final CrosschainKeyManager keyManager) {
 
     OptionalLong size = getSize();
-    LOG.info("******** STORAGE ********* In RESTORE");
 
     // If the store is untouched, then explicitly initialize the size to 0.
     if (size.isEmpty()) {
@@ -240,7 +240,6 @@ public class CrosschainNodeStorage {
       return;
     }
 
-    LOG.info("******** STORAGE ********* STORE IS NON-EMPTY");
     // If the store has some elements, then restore them.
     long num = size.getAsLong();
     long key = 0;
@@ -252,7 +251,6 @@ public class CrosschainNodeStorage {
         ByteBuffer buf = ByteBuffer.wrap(val.get());
         byte component = buf.get();
         if (component == Component.LINKED_NODE.getId()[0]) {
-          LOG.info("***** STORAGE ***** GETTING LINKED NODE DATA");
           LinkedNodeData nodeData = LinkedNodeData.deserialize(buf.array());
           linkedNodeManager.addNode(nodeData.chainId, nodeData.ipAddressAndPort);
           cache.put(BigInteger.valueOf(key), nodeData);

@@ -18,6 +18,7 @@ import static org.hyperledger.besu.controller.KeyPairUtil.loadKeyPair;
 
 import org.hyperledger.besu.config.GenesisConfigFile;
 import org.hyperledger.besu.crosschain.core.CrosschainController;
+import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1.KeyPair;
 import org.hyperledger.besu.ethereum.ProtocolContext;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.JsonRpcMethodFactory;
@@ -199,8 +200,6 @@ public abstract class BesuControllerBuilder<C> {
 
     prepForBuild();
 
-    LOG.info("******* STORAGE ***** BesuController.build() started");
-
     final ProtocolSchedule<C> protocolSchedule = createProtocolSchedule();
     final GenesisState genesisState = GenesisState.fromConfig(genesisConfig, protocolSchedule);
     this.crosschainController = new CrosschainController();
@@ -304,7 +303,6 @@ public abstract class BesuControllerBuilder<C> {
     final TransactionSimulator transactionSimulator =
         new TransactionSimulator(
             blockchain, protocolContext.getWorldStateArchive(), protocolSchedule);
-    LOG.info("******* STORAGE ***** Before crosschainController.init");
 
     this.crosschainController.init(
         transactionSimulator,
@@ -312,8 +310,8 @@ public abstract class BesuControllerBuilder<C> {
         chainId.get(),
         this.nodeKeys,
         blockchain,
-        protocolContext.getWorldStateArchive() /*,
-        new CrosschainNodeStorage(storageProvider.getCrosschainNodeStorage())*/);
+        protocolContext.getWorldStateArchive(),
+        new CrosschainNodeStorage(storageProvider.getCrosschainNodeStorage()));
 
     final MiningCoordinator miningCoordinator =
         createMiningCoordinator(
@@ -329,7 +327,6 @@ public abstract class BesuControllerBuilder<C> {
 
     final JsonRpcMethodFactory additionalJsonRpcMethodFactory =
         createAdditionalJsonRpcMethodFactory(protocolContext);
-    LOG.info("******** STORAGE ******* FINISHING UP BESUCONTROLLERBUILDER.BUILD");
 
     return new BesuController<>(
         protocolSchedule,
