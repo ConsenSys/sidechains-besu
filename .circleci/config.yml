@@ -103,7 +103,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - run:
           name: Build
           no_output_timeout: 20m
@@ -116,7 +116,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - run:
           name: IntegrationTests
           command: |
@@ -136,7 +136,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - run:
           name: ReferenceTests
           no_output_timeout: 20m
@@ -150,7 +150,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - run:
           name: AcceptanceTests
           no_output_timeout: 40m
@@ -166,7 +166,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - setup_remote_docker
       - run:
           name: hadoLint
@@ -187,7 +187,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - run:
           name: Publish
           command: |
@@ -198,7 +198,7 @@ jobs:
     steps:
       - prepare
       - attach_workspace:
-          ~/
+          at: ~/
       - setup_remote_docker
       - run:
           name: Publish Docker
