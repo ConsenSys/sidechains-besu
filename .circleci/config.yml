@@ -88,10 +88,10 @@ jobs:
           paths:
             - ../sidechains-web3j/.gradle
       - persist_to_workspace:
-          root: ~/
+          root: ~/project
           paths:
-            - ./project
-            - ./sidechains-web3j
+            - ./
+            - ../sidechains-web3j
       - store_artifacts:
           name: Distribution artifacts
           path:  build/distributions
@@ -157,6 +157,9 @@ jobs:
           command: |
             ./gradlew --parallel acceptanceTest
       - capture_test_results
+      - store_artifacts:
+          path: build/reports
+          destination: acceptance-tests
 
   buildDocker:
     executor: besu_executor_med
