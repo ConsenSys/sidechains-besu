@@ -20,6 +20,7 @@ import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenerati
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorageTransaction;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,7 +37,6 @@ import java.util.OptionalLong;
 import com.google.common.primitives.Bytes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hyperledger.besu.util.bytes.BytesValue;
 
 /**
  * This class persists the information of a node that is related to crosschain transactions. There
@@ -125,7 +125,8 @@ public class CrosschainNodeStorage {
       ByteBuffer buf = ByteBuffer.wrap(stream);
       BigInteger chainId = BigInteger.valueOf(buf.getLong());
       String[] data = new String(buf.array(), Charset.defaultCharset()).split("#", 2);
-      Address coordCtrtAddr = Address.wrap(BytesValue.wrap(data[1].getBytes(Charset.defaultCharset())));
+      Address coordCtrtAddr =
+          Address.wrap(BytesValue.wrap(data[1].getBytes(Charset.defaultCharset())));
       return new CoordinationData(chainId, data[0], coordCtrtAddr);
     }
   }
