@@ -20,7 +20,6 @@ import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenerati
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorage;
 import org.hyperledger.besu.plugin.services.storage.KeyValueStorageTransaction;
-import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -85,16 +84,19 @@ public class CrosschainNodeStorage {
     }
 
     static byte[] serialize(final BigInteger chainId, final String ipAddressAndPort) {
-      return Bytes.concat(
-          Component.LINKED_NODE.getId(),
-          longToByteArray(chainId.longValue()),
-          ipAddressAndPort.getBytes(Charset.defaultCharset()));
+      byte[] val = Bytes.concat(
+        Component.LINKED_NODE.getId(), longToByteArray(chainId.longValue()),
+        ipAddressAndPort.getBytes(Charset.defaultCharset()));
+      return val;
     }
 
-    static LinkedNodeData deserialize(final byte[] stream) {
-      ByteBuffer buf = ByteBuffer.wrap(stream);
-      return new LinkedNodeData(
-          BigInteger.valueOf(buf.getLong()), new String(buf.array(), Charset.defaultCharset()));
+    static LinkedNodeData deserialize(final byte[] buf) {
+      byte[] chainIdB = new byte[Long.BYTES];
+      System.arraycopy(buf, 1, chainIdB, 0, Long.BYTES);
+      BigInteger chainId = new BigInteger(chainIdB);
+      byte[] ipAddrB = new byte[buf.length - Long.BYTES - 1];
+      System.arraycopy(buf, 1 + Long.BYTES, ipAddrB, 0, ipAddrB.length);
+      return new LinkedNodeData(chainId, new String(ipAddrB, Charset.defaultCharset()));
     }
   }
 
@@ -113,20 +115,21 @@ public class CrosschainNodeStorage {
 
     static byte[] serialize(
         final BigInteger chainId, final String ipAddressAndPort, final Address coordCtrtAddr) {
+      String ipAddrCtrtAddr = ipAddressAndPort + "#" + coordCtrtAddr.getHexString();
       return Bytes.concat(
           Component.COORDINATION.getId(),
           longToByteArray(chainId.longValue()),
-          ipAddressAndPort.getBytes(Charset.defaultCharset()),
-          "#".getBytes(Charset.defaultCharset()),
-          coordCtrtAddr.getByteArray());
+          ipAddrCtrtAddr.getBytes(Charset.defaultCharset()));
     }
 
-    static CoordinationData deserialize(final byte[] stream) {
-      ByteBuffer buf = ByteBuffer.wrap(stream);
-      BigInteger chainId = BigInteger.valueOf(buf.getLong());
-      String[] data = new String(buf.array(), Charset.defaultCharset()).split("#", 2);
-      Address coordCtrtAddr =
-          Address.wrap(BytesValue.wrap(data[1].getBytes(Charset.defaultCharset())));
+    static CoordinationData deserialize(final byte[] buf) {
+      byte[] chainIdB = new byte[Long.BYTES];
+      System.arraycopy(buf, 1, chainIdB, 0, Long.BYTES);
+      BigInteger chainId = new BigInteger(chainIdB);
+      byte[] strBuf = new byte[buf.length - Long.BYTES - 1];
+      System.arraycopy(buf, 1 + Long.BYTES, strBuf, 0, strBuf.length);
+      String[] data = new String(strBuf, Charset.defaultCharset()).split("#", 2);
+      Address coordCtrtAddr = Address.fromHexString(data[1]);
       return new CoordinationData(chainId, data[0], coordCtrtAddr);
     }
   }
@@ -162,22 +165,28 @@ public class CrosschainNodeStorage {
         out.writeObject(credentials);
         byte[] credentialsB = byteOut.toByteArray();
 
+        String str = new String(activeKenGenB, Charset.defaultCharset()) + "#" +
+          new String(credentialsB, Charset.defaultCharset());
+
         return Bytes.concat(
             Component.KEY.getId(),
             longToByteArray(activeKeyVersion),
-            activeKenGenB,
-            "#".getBytes(Charset.defaultCharset()),
-            credentialsB);
+            str.getBytes(Charset.defaultCharset()));
       } catch (Exception e) {
         LOG.error("Unexpected exception while serializing crosschain key data: {}", e.toString());
         return null;
       }
     }
 
-    static KeyData deserialize(final byte[] stream) {
-      ByteBuffer buf = ByteBuffer.wrap(stream);
-      long keyVersion = buf.getLong();
-      String[] data = new String(buf.array(), Charset.defaultCharset()).split("#", 2);
+    static KeyData deserialize(final byte[] buf) {
+      byte[] keyVersionB = new byte[Long.BYTES];
+      System.arraycopy(buf, 1, keyVersionB, 0, Long.BYTES);
+      long keyVersion = new BigInteger(keyVersionB).longValue();
+
+      byte[] strBuf = new byte[buf.length - Long.BYTES - 1];
+      System.arraycopy(buf, 1 + Long.BYTES, strBuf, 0, strBuf.length);
+      String[] data = new String(strBuf, Charset.defaultCharset()).split("#", 2);
+
       KeyData keyData = null;
 
       try {
@@ -249,23 +258,20 @@ public class CrosschainNodeStorage {
       if (val.isEmpty()) {
         continue;
       } else {
-        ByteBuffer buf = ByteBuffer.wrap(val.get());
-        byte component = buf.get();
+        byte component = val.get()[0];
         if (component == Component.LINKED_NODE.getId()[0]) {
-          LinkedNodeData nodeData = LinkedNodeData.deserialize(buf.array());
+          LinkedNodeData nodeData = LinkedNodeData.deserialize(val.get());
           linkedNodeManager.addNode(nodeData.chainId, nodeData.ipAddressAndPort);
           cache.put(BigInteger.valueOf(key), nodeData);
         } else if (component == Component.COORDINATION.getId()[0]) {
-          LOG.info("***** STORAGE ***** GETTING COORDINATION DATA");
-          CoordinationData coordinationData = CoordinationData.deserialize(buf.array());
+          CoordinationData coordinationData = CoordinationData.deserialize(val.get());
           coordContractManager.addCoordinationContract(
               coordinationData.chainId,
               coordinationData.coordCtrtAddr,
               coordinationData.ipAddressAndPort);
           cache.put(BigInteger.valueOf(key), coordinationData);
         } else if (component == Component.KEY.getId()[0]) {
-          LOG.info("***** STORAGE ***** GETTING KEY DATA");
-          KeyData keyData = KeyData.deserialize(buf.array());
+          KeyData keyData = KeyData.deserialize(val.get());
           keyManager.restore(
               keyData.activeKeyGenerations, keyData.credentials, keyData.activeKeyVersion);
           cache.put(BigInteger.valueOf(key), keyData);
