@@ -63,7 +63,7 @@ public class CrosschainKeyManager {
 
   public Map<Long, ThresholdKeyGeneration> activeKeyGenerations = new HashMap<>();
 
-  Map<Long, BlsThresholdCredentials> credentials;
+  public Map<Long, BlsThresholdCredentials> credentials;
 
   ThresholdKeyGenContractInterface thresholdKeyGenContract;
   CrosschainDevP2PInterface p2p;

@@ -419,6 +419,35 @@ public class CrosschainNodeStorage {
       return incrementSize();
     }
 
+    /**
+     * This method persists the key information.
+     *
+     * @param keyVersion Current active key version.
+     * @param activeKeyGenerations Current active key data being used.
+     * @param credentials Stored credentials.
+     * @return Updater instance used.
+     */
+    public Updater putKeyData(
+        final long keyVersion,
+        final Map<Long, ThresholdKeyGeneration> activeKeyGenerations,
+        final Map<Long, BlsThresholdCredentials> credentials) {
+
+      // Increment the maxKey for the purposes of bookkeeping
+      CrosschainNodeStorage.this.maxKey++;
+
+      // Add the element to the transaction
+      transaction.put(
+          longToByteArray(CrosschainNodeStorage.this.maxKey),
+          KeyData.serialize(activeKeyGenerations, credentials, keyVersion));
+
+      // Simulate the adding in the cache
+      cache.put(
+          BigInteger.valueOf(CrosschainNodeStorage.this.maxKey),
+          new KeyData(activeKeyGenerations, credentials, keyVersion));
+
+      return incrementSize();
+    }
+
     public Updater putSize(final long size) {
       transaction.put(longToByteArray(0), longToByteArray(size));
       return this;

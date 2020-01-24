@@ -240,7 +240,14 @@ public class CrosschainController {
    */
   public long startThresholdKeyGeneration(
       final int threshold, final BlsThresholdCryptoSystem algorithm) {
-    return this.crosschainKeyManager.generateNewKeys(threshold, algorithm);
+    long keyVersion = this.crosschainKeyManager.generateNewKeys(threshold, algorithm);
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    updater.putKeyData(
+        crosschainKeyManager.getActiveKeyVersion(),
+        crosschainKeyManager.activeKeyGenerations,
+        crosschainKeyManager.credentials);
+    updater.commit();
+    return keyVersion;
   }
 
   /**
@@ -295,6 +302,12 @@ public class CrosschainController {
    */
   public void activateKey(final long keyVersion) {
     this.crosschainKeyManager.activateKey(keyVersion);
+    CrosschainNodeStorage.Updater updater = nodeStorage.updater();
+    updater.putKeyData(
+        crosschainKeyManager.getActiveKeyVersion(),
+        crosschainKeyManager.activeKeyGenerations,
+        crosschainKeyManager.credentials);
+    updater.commit();
   }
 
   /**
