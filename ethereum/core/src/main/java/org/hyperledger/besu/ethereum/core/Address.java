@@ -23,6 +23,8 @@ import org.hyperledger.besu.util.bytes.DelegatingBytesValue;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import java.math.BigInteger;
+
 /** A 160-bits account address. */
 public class Address extends DelegatingBytesValue
     implements org.hyperledger.besu.plugin.data.Address {
@@ -50,6 +52,8 @@ public class Address extends DelegatingBytesValue
   public static final Address CROSSCHAIN_GETINFO = Address.precompiled(120);
 
   public static final Address ZERO = Address.fromHexString("0x0");
+
+  public static final int MAX_PRECOMPILE = Byte.MAX_VALUE;
 
   protected Address(final BytesValue bytes) {
     super(bytes);
@@ -125,7 +129,7 @@ public class Address extends DelegatingBytesValue
 
   private static Address precompiled(final int value) {
     // Keep it simple while we don't need precompiled above 127.
-    checkArgument(value < Byte.MAX_VALUE);
+    checkArgument(value < MAX_PRECOMPILE);
     final byte[] address = new byte[SIZE];
     address[SIZE - 1] = (byte) value;
     return new Address(BytesValue.wrap(address));
@@ -134,6 +138,7 @@ public class Address extends DelegatingBytesValue
   public static Address privacyPrecompiled(final int value) {
     return precompiled(value);
   }
+
 
   /**
    * Address of the created contract.
@@ -209,4 +214,11 @@ public class Address extends DelegatingBytesValue
     final BytesValue copiedStorage = wrapped.copy();
     return Address.wrap(copiedStorage);
   }
+
+  public boolean isPrecompile() {
+    String val = toUnprefixedString();
+    BigInteger big = new BigInteger(val, 16);
+    return (big.compareTo(BigInteger.valueOf(MAX_PRECOMPILE)) < 0);
+  }
+
 }
