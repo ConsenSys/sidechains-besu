@@ -84,9 +84,11 @@ public class CrosschainNodeStorage {
     }
 
     static byte[] serialize(final BigInteger chainId, final String ipAddressAndPort) {
-      byte[] val = Bytes.concat(
-        Component.LINKED_NODE.getId(), longToByteArray(chainId.longValue()),
-        ipAddressAndPort.getBytes(Charset.defaultCharset()));
+      byte[] val =
+          Bytes.concat(
+              Component.LINKED_NODE.getId(),
+              longToByteArray(chainId.longValue()),
+              ipAddressAndPort.getBytes(Charset.defaultCharset()));
       return val;
     }
 
@@ -165,8 +167,10 @@ public class CrosschainNodeStorage {
         out.writeObject(credentials);
         byte[] credentialsB = byteOut.toByteArray();
 
-        String str = new String(activeKenGenB, Charset.defaultCharset()) + "#" +
-          new String(credentialsB, Charset.defaultCharset());
+        String str =
+            new String(activeKenGenB, Charset.defaultCharset())
+                + "#"
+                + new String(credentialsB, Charset.defaultCharset());
 
         return Bytes.concat(
             Component.KEY.getId(),
