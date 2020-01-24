@@ -36,14 +36,12 @@ import org.hyperledger.besu.ethereum.vm.MessageFrame;
 import org.hyperledger.besu.ethereum.vm.OperationTracer;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
-import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.tx.CrosschainContextGenerator;
 
 public class CrosschainTransactionProcessor extends MainnetTransactionProcessor {
   private static final Logger LOG = LogManager.getLogger();
@@ -246,8 +244,7 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
         if (acc.isLockable()) {
           if (acc.isLocked()) {
             LOG.error(
-                "Attempt to execute transaction on locked contract: {}",
-                accAddress.toString());
+                "Attempt to execute transaction on locked contract: {}", accAddress.toString());
             return Result.failed(gasAvailable.toLong(), validationResult, null);
           }
 
@@ -270,7 +267,8 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
               } else {
                 // The account that has changed is an EOA or a precompile.
                 // The sender account must increase its nonce as part of a transaction.
-                // However, no other account can change, and the sender's balance at this point should
+                // However, no other account can change, and the sender's balance at this point
+                // should
                 // remain unchanged. That is, they shouldn't transfer Ether into a locked account or
                 // have Ether sent from a locked account. This is to prevent Ether being created or
                 // destroyed as a result of ignored Crosschain Transactions.
@@ -284,7 +282,8 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
                 } else {
                   if (accAddress.isPrecompile()) {
                     LOG.info(
-                        "*****Updated precompile account {}: Needs further investigation", accAddress.toString());
+                        "*****Updated precompile account {}: Needs further investigation",
+                        accAddress.toString());
                   } else {
                     LOG.error(
                         "****Attempt to alter EOA account other than sender: {}",

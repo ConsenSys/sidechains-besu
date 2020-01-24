@@ -21,9 +21,9 @@ import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.util.bytes.BytesValue;
 import org.hyperledger.besu.util.bytes.DelegatingBytesValue;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-
 import java.math.BigInteger;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 /** A 160-bits account address. */
 public class Address extends DelegatingBytesValue
@@ -139,7 +139,6 @@ public class Address extends DelegatingBytesValue
     return precompiled(value);
   }
 
-
   /**
    * Address of the created contract.
    *
@@ -220,5 +219,4 @@ public class Address extends DelegatingBytesValue
     BigInteger big = new BigInteger(val, 16);
     return (big.compareTo(BigInteger.valueOf(MAX_PRECOMPILE)) < 0);
   }
-
 }
