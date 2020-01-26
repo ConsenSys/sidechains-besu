@@ -12,8 +12,10 @@
  */
 package org.hyperledger.besu.util.bytes;
 
+import java.io.Serializable;
+
 /** An implementation of {@link MutableBytes32} backed by a byte array ({@code byte[]}). */
-class MutableArrayWrappingBytes32 extends MutableArrayWrappingBytesValue implements MutableBytes32 {
+class MutableArrayWrappingBytes32 extends MutableArrayWrappingBytesValue implements MutableBytes32, Serializable {
 
   MutableArrayWrappingBytes32(final byte[] bytes) {
     this(bytes, 0);

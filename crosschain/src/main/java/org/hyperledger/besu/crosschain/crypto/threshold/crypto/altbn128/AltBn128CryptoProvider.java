@@ -23,9 +23,10 @@ import org.hyperledger.besu.crypto.altbn128.Fq12;
 import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class AltBn128CryptoProvider extends CryptoProviderBase implements BlsCryptoProvider {
+public class AltBn128CryptoProvider extends CryptoProviderBase implements BlsCryptoProvider, Serializable {
   public BlsCryptoProvider.DigestAlgorithm digestAlgorithm;
 
   public AltBn128CryptoProvider(final BlsCryptoProvider.DigestAlgorithm alg) {

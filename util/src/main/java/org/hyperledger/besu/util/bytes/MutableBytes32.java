@@ -14,6 +14,7 @@ package org.hyperledger.besu.util.bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.io.Serializable;
 import java.security.MessageDigest;
 
 /**

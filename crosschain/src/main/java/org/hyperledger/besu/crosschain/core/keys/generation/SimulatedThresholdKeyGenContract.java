@@ -15,16 +15,17 @@ package org.hyperledger.besu.crosschain.core.keys.generation;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.util.bytes.Bytes32;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 // Simulates a contract which sits on the sidechain.
-class SimulatedThresholdKeyGenContract {
+class SimulatedThresholdKeyGenContract implements Serializable {
   private long expectedNextVersion;
   private static final long KEY_VERSION_OF_FIRST_KEY = 1;
 
-  private Map<Long, SimulatedThresholdKeyGenContractSingleKeyGen> keyGens = new HashMap<>();
+  private transient Map<Long, SimulatedThresholdKeyGenContractSingleKeyGen> keyGens = new HashMap<>();
 
   public SimulatedThresholdKeyGenContract() {
     this(KEY_VERSION_OF_FIRST_KEY);

@@ -15,6 +15,7 @@ package org.hyperledger.besu.crosschain.crypto.threshold.scheme;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -34,7 +35,7 @@ import java.security.SecureRandom;
  *
  * <p>The system applies equally well to BLS Points.
  */
-public final class ThresholdScheme {
+public final class ThresholdScheme implements Serializable {
   private BlsCryptoProvider cryptoProvider;
 
   // Large prime number which must be bigger than the secret being protected.
@@ -44,7 +45,7 @@ public final class ThresholdScheme {
   private final int threshold;
 
   // Random number generator used to generate random coefficients from.
-  private final SecureRandom random;
+  private transient final SecureRandom random;
 
   /**
    * This constructor can be used when the class is to be used for all operations except for

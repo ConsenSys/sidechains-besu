@@ -12,16 +12,18 @@
  */
 package org.hyperledger.besu.util.bytes;
 
+import java.io.Serializable;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /** An implementation of {@link Bytes32} backed by a byte array ({@code byte[]}). */
-class ArrayWrappingBytes32 extends ArrayWrappingBytesValue implements Bytes32 {
+class ArrayWrappingBytes32 extends ArrayWrappingBytesValue implements Bytes32, Serializable {
 
-  ArrayWrappingBytes32(final byte[] bytes) {
+  public ArrayWrappingBytes32(final byte[] bytes) {
     this(checkLength(bytes), 0);
   }
 
-  ArrayWrappingBytes32(final byte[] bytes, final int offset) {
+  public ArrayWrappingBytes32(final byte[] bytes, final int offset) {
     super(checkLength(bytes, offset), offset, SIZE);
   }
 

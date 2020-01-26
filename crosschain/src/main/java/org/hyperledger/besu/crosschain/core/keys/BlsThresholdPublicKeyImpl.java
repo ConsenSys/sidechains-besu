@@ -18,6 +18,7 @@ import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -25,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Holds the Blockchain Public Key and associated meta-data. */
-public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKey {
+public class BlsThresholdPublicKeyImpl implements BlsThresholdPublicKey, Serializable {
   protected static final Logger LOG = LogManager.getLogger();
 
   private long keyVersion;

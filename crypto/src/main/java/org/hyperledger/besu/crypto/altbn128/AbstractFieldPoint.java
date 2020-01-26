@@ -12,6 +12,7 @@
  */
 package org.hyperledger.besu.crypto.altbn128;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Objects;
 
@@ -22,7 +23,7 @@ import com.google.common.base.MoreObjects;
  * https://github.com/ethereum/py_ecc/blob/master/py_ecc/bn128/bn128_field_elements.py
  */
 @SuppressWarnings("rawtypes")
-public abstract class AbstractFieldPoint<U extends AbstractFieldPoint> implements FieldPoint<U> {
+public abstract class AbstractFieldPoint<U extends AbstractFieldPoint> implements FieldPoint<U>, Serializable {
 
   private static final BigInteger TWO = BigInteger.valueOf(2);
 

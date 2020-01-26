@@ -17,13 +17,14 @@ import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.util.bytes.Bytes32;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Wraps the test version of the Threshold Key Generation Contract. */
-public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenContractInterface {
+public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenContractInterface, Serializable {
   private static final int DEFAULT_ROUND_DURATION = 5;
 
   private SimulatedThresholdKeyGenContract keyGen = new SimulatedThresholdKeyGenContract();

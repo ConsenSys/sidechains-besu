@@ -12,7 +12,9 @@
  */
 package org.hyperledger.besu.util.bytes;
 
-public class DelegatingBytes32 extends BaseDelegatingBytesValue<Bytes32> implements Bytes32 {
+import java.io.Serializable;
+
+public class DelegatingBytes32 extends BaseDelegatingBytesValue<Bytes32> implements Bytes32, Serializable {
   protected DelegatingBytes32(final Bytes32 wrapped) {
     super(unwrap(wrapped));
   }

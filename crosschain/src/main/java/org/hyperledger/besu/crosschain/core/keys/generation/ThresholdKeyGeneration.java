@@ -27,6 +27,7 @@ import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ThresholdKeyGeneration {
+public class ThresholdKeyGeneration implements Serializable {
   protected static final Logger LOG = LogManager.getLogger();
 
   private int threshold;
@@ -47,11 +48,11 @@ public class ThresholdKeyGeneration {
   private BlsThresholdCryptoSystem algorithm;
   private KeyStatus keyGenerationStatus = KeyStatus.UNKNOWN_KEY;
 
-  private SecureRandom prng = new PRNGSecureRandom();
+  private transient SecureRandom prng = new PRNGSecureRandom();
 
   private Map<BigInteger, BigInteger> mySecretShares;
   private BlsPoint[] myCoeffsPublicValues;
-  private Bytes32[] myCoeffsPublicValueCommitments;
+  private transient Bytes32[] myCoeffsPublicValueCommitments;
   private BigInteger myNodeAddress;
   private HashSet<BigInteger> nodesStillActiveInKeyGeneration;
 
@@ -370,7 +371,7 @@ public class ThresholdKeyGeneration {
     return yValue;
   }
 
-  class CrosschainPartSecretShareCallbackImpl implements CrosschainPartSecretShareCallback {
+  class CrosschainPartSecretShareCallbackImpl implements CrosschainPartSecretShareCallback, Serializable {
     @Override
     public void storePrivateSecretShareCallback(
         final BigInteger nodeId, final BigInteger secretShare) {

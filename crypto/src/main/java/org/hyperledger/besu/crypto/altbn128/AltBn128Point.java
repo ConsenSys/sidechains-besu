@@ -12,11 +12,13 @@
  */
 package org.hyperledger.besu.crypto.altbn128;
 
+import java.io.Serializable;
+
 /**
  * Adapted from the pc_ecc (Apache 2 License) implementation:
  * https://github.com/ethereum/py_ecc/blob/master/py_ecc/bn128/bn128_field_elements.py
  */
-public class AltBn128Point extends AbstractFieldPoint<AltBn128Point> {
+public class AltBn128Point extends AbstractFieldPoint<AltBn128Point> implements Serializable {
 
   static final Fq B = Fq.create(3);
 

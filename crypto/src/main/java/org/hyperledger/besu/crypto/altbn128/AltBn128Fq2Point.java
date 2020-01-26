@@ -12,13 +12,14 @@
  */
 package org.hyperledger.besu.crypto.altbn128;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
  * Adapted from the pc_ecc (Apache 2 License) implementation:
  * https://github.com/ethereum/py_ecc/blob/master/py_ecc/bn128/bn128_field_elements.py
  */
-public class AltBn128Fq2Point extends AbstractFieldPoint<AltBn128Fq2Point> {
+public class AltBn128Fq2Point extends AbstractFieldPoint<AltBn128Fq2Point> implements Serializable {
   private static BigInteger CURVE_ORDER =
       new BigInteger(
           "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);

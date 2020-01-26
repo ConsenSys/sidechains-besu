@@ -15,6 +15,7 @@ package org.hyperledger.besu.crosschain.p2p;
 import org.hyperledger.besu.crosschain.core.keys.generation.ThresholdKeyGenContractInterface;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +25,12 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface {
+public class SimulatedCrosschainDevP2P implements CrosschainDevP2PInterface, Serializable {
   protected static final Logger LOG = LogManager.getLogger();
   BigInteger realNodesAddress;
 
   private static final int DEFAULT_NUMBER_OF_SIMULATED_NODES = 0;
-  public Map<BigInteger, SimulatedOtherNode> otherNodes;
+  public transient Map<BigInteger, SimulatedOtherNode> otherNodes;
 
   public SimulatedCrosschainDevP2P(final ThresholdKeyGenContractInterface keyGenContractInterface) {
     this(keyGenContractInterface, DEFAULT_NUMBER_OF_SIMULATED_NODES);

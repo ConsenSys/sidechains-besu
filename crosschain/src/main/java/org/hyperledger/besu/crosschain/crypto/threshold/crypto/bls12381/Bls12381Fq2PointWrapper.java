@@ -15,14 +15,15 @@ package org.hyperledger.besu.crosschain.crypto.threshold.crypto.bls12381;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 import org.apache.milagro.amcl.BLS381.BIG;
 import org.apache.milagro.amcl.BLS381.ECP2;
 import org.apache.milagro.amcl.BLS381.FP2;
 
-public class Bls12381Fq2PointWrapper implements BlsPoint {
-  ECP2 point;
+public class Bls12381Fq2PointWrapper implements BlsPoint, Serializable {
+  transient ECP2 point;
 
   Bls12381Fq2PointWrapper(final org.apache.milagro.amcl.BLS381.ECP2 point) {
     this.point = point;

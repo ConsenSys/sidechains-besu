@@ -18,12 +18,13 @@ import org.hyperledger.besu.crypto.altbn128.AltBn128Point;
 import org.hyperledger.besu.crypto.altbn128.Fq;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 // TODO getting a class cast exception if BlsPublicKey is not added here -???
-public class AltBn128PointWrapper implements BlsPoint {
+public class AltBn128PointWrapper implements BlsPoint, Serializable {
 
-  AltBn128Point point;
+  transient AltBn128Point point;
 
   AltBn128PointWrapper(final AltBn128Point point) {
     this.point = point;

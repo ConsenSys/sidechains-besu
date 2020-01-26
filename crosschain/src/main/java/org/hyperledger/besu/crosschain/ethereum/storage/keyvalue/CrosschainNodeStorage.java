@@ -160,22 +160,13 @@ public class CrosschainNodeStorage {
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(byteOut);
         out.writeObject(activeKeyGenerations);
-        byte[] activeKenGenB = byteOut.toByteArray();
-
-        byteOut.reset();
-        out.reset();
         out.writeObject(credentials);
-        byte[] credentialsB = byteOut.toByteArray();
-
-        String str =
-            new String(activeKenGenB, Charset.defaultCharset())
-                + "#"
-                + new String(credentialsB, Charset.defaultCharset());
+        byte[] maps = byteOut.toByteArray();
 
         return Bytes.concat(
             Component.KEY.getId(),
             longToByteArray(activeKeyVersion),
-            str.getBytes(Charset.defaultCharset()));
+            maps);
       } catch (Exception e) {
         LOG.error("Unexpected exception while serializing crosschain key data: {}", e.toString());
         return null;
@@ -189,29 +180,19 @@ public class CrosschainNodeStorage {
 
       byte[] strBuf = new byte[buf.length - Long.BYTES - 1];
       System.arraycopy(buf, 1 + Long.BYTES, strBuf, 0, strBuf.length);
-      String[] data = new String(strBuf, Charset.defaultCharset()).split("#", 2);
 
       KeyData keyData = null;
 
       try {
-        // data[0] contains the activeKenGen map
-        ByteArrayInputStream byteIn =
-            new ByteArrayInputStream(data[0].getBytes(Charset.defaultCharset()));
-        ObjectInputStream in;
-
-        in = new ObjectInputStream(byteIn);
+        ByteArrayInputStream byteIn = new ByteArrayInputStream(strBuf);
+        ObjectInputStream in = new ObjectInputStream(byteIn);
         @SuppressWarnings("unchecked")
         Map<Long, ThresholdKeyGeneration> activeKeyGenerations =
             (Map<Long, ThresholdKeyGeneration>) in.readObject();
-
-        // data[1] contains the credentials map
-        byteIn = new ByteArrayInputStream(data[1].getBytes(Charset.defaultCharset()));
-        in = new ObjectInputStream(byteIn);
         @SuppressWarnings("unchecked")
         Map<Long, BlsThresholdCredentials> credentials =
             (Map<Long, BlsThresholdCredentials>) in.readObject();
         keyData = new KeyData(activeKeyGenerations, credentials, keyVersion);
-
       } catch (Exception e) {
         LOG.error("Exception while reading from the crosschain node store: {}", e);
       }
