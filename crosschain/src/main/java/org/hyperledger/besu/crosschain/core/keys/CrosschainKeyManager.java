@@ -103,9 +103,9 @@ public class CrosschainKeyManager {
   /**
    * This method is used to restore the key data from the persistent store when the node restarts.
    *
-   * @param activeKeyGenerations
-   * @param credentials
-   * @param activeKeyVersion
+   * @param activeKeyGenerations Current credentials
+   * @param credentials All the credentials
+   * @param activeKeyVersion The version of the key that is active.
    */
   public void restore(
       final Map<Long, ThresholdKeyGeneration> activeKeyGenerations,

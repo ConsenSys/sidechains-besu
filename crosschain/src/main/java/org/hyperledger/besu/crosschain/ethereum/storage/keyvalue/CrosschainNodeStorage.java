@@ -215,6 +215,7 @@ public class CrosschainNodeStorage {
    * @param linkedNodeManager LinkedNodeManager instance needed to add linked nodes.
    * @param coordContractManager CoordContractManager instance needed to add coordination contract
    *     information.
+   * @param keyManager CrosschainKeyManager instance needed to store and restore key data
    */
   public void restoreNodeData(
       final LinkedNodeManager linkedNodeManager,
