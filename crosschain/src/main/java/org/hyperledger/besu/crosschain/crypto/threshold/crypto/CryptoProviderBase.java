@@ -12,9 +12,9 @@
  */
 package org.hyperledger.besu.crosschain.crypto.threshold.crypto;
 
-import com.google.common.base.Charsets;
-
 import java.io.Serializable;
+
+import com.google.common.base.Charsets;
 
 /** Base class of all crypto providers. */
 public abstract class CryptoProviderBase implements BlsCryptoProvider, Serializable {

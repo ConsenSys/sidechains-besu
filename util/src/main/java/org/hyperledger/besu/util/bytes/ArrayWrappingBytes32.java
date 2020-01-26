@@ -12,9 +12,9 @@
  */
 package org.hyperledger.besu.util.bytes;
 
-import java.io.Serializable;
-
 import static com.google.common.base.Preconditions.checkArgument;
+
+import java.io.Serializable;
 
 /** An implementation of {@link Bytes32} backed by a byte array ({@code byte[]}). */
 class ArrayWrappingBytes32 extends ArrayWrappingBytesValue implements Bytes32, Serializable {

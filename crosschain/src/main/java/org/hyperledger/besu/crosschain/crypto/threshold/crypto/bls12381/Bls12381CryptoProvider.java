@@ -31,7 +31,8 @@ import org.apache.milagro.amcl.BLS381.FP12;
 import org.apache.milagro.amcl.BLS381.PAIR;
 import org.apache.milagro.amcl.BLS381.ROM;
 
-public class Bls12381CryptoProvider extends CryptoProviderBase implements BlsCryptoProvider, Serializable {
+public class Bls12381CryptoProvider extends CryptoProviderBase
+    implements BlsCryptoProvider, Serializable {
   private static final String SECURITY_DOMAIN = "BLS12";
 
   public BlsCryptoProvider.DigestAlgorithm digestAlgorithm;

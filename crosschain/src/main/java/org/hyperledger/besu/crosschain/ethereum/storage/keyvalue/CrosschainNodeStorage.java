@@ -163,10 +163,7 @@ public class CrosschainNodeStorage {
         out.writeObject(credentials);
         byte[] maps = byteOut.toByteArray();
 
-        return Bytes.concat(
-            Component.KEY.getId(),
-            longToByteArray(activeKeyVersion),
-            maps);
+        return Bytes.concat(Component.KEY.getId(), longToByteArray(activeKeyVersion), maps);
       } catch (Exception e) {
         LOG.error("Unexpected exception while serializing crosschain key data: {}", e.toString());
         return null;

@@ -371,7 +371,8 @@ public class ThresholdKeyGeneration implements Serializable {
     return yValue;
   }
 
-  class CrosschainPartSecretShareCallbackImpl implements CrosschainPartSecretShareCallback, Serializable {
+  class CrosschainPartSecretShareCallbackImpl
+      implements CrosschainPartSecretShareCallback, Serializable {
     @Override
     public void storePrivateSecretShareCallback(
         final BigInteger nodeId, final BigInteger secretShare) {

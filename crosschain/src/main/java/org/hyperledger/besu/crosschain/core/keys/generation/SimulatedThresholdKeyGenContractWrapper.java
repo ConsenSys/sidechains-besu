@@ -24,7 +24,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Wraps the test version of the Threshold Key Generation Contract. */
-public class SimulatedThresholdKeyGenContractWrapper implements ThresholdKeyGenContractInterface, Serializable {
+public class SimulatedThresholdKeyGenContractWrapper
+    implements ThresholdKeyGenContractInterface, Serializable {
   private static final int DEFAULT_ROUND_DURATION = 5;
 
   private SimulatedThresholdKeyGenContract keyGen = new SimulatedThresholdKeyGenContract();

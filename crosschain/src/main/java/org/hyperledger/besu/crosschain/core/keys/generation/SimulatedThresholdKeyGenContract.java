@@ -25,7 +25,8 @@ class SimulatedThresholdKeyGenContract implements Serializable {
   private long expectedNextVersion;
   private static final long KEY_VERSION_OF_FIRST_KEY = 1;
 
-  private transient Map<Long, SimulatedThresholdKeyGenContractSingleKeyGen> keyGens = new HashMap<>();
+  private transient Map<Long, SimulatedThresholdKeyGenContractSingleKeyGen> keyGens =
+      new HashMap<>();
 
   public SimulatedThresholdKeyGenContract() {
     this(KEY_VERSION_OF_FIRST_KEY);

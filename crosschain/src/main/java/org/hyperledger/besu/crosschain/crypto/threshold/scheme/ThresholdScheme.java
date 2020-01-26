@@ -45,7 +45,7 @@ public final class ThresholdScheme implements Serializable {
   private final int threshold;
 
   // Random number generator used to generate random coefficients from.
-  private transient final SecureRandom random;
+  private final transient SecureRandom random;
 
   /**
    * This constructor can be used when the class is to be used for all operations except for
