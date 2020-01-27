@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +40,9 @@ public class CrosschainProtocolManager implements ProtocolManager {
 
   private final ScheduledExecutorService peerConnectionScheduler =
       Executors.newSingleThreadScheduledExecutor();
+
+  private ScheduledFuture<?> futurePings;
+
   /**
    * Constructor for the crosschain protocol manager
    *
@@ -49,7 +53,9 @@ public class CrosschainProtocolManager implements ProtocolManager {
     LOG.debug("Initial peers :{}", ((ValidatorPeers) peers).getLatestValidators());
     int initialDelay = (int) (Math.random() * 5.0) + 2;
     LOG.debug("Pinger runs in {} secs", initialDelay);
-    peerConnectionScheduler.scheduleAtFixedRate(this::pinger, initialDelay, 10, TimeUnit.SECONDS);
+    futurePings =
+        peerConnectionScheduler.scheduleAtFixedRate(
+            this::pinger, initialDelay, 10, TimeUnit.SECONDS);
     // peerConnectionScheduler.schedule(this::pinger, initialDelay, TimeUnit.SECONDS);
 
   }
@@ -71,10 +77,18 @@ public class CrosschainProtocolManager implements ProtocolManager {
   }
 
   @Override
-  public void stop() {}
+  public void stop() {
+    futurePings.cancel(true);
+  }
 
   @Override
-  public void awaitStop() throws InterruptedException {}
+  public void awaitStop() throws InterruptedException {
+    try {
+      futurePings.get();
+    } catch (Exception e) {
+      // we just want it to die
+    }
+  }
 
   /**
    * This function is called by the P2P framework when an "CCH" message has been received.

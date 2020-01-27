@@ -80,7 +80,7 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
 
   @After
   public void closeDown() throws Exception {
-    this.cluster.close();
+    this.clusterCoordinationBlockchain.close();
     this.clusterBc1.close();
     this.clusterBc2.close();
   }
