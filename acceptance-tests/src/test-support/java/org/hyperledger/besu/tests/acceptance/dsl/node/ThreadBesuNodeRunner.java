@@ -49,23 +49,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.google.common.io.Files;
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 
 public class ThreadBesuNodeRunner implements BesuNodeRunner {
 
   private final Logger LOG = LogManager.getLogger();
+  // private final Logger PROCESS_LOG = LogManager.getLogger("org.hyperledger.besu.SubProcessLog");
+
   private final Map<String, Runner> besuRunners = new HashMap<>();
-  private ExecutorService nodeExecutor = Executors.newCachedThreadPool();
+  //  private ExecutorService nodeExecutor = Executors.newCachedThreadPool();
 
   private final Map<Node, BesuPluginContextImpl> besuPluginContextMap = new HashMap<>();
 
@@ -99,9 +99,12 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
 
   @Override
   public void startNode(final BesuNode node) {
-    if (nodeExecutor == null || nodeExecutor.isShutdown()) {
-      nodeExecutor = Executors.newCachedThreadPool();
-    }
+    //    if (nodeExecutor == null || nodeExecutor.isShutdown()) {
+    //      nodeExecutor = Executors.newCachedThreadPool();
+    //    }
+
+    assert (!ThreadContext.containsKey("node"));
+    ThreadContext.put("node", node.getName());
 
     final StorageServiceImpl storageService = new StorageServiceImpl();
     final BesuConfiguration commonPluginConfiguration =
@@ -193,6 +196,7 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
     runner.start();
 
     besuRunners.put(node.getName(), runner);
+    ThreadContext.remove("node");
   }
 
   @Override
@@ -203,6 +207,7 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
     }
     node.stop();
     killRunner(node.getName());
+    // ThreadContext.clearMap();
   }
 
   @Override
@@ -213,14 +218,14 @@ public class ThreadBesuNodeRunner implements BesuNodeRunner {
 
     // iterate over a copy of the set so that besuRunner can be updated when a runner is killed
     new HashSet<>(besuRunners.keySet()).forEach(this::killRunner);
-    try {
-      nodeExecutor.shutdownNow();
-      if (!nodeExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-        throw new IllegalStateException("Failed to shut down node executor");
-      }
-    } catch (final InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    //    try {
+    //      nodeExecutor.shutdownNow();
+    //      if (!nodeExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+    //        throw new IllegalStateException("Failed to shut down node executor");
+    //      }
+    //    } catch (final InterruptedException e) {
+    //      throw new RuntimeException(e);
+    //    }
   }
 
   @Override

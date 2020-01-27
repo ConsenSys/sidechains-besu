@@ -38,7 +38,24 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.net.NetTransactions
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.perm.PermissioningTransactions;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.web3.Web3Transactions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 public class AcceptanceTestBase {
 
@@ -91,6 +108,74 @@ public class AcceptanceTestBase {
     besu = new BesuNodeFactory();
     contractVerifier = new ContractVerifier(accounts.getPrimaryBenefactor());
     permissionedNodeBuilder = new PermissionedNodeBuilder();
+  }
+
+  private static LoggerContext ctx;
+  private static XmlConfiguration config;
+  private static PatternLayout layout;
+  // private static String pattern;
+
+  static {
+    System.setProperty("log4j2.isThreadContextMapInheritable", "true");
+  }
+
+  @Rule public final TestName name = new TestName();
+
+  @BeforeClass
+  public static void classSetUpAcceptanceTestBase() {
+    // Store the initial Console Appender's layout
+    if (layout == null) {
+      ctx = (LoggerContext) LogManager.getContext(false);
+      config = (XmlConfiguration) ctx.getConfiguration();
+      var originalAppender =
+          (ConsoleAppender)
+              config.getAppenders().values().stream()
+                  .filter(a -> a instanceof ConsoleAppender)
+                  .collect(Collectors.toList())
+                  .get(0);
+      var originalLayout = (PatternLayout) originalAppender.getLayout();
+      var pattern = originalLayout.getConversionPattern();
+      layout = PatternLayout.newBuilder().withPattern(pattern).build();
+    }
+  }
+
+  @Before
+  public void setUpAcceptanceTestBase() {
+
+    Collection<Appender> old_appenders = config.getAppenders().values();
+    Collection<Appender> new_appenders = new ArrayList<Appender>();
+    ConsoleAppender appender1 =
+        ConsoleAppender.newBuilder()
+            .setLayout(layout)
+            .setConfiguration(config)
+            .setIgnoreExceptions(false)
+            .setTarget(Target.SYSTEM_OUT)
+            .setFollow(true)
+            .setName("stdout")
+            .build();
+    new_appenders.add(appender1);
+    if (Boolean.getBoolean("acctests.savePerTestLogs")) {
+      FileAppender appender2 =
+          FileAppender.newBuilder()
+              .setName("file")
+              .withFileName("build/acceptanceTestLogs/" + name.getMethodName() + ".log")
+              .withAppend(false)
+              .setLayout(layout)
+              .setConfiguration(config)
+              .build();
+      new_appenders.add(appender2);
+    }
+    for (var a : old_appenders) {
+      config.removeAppender(a.getName());
+    }
+    for (var a : new_appenders) {
+      a.start();
+      config.addAppender(a);
+      config.getRootLogger().addAppender(a, null, null);
+    }
+
+    ctx.updateLoggers();
+    ThreadContext.put("test", name.getMethodName());
   }
 
   @After

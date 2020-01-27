@@ -114,8 +114,11 @@ sourceSets {
 processTestResources.dependsOn(':besu:testJar')
 
 task acceptanceTest(type: Test) {
+  inputs.property "integration.date", LocalTime.now() // so it runs every time
+
   dependsOn(rootProject.installDist)
   systemProperty 'acctests.runBesuAsProcess', 'false'
+   systemProperty 'acctests.savePerTestLogs', 'true'
   mustRunAfter rootProject.subprojects*.test
   description = 'Runs Besu acceptance tests.'
   group = 'verification'
