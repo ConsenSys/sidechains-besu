@@ -39,10 +39,10 @@ public class CrosschainPrecompiledContractRegistries {
         new CrosschainGetInfoPrecompiledContract(
             precompiledContractConfiguration.getGasCalculator()));
     registry.put(
-            Address.CROSSCHAIN_ISLOCKED,
-            Account.DEFAULT_VERSION,
-            new CrosschainGetInfoPrecompiledContract(
-                    precompiledContractConfiguration.getGasCalculator()));
+        Address.CROSSCHAIN_ISLOCKED,
+        Account.DEFAULT_VERSION,
+        new CrosschainGetInfoPrecompiledContract(
+            precompiledContractConfiguration.getGasCalculator()));
     return registry;
   }
 }
