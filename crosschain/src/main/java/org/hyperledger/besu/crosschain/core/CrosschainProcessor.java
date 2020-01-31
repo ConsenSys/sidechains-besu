@@ -131,6 +131,13 @@ public class CrosschainProcessor {
 
         BytesValue result = processResult(response);
 
+        /*if((!processSubordinateTransactions
+          && subordinateTransactionsAndView.getType().isSubordinateView())) {
+          ThresholdSignedMessage viewResultMessage = ThresholdSignedMessage.decodeEncodedMessage(result);
+          //viewResultMessage.verify(viewResultMessage.getSignature(), )
+          LOG.info("Signed View Result Message KeyVersion = {}", viewResultMessage.getKeyVersion());
+        }*/
+
         // TODO If this is a subordinate view
         // TODO verify the signature of the result
         // TODO check that the Subordiante View hash returned matches the submitted subordiante

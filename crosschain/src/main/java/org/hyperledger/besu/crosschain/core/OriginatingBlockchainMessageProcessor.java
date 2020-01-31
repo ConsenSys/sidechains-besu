@@ -82,12 +82,13 @@ public class OriginatingBlockchainMessageProcessor {
     ThresholdSignedMessage message = new CrosschainTransactionStartMessage(transaction);
 
     // Cooperate with other nodes to threshold sign the message.
-    ThresholdSignedMessage signedMessage = this.keyManager.thresholdSign(message);
+    this.keyManager.thresholdSign(message);
+    // Now the message is signed.
 
     // Submit message to Coordination Contract.
     boolean startedOK =
         new OutwardBoundConnectionManager(this.nodeKeys)
-            .coordContractStart(ipAndPort, coordBcId, coordContractAddress, signedMessage);
+            .coordContractStart(ipAndPort, coordBcId, coordContractAddress, message);
     LOG.info("started OK {}", startedOK);
   }
 }
