@@ -62,6 +62,19 @@ public class SubordinateViewResultMessage extends AbstractThresholdSignedMessage
   }
 
   @Override
+  public BytesValue getEncodedCoreMessage() {
+    return RLP.encode(
+        out -> {
+          out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.SUBORDINATE_VIEW_RESULT.value);
+          out.writeLongScalar(this.blockNumber);
+          out.writeBytesValue(this.result);
+          out.writeBytesValue(RLP.encode(this.transaction::writeTo));
+          out.endList();
+        });
+  }
+
+  @Override
   public BytesValue getEncodedMessage() {
     return RLP.encode(
         out -> {
