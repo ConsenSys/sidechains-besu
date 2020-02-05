@@ -38,7 +38,6 @@ public class CoordinationContractWrapper {
   private static final Logger LOG = LogManager.getLogger();
   public static final BigInteger VOTE_CHANGE_PUBLIC_KEY = BigInteger.valueOf(5);
 
-
   public static final int RETRY = 5;
   // TODO this should be parameter and not hard coded.
   public static final int COORDINATION_BLOCK_PERIOD_IN_MS = 2000;
