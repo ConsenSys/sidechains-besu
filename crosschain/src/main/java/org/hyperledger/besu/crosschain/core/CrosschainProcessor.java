@@ -58,8 +58,8 @@ public class CrosschainProcessor {
   private LinkedNodeManager linkedNodeManager;
   private CoordContractManager coordContractManager;
 
-  public CrosschainProcessor(final LinkedNodeManager linkedNodeManager,
-                             final CoordContractManager coordContractManager) {
+  public CrosschainProcessor(
+      final LinkedNodeManager linkedNodeManager, final CoordContractManager coordContractManager) {
     this.linkedNodeManager = linkedNodeManager;
     this.coordContractManager = coordContractManager;
   }
@@ -136,53 +136,64 @@ public class CrosschainProcessor {
 
         BytesValue result = processResult(response);
 
-        if((!processSubordinateTransactions
-          && subordinateTransactionsAndView.getType().isSubordinateView())) {
+        if ((!processSubordinateTransactions
+            && subordinateTransactionsAndView.getType().isSubordinateView())) {
 
           // Decode the response
           SubordinateViewResultMessage viewResultMessage =
-            (SubordinateViewResultMessage)ThresholdSignedMessage.decodeEncodedMessage(result);
+              (SubordinateViewResultMessage) ThresholdSignedMessage.decodeEncodedMessage(result);
 
           // Obtain the blockchain public key from the coordination contract using the sidechainId
           Optional<BigInteger> coordChainId = transaction.getCrosschainCoordinationBlockchainId();
           Optional<Address> coordAddr = transaction.getCrosschainCoordinationContractAddress();
-          if(coordChainId.isEmpty() || coordAddr.isEmpty()) {
+          if (coordChainId.isEmpty() || coordAddr.isEmpty()) {
             LOG.error("Coordination Chain is not set up");
             return true;
           }
-          String coordIpAddrAndPort = coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
+          String coordIpAddrAndPort =
+              coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
           BigInteger publicKey =
-            new OutwardBoundConnectionManager(this.nodeKeys)
-              .getPublicKeyFromCoordContract(coordIpAddrAndPort, coordChainId.get(), coordAddr.get(),
-                sidechainId, viewResultMessage.getKeyVersion());
+              new OutwardBoundConnectionManager(this.nodeKeys)
+                  .getPublicKeyFromCoordContract(
+                      coordIpAddrAndPort,
+                      coordChainId.get(),
+                      coordAddr.get(),
+                      sidechainId,
+                      viewResultMessage.getKeyVersion());
           LOG.info("Obtained the public key {}", publicKey.toByteArray());
 
           // TODO: VERIFY THE SIGNATURE
           BlsPoint.load(publicKey.toByteArray());
 
           // Verify the signature
-//          boolean signatureVerification =
-//          publicKey
-//            .getAlgorithm()
-//            .getCryptoProvider()
-//            .verify(
-//              publicKey,
-//              viewResultMessage.getEncodedCoreMessage().extractArray(),
-//              BlsPoint.load(viewResultMessage.getSignature().getByteArray()));
-//          if(signatureVerification) {
-//            LOG.info("The signature of Subordinate View Result message verified.");
-//          } else {
-//            LOG.error("Verification of the subordinate view result message's signature failed.");
-//            return true;
-//          }
+          //          boolean signatureVerification =
+          //          publicKey
+          //            .getAlgorithm()
+          //            .getCryptoProvider()
+          //            .verify(
+          //              publicKey,
+          //              viewResultMessage.getEncodedCoreMessage().extractArray(),
+          //              BlsPoint.load(viewResultMessage.getSignature().getByteArray()));
+          //          if(signatureVerification) {
+          //            LOG.info("The signature of Subordinate View Result message verified.");
+          //          } else {
+          //            LOG.error("Verification of the subordinate view result message's signature
+          // failed.");
+          //            return true;
+          //          }
 
           // Check that the Subordiante View hash returned matches the submitted subordiante view.
-          if(viewResultMessage.getResult().equals(subordinateTransactionsAndView.getSignedResult())) {
-            LOG.info("The obtained subordinate view result matches the signed result in the transaction.");
+          if (viewResultMessage
+              .getResult()
+              .equals(subordinateTransactionsAndView.getSignedResult())) {
+            LOG.info(
+                "The obtained subordinate view result matches the signed result in the transaction.");
             subordinateTransactionsAndView.addSignedResult(result);
           } else {
-            LOG.error("The obtained subordinate view result does not match the signed result in the transaction: {} {}",
-              viewResultMessage.getResult().extractArray(), subordinateTransactionsAndView.getSignedResult().extractArray());
+            LOG.error(
+                "The obtained subordinate view result does not match the signed result in the transaction: {} {}",
+                viewResultMessage.getResult().extractArray(),
+                subordinateTransactionsAndView.getSignedResult().extractArray());
             return true;
           }
 

@@ -12,8 +12,8 @@
  */
 package org.hyperledger.besu.tests.acceptance.crosschain.common;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static org.hyperledger.besu.crosschain.core.coordination.CoordinationContractWrapper.VOTE_CHANGE_PUBLIC_KEY;
+
 import org.hyperledger.besu.crosschain.core.coordination.generated.CrosschainCoordinationV1;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKeyImpl;
@@ -22,12 +22,14 @@ import org.hyperledger.besu.tests.acceptance.dsl.AcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;
 import org.hyperledger.besu.tests.acceptance.dsl.node.BesuNode;
 import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
+import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import org.hyperledger.besu.util.bytes.BytesValue;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.besu.crypto.crosschain.BlsThresholdCryptoSystem;
@@ -37,8 +39,6 @@ import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.CrosschainTransactionManager;
-
-import static org.hyperledger.besu.crosschain.core.coordination.CoordinationContractWrapper.VOTE_CHANGE_PUBLIC_KEY;
 
 public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
   private static final Logger LOG = LogManager.getLogger();
@@ -102,41 +102,53 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
     String ipAddressAndPort = ipAddress + ":" + port;
     nodeOnBlockchain.execute(
-      crossTransactions.addCoordinationContract(
-        this.nodeOnCoordinationBlockchain.getChainId(),
-        this.coordContract.getContractAddress(),
-        ipAddressAndPort));
+        crossTransactions.addCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress(),
+            ipAddressAndPort));
 
     BigInteger keyVersionGenerated =
-      nodeOnBlockchain.execute(
-        crossTransactions.startThresholdKeyGeneration(
-          1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
+        nodeOnBlockchain.execute(
+            crossTransactions.startThresholdKeyGeneration(
+                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
     System.out.println("Key version generated: " + keyVersionGenerated);
 
     LOG.info("Adding the blockchain to the coordination contract");
-    TransactionReceipt receipt = coordContract.addBlockchain(
-      nodeOnBlockchain.getChainId(),
-      this.votingContract.getContractAddress(),
-      BigInteger.valueOf(VOTING_TIME_PERIOD)).send();
+    TransactionReceipt receipt =
+        coordContract
+            .addBlockchain(
+                nodeOnBlockchain.getChainId(),
+                this.votingContract.getContractAddress(),
+                BigInteger.valueOf(VOTING_TIME_PERIOD))
+            .send();
     LOG.info(" TX Receipt: {}", receipt);
 
     boolean exists = coordContract.getBlockchainExists(nodeOnBlockchain.getChainId()).send();
-    LOG.info(" Blockchain {} has been added to coordination contract: {}",
-      nodeOnBlockchain.getChainId(), exists);
+    LOG.info(
+        " Blockchain {} has been added to coordination contract: {}",
+        nodeOnBlockchain.getChainId(),
+        exists);
 
-    CrossBlockchainPublicKeyResponse publicKeyResponse = nodeOnBlockchain.execute(
-      this.crossTransactions.getBlockchainPublicKey(keyVersionGenerated.longValue()));
+    CrossBlockchainPublicKeyResponse publicKeyResponse =
+        nodeOnBlockchain.execute(
+            this.crossTransactions.getBlockchainPublicKey(keyVersionGenerated.longValue()));
     BlsThresholdPublicKey publicKey =
-      BlsThresholdPublicKeyImpl.readFrom(BytesValue.fromHexString(publicKeyResponse.getEncodedKey()));
+        BlsThresholdPublicKeyImpl.readFrom(
+            BytesValue.fromHexString(publicKeyResponse.getEncodedKey()));
 
-    LOG.info("Propose vote to add the public key {} {}", publicKey.getPublicKey().store(),
-      keyVersionGenerated);
-    receipt = coordContract.proposeVote(
-      nodeOnBlockchain.getChainId(),
-      VOTE_CHANGE_PUBLIC_KEY,
-      BigInteger.ZERO,
-      keyVersionGenerated,
-      publicKey.getPublicKey().store()).send();
+    LOG.info(
+        "Propose vote to add the public key {} {}",
+        publicKey.getPublicKey().store(),
+        keyVersionGenerated);
+    receipt =
+        coordContract
+            .proposeVote(
+                nodeOnBlockchain.getChainId(),
+                VOTE_CHANGE_PUBLIC_KEY,
+                BigInteger.ZERO,
+                keyVersionGenerated,
+                publicKey.getPublicKey().store())
+            .send();
     LOG.info(" TX Receipt: {}", receipt);
 
     // Sleep for voting period
@@ -150,11 +162,11 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     LOG.info("Waiting for block to be mined");
     Thread.sleep(BLOCK_PERIOD);
 
-    boolean keyExists = coordContract.publicKeyExists(nodeOnBlockchain.getChainId(), keyVersionGenerated).send();
+    boolean keyExists =
+        coordContract.publicKeyExists(nodeOnBlockchain.getChainId(), keyVersionGenerated).send();
     if (keyExists) {
       LOG.info("Key successfully added to coordination contract");
-    }
-    else {
+    } else {
       LOG.error("FAILED to add key to contract");
       return;
     }
@@ -163,10 +175,11 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     nodeOnBlockchain.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
 
     Tuple3<BigInteger, BigInteger, List<BigInteger>> result =
-      this.coordContract.getPublicKey(nodeOnBlockchain.getChainId(), keyVersionGenerated).send();
-    LOG.info("***** {} {} {}", result.component1(), result.component2(), result.component3().size());
+        this.coordContract.getPublicKey(nodeOnBlockchain.getChainId(), keyVersionGenerated).send();
+    LOG.info(
+        "***** {} {} {}", result.component1(), result.component2(), result.component3().size());
     ByteBuffer buf = ByteBuffer.allocate(32);
-    for(BigInteger a : result.component3()) {
+    for (BigInteger a : result.component3()) {
       buf.putLong(a.longValue());
     }
     LOG.info("*** RETRIEVED PUBLIC KEY = {}", new BigInteger(buf.array()));
