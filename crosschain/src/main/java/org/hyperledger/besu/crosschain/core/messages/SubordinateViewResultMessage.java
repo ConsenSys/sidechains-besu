@@ -93,7 +93,8 @@ public class SubordinateViewResultMessage extends AbstractThresholdSignedMessage
   protected void decode(final RLPInput in) {
     this.blockNumber = in.readLongScalar();
     this.result = in.readBytesValue();
-    this.transaction = CrosschainTransaction.readFrom(in);
+    final RLPInput inTrans = RLP.input(in.readBytesValue());
+    this.transaction = CrosschainTransaction.readFrom(inTrans);
     this.keyVersion = in.readLongScalar();
     BytesValue sig = in.readBytesValue();
     if (sig.isZero()) {

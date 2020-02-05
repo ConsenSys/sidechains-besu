@@ -18,6 +18,8 @@ import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +28,7 @@ import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
@@ -33,6 +36,8 @@ import org.web3j.tx.gas.StaticGasProvider;
 
 public class CoordinationContractWrapper {
   private static final Logger LOG = LogManager.getLogger();
+  public static final BigInteger VOTE_CHANGE_PUBLIC_KEY = BigInteger.valueOf(5);
+
 
   public static final int RETRY = 5;
   // TODO this should be parameter and not hard coded.
@@ -100,5 +105,45 @@ public class CoordinationContractWrapper {
         "Crosschain Coordination Contract start message transaction receipt: {}",
         receipt.toString());
     return true;
+  }
+
+  public BigInteger getPublicKeyFromCoordContract(
+    final String coordIpAddrAndPort,
+    final BigInteger coordChainId,
+    final Address coordContractAddr,
+    final BigInteger blockchainId,
+    final long keyVersion) {
+
+    String uri = "http://" + coordIpAddrAndPort + "/";
+    Besu web3j = Besu.build(new HttpService(uri), COORDINATION_BLOCK_PERIOD_IN_MS);
+    RawTransactionManager tm =
+      new RawTransactionManager(
+        web3j,
+        this.credentials,
+        coordChainId.longValue(),
+        RETRY,
+        COORDINATION_BLOCK_PERIOD_IN_MS);
+    CrosschainCoordinationV1 contractWrapper =
+      CrosschainCoordinationV1.load(
+        coordContractAddr.getHexString(), web3j, tm, this.freeGasProvider);
+
+    try {
+      LOG.info("Querying the coordination contract for public key with chain Id = {}, key version = {}",
+        blockchainId.longValue(), keyVersion);
+      Tuple3<BigInteger, BigInteger, List<BigInteger>> result =
+        contractWrapper.getPublicKey(blockchainId, BigInteger.valueOf(keyVersion)).send();
+      LOG.info("Coordination contract gives back {}, {}, {}",
+        result.component1().longValue(), result.component2().longValue(), result.component3().size());
+      ByteBuffer buffer = ByteBuffer.allocate(32);
+      for(BigInteger elem : result.component3()) {
+        LOG.info("ELEMENT = {}", elem.longValue());
+        buffer.putLong(elem.longValue());
+      }
+      return new BigInteger(buffer.array());
+    } catch(Exception e) {
+      LOG.error("Exception while getting the public key from coordination contract {}", e.toString());
+    }
+
+    return BigInteger.ZERO;
   }
 }
