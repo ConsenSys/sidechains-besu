@@ -107,11 +107,14 @@ public class CrossProcessSubordinateView implements JsonRpcMethod {
     }
     if (resultOrError instanceof TransactionSimulatorResult) {
       // Decode the response
-      SubordinateViewResultMessage resultMessage = (SubordinateViewResultMessage)ThresholdSignedMessage
-        .decodeEncodedMessage(((TransactionSimulatorResult) resultOrError).getOutput());
+      SubordinateViewResultMessage resultMessage =
+          (SubordinateViewResultMessage)
+              ThresholdSignedMessage.decodeEncodedMessage(
+                  ((TransactionSimulatorResult) resultOrError).getOutput());
       LOG.info("Simulator Result: " + resultMessage.getResult());
 
-      return new JsonRpcSuccessResponse(request.getId(), resultMessage.getEncodedMessage().getHexString());
+      return new JsonRpcSuccessResponse(
+          request.getId(), resultMessage.getEncodedMessage().getHexString());
     } else if (resultOrError instanceof TransactionValidator.TransactionInvalidReason) {
       JsonRpcError error =
           convertTransactionInvalidReason(
