@@ -18,8 +18,6 @@ import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
-import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
-import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsPoint;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
@@ -73,7 +71,7 @@ public class CrosschainController {
   public CrosschainController() {
     this.linkedNodeManager = new LinkedNodeManager();
     this.coordContractManager = new CoordContractManager();
-    this.processor = new CrosschainProcessor(this.linkedNodeManager);
+    this.processor = new CrosschainProcessor(this.linkedNodeManager, this.coordContractManager);
     this.crosschainKeyManager = CrosschainKeyManager.getCrosschainKeyManager();
     this.origMsgProcessor =
         new OriginatingBlockchainMessageProcessor(
@@ -101,12 +99,6 @@ public class CrosschainController {
     this.worldStateArchive = worldStateArchive;
   }
 
-  /**
-   * Execute a subordinate transaction.
-   *
-   * @param transaction Subordinate Transaction to execute.
-   * @return Validaiton result.
-   */
   /**
    * Execute a subordinate transaction.
    *
@@ -174,30 +166,19 @@ public class CrosschainController {
       BytesValue resultBytesValue = resultTxSim.getOutput();
       LOG.info("Transaction Simulator Result: " + resultBytesValue.toString());
 
-      ThresholdSignedMessage resultMessage =
+      SubordinateViewResultMessage resultMessage =
           new SubordinateViewResultMessage(subordinateView, resultBytesValue, blockNumber);
 
       // Cooperate with other nodes to threshold sign (in-place) the message.
       this.crosschainKeyManager.thresholdSign(resultMessage);
 
-      BlsThresholdPublicKey pubKey = this.crosschainKeyManager.getActivePublicKey();
-      boolean verification =
-          pubKey
-              .getAlgorithm()
-              .getCryptoProvider()
-              .verify(
-                  pubKey.getPublicKey(),
-                  resultMessage.getEncodedCoreMessage().extractArray(),
-                  BlsPoint.load(resultMessage.getSignature().getByteArray()));
-      LOG.info(" The Verification is {}", verification);
       // TODO: Broadcast using P2P
 
-      // Replace the output with the output and signature in the result object.
       txResult =
           MainnetTransactionProcessor.Result.successful(
               resultTxSim.getResult().getLogs(),
               resultTxSim.getResult().getGasRemaining(),
-              resultBytesValue,
+              resultMessage.getEncodedMessage(),
               resultTxSim.getValidationResult());
       return new TransactionSimulatorResult(subordinateView, txResult);
     } else {

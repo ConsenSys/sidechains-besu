@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Flowable;
 import org.web3j.abi.EventEncoder;
@@ -24,6 +25,7 @@ import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Function;
@@ -42,6 +44,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -404,31 +407,24 @@ public class CrosschainCoordinationV1 extends Contract {
     return executeRemoteCallSingleValueReturn(function, BigInteger.class);
   }
 
-  //  public RemoteFunctionCall<Tuple3<BigInteger, BigInteger, List<BigInteger>>> getPublicKey(
-  //      BigInteger _blockchainId, BigInteger _keyVersion) {
-  //    final Function function =
-  //        new Function(
-  //            FUNC_GETPUBLICKEY,
-  //            Arrays.<Type>asList(
-  //                new org.web3j.abi.datatypes.generated.Uint256(_blockchainId),
-  //                new org.web3j.abi.datatypes.generated.Uint64(_keyVersion)),
-  //            Arrays.<TypeReference<?>>asList(
-  //                new TypeReference<Uint256>() {},
-  //                new TypeReference<Uint32>() {},
-  //                new TypeReference<DynamicArray<Uint256>>() {}));
-  //    return new RemoteFunctionCall<Tuple3<BigInteger, BigInteger, List<BigInteger>>>(
-  //        function,
-  //        new Callable<Tuple3<BigInteger, BigInteger, List<BigInteger>>>() {
-  //          @Override
-  //          public Tuple3<BigInteger, BigInteger, List<BigInteger>> call() throws Exception {
-  //            List<Type> results = executeCallMultipleValueReturn(function);
-  //            return new Tuple3<BigInteger, BigInteger, List<BigInteger>>(
-  //                (BigInteger) results.get(0).getValue(),
-  //                (BigInteger) results.get(1).getValue(),
-  //                convertToNative((List<Uint256>) results.get(2).getValue()));
-  //          }
-  //        });
-  //  }
+  public RemoteFunctionCall<Tuple3<BigInteger, BigInteger, List<BigInteger>>> getPublicKey(BigInteger _blockchainId, BigInteger _keyVersion) {
+    final Function function = new Function(FUNC_GETPUBLICKEY,
+      Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_blockchainId),
+        new org.web3j.abi.datatypes.generated.Uint64(_keyVersion)),
+      Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint32>() {}, new TypeReference<DynamicArray<Uint256>>() {}));
+    return new RemoteFunctionCall<Tuple3<BigInteger, BigInteger, List<BigInteger>>>(function,
+      new Callable<Tuple3<BigInteger, BigInteger, List<BigInteger>>>() {
+        @Override
+        @SuppressWarnings("unchecked")
+        public Tuple3<BigInteger, BigInteger, List<BigInteger>> call() throws Exception {
+          List<Type> results = executeCallMultipleValueReturn(function);
+          return new Tuple3<BigInteger, BigInteger, List<BigInteger>>(
+            (BigInteger) results.get(0).getValue(),
+            (BigInteger) results.get(1).getValue(),
+            convertToNative((List<Type>) results.get(2).getValue()));
+        }
+      });
+  }
 
   public RemoteFunctionCall<TransactionReceipt> start(
       BigInteger _originatingBlockchainId,

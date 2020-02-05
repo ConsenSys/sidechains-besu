@@ -92,4 +92,15 @@ public class OutwardBoundConnectionManager {
     return this.wrapper.start(
         ipAddressPort, blockchainId, contractAddress, (CrosschainTransactionStartMessage) message);
   }
+
+  // Get a blockchain's public key from the coordination contract
+  public BigInteger getPublicKeyFromCoordContract(
+    final String coordIpAddrAndPort,
+    final BigInteger coordChainId,
+    final Address coordContractAddr,
+    final BigInteger blockchainId,
+    final long keyVersion) {
+    return this.wrapper.getPublicKeyFromCoordContract(
+      coordIpAddrAndPort, coordChainId, coordContractAddr, blockchainId, keyVersion);
+  }
 }
