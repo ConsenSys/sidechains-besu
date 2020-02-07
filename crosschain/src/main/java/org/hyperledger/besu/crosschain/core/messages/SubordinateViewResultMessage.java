@@ -13,6 +13,7 @@
 package org.hyperledger.besu.crosschain.core.messages;
 
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
+import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.util.bytes.BytesValue;
@@ -69,7 +70,7 @@ public class SubordinateViewResultMessage extends AbstractThresholdSignedMessage
           out.writeLongScalar(ThresholdSignedMessageType.SUBORDINATE_VIEW_RESULT.value);
           out.writeLongScalar(this.blockNumber);
           out.writeBytesValue(this.result);
-          out.writeBytesValue(RLP.encode(this.transaction::writeTo));
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.endList();
         });
   }
@@ -82,7 +83,7 @@ public class SubordinateViewResultMessage extends AbstractThresholdSignedMessage
           out.writeLongScalar(ThresholdSignedMessageType.SUBORDINATE_VIEW_RESULT.value);
           out.writeLongScalar(this.blockNumber);
           out.writeBytesValue(this.result);
-          out.writeBytesValue(RLP.encode(this.transaction::writeTo));
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.writeLongScalar(this.keyVersion);
           out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
           out.endList();
@@ -93,8 +94,8 @@ public class SubordinateViewResultMessage extends AbstractThresholdSignedMessage
   protected void decode(final RLPInput in) {
     this.blockNumber = in.readLongScalar();
     this.result = in.readBytesValue();
-    final RLPInput inTrans = RLP.input(in.readBytesValue());
-    this.transaction = CrosschainTransaction.readFrom(inTrans);
+    String hashHexString = in.readBytesValue().getHexString();
+    this.txHash = Hash.fromHexString(hashHexString);
     this.keyVersion = in.readLongScalar();
     BytesValue sig = in.readBytesValue();
     if (sig.isZero()) {

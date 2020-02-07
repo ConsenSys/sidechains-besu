@@ -14,6 +14,7 @@ package org.hyperledger.besu.crosschain.core.messages;
 
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
+import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.ethereum.rlp.RLPOutput;
 import org.hyperledger.besu.util.bytes.BytesValue;
@@ -24,6 +25,7 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
   protected long keyVersion = 0;
   protected BytesValue signature = null;
   protected CrosschainTransaction transaction;
+  protected Hash txHash;
 
   public AbstractThresholdSignedMessage() {}
 
@@ -36,6 +38,7 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
     this.transaction = transaction;
     this.keyVersion = keyVersion;
     this.signature = signature;
+    this.txHash = this.transaction.hash();
   }
 
   public AbstractThresholdSignedMessage(final RLPInput in) {
@@ -46,6 +49,10 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
   public void setSignature(final long keyVersion, final BytesValue sig) {
     this.keyVersion = keyVersion;
     this.signature = sig;
+  }
+
+  public Hash getTxHash() {
+    return this.txHash;
   }
 
   @Override

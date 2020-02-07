@@ -188,21 +188,13 @@ public class CrosschainProcessor {
           }
 
           // Check that the Subordiante View hash returned matches the submitted subordiante view.
-          //          if (viewResultMessage
-          //              .getResult()
-          //              .equals(subordinateTransactionsAndView.getSignedResult())) {
-          //            LOG.info(
-          //                "The obtained subordinate view result matches the signed result in the
-          // transaction.");
-          //            subordinateTransactionsAndView.addSignedResult(result);
-          //          } else {
-          //            LOG.error(
-          //                "The obtained subordinate view result does not match the signed result
-          // in the transaction: {} {}",
-          //                viewResultMessage.getResult().extractArray(),
-          //                subordinateTransactionsAndView.getSignedResult().extractArray());
-          //            return true;
-          //          }
+          if (subordinateTransactionsAndView.hash().equals(viewResultMessage.getTxHash())) {
+            LOG.info("The hash of the subordinate view result transaction matches.");
+          } else {
+            LOG.error("The hash of the subordinate view result transaction does not match");
+            return true;
+          }
+
           LOG.info("Crosschain Result: " + viewResultMessage.getResult().toString());
           subordinateTransactionsAndView.addSignedResult(viewResultMessage.getResult());
         } else {
