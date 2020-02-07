@@ -18,7 +18,6 @@ import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -136,7 +135,7 @@ public class CoordinationContractWrapper {
       String pubKeyHexString = new String();
       for (BigInteger elem : result.component3()) {
         String temp = elem.toString(16);
-        while(temp.length() < 64) {
+        while (temp.length() < 64) {
           temp = "0" + temp;
         }
         pubKeyHexString += temp;
