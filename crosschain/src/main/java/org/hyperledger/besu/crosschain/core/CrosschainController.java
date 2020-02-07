@@ -108,7 +108,7 @@ public class CrosschainController {
    * Execute a subordinate transaction.
    *
    * @param transaction Subordinate Transaction to execute.
-   * @return Validation result.
+   * @return Validaiton result.
    */
   public ValidationResult<TransactionValidator.TransactionInvalidReason> addLocalTransaction(
       final CrosschainTransaction transaction) {
