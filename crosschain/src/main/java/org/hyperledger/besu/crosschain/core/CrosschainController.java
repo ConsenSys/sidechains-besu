@@ -17,8 +17,8 @@ import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
-import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
+import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
@@ -110,15 +110,6 @@ public class CrosschainController {
    * @param transaction Subordinate Transaction to execute.
    * @return Validation result.
    */
-<<<<<<< HEAD
-  /**
-   * Execute a subordinate transaction.
-   *
-   * @param transaction Subordinate Transaction to execute.
-   * @return Validation result.
-   */
-=======
->>>>>>> Added logic for retrieving public keys from Coordination contract for verifying subordinate view result message
   public ValidationResult<TransactionValidator.TransactionInvalidReason> addLocalTransaction(
       final CrosschainTransaction transaction) {
     if (transaction.getType().isOriginatingTransaction()) {
