@@ -133,17 +133,15 @@ public class CoordinationContractWrapper {
           keyVersion);
       Tuple3<BigInteger, BigInteger, List<BigInteger>> result =
           contractWrapper.getPublicKey(blockchainId, BigInteger.valueOf(keyVersion)).send();
-      LOG.info(
-          "Coordination contract gives back {}, {}, {}",
-          result.component1().longValue(),
-          result.component2().longValue(),
-          result.component3().size());
-      ByteBuffer buffer = ByteBuffer.allocate(32);
+      String pubKeyHexString = new String();
       for (BigInteger elem : result.component3()) {
-        LOG.info("ELEMENT = {}", elem.longValue());
-        buffer.putLong(elem.longValue());
+        String temp = elem.toString(16);
+        while(temp.length() < 64) {
+          temp = "0" + temp;
+        }
+        pubKeyHexString += temp;
       }
-      return new BigInteger(buffer.array());
+      return new BigInteger(pubKeyHexString, 16);
     } catch (Exception e) {
       LOG.error(
           "Exception while getting the public key from coordination contract {}", e.toString());
