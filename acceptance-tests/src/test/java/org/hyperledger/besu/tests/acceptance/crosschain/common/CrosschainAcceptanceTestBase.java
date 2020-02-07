@@ -15,18 +15,13 @@ package org.hyperledger.besu.tests.acceptance.crosschain.common;
 import static org.hyperledger.besu.crosschain.core.coordination.CoordinationContractWrapper.VOTE_CHANGE_PUBLIC_KEY;
 
 import org.hyperledger.besu.crosschain.core.coordination.generated.CrosschainCoordinationV1;
-import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
-import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKeyImpl;
 import org.hyperledger.besu.tests.acceptance.crosschain.generated.VotingAlgMajorityWhoVoted;
 import org.hyperledger.besu.tests.acceptance.dsl.AcceptanceTestBase;
 import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;
 import org.hyperledger.besu.tests.acceptance.dsl.node.BesuNode;
 import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
-import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,11 +32,22 @@ import org.web3j.protocol.besu.response.crosschain.CrossBlockchainPublicKeyRespo
 import org.web3j.protocol.besu.response.crosschain.CrossIsLockedResponse;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.CrosschainTransactionManager;
 
 public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
   private static final Logger LOG = LogManager.getLogger();
+
+  public static byte[] stringToBytes(final String str1) {
+    System.out.println(str1);
+    String str = str1.substring(2);
+    byte[] out = new byte[(str.length()) / 2];
+    for (int i = 0; i < out.length; i++) {
+      String s = str.substring(i * 2, i * 2 + 2);
+      byte b = (byte) (Integer.decode("0x" + s) & 0xff);
+      out[i] = b;
+    }
+    return out;
+  }
 
   public static final int VOTING_TIME_OUT = 2;
   public static final int VOTING_TIME_PERIOD = 1;
@@ -132,13 +138,11 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     CrossBlockchainPublicKeyResponse publicKeyResponse =
         nodeOnBlockchain.execute(
             this.crossTransactions.getBlockchainPublicKey(keyVersionGenerated.longValue()));
-    BlsThresholdPublicKey publicKey =
-        BlsThresholdPublicKeyImpl.readFrom(
-            BytesValue.fromHexString(publicKeyResponse.getEncodedKey()));
 
+    byte[] publicKeyBytes = stringToBytes(publicKeyResponse.getEncodedKey());
     LOG.info(
-        "Propose vote to add the public key {} {}",
-        publicKey.getPublicKey().store(),
+        "Propose vote to add the public key {} with key version = {}",
+        publicKeyBytes,
         keyVersionGenerated);
     receipt =
         coordContract
@@ -147,7 +151,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
                 VOTE_CHANGE_PUBLIC_KEY,
                 BigInteger.ZERO,
                 keyVersionGenerated,
-                publicKey.getPublicKey().store())
+                publicKeyBytes)
             .send();
     LOG.info(" TX Receipt: {}", receipt);
 
@@ -173,16 +177,6 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
     // Finally, activate the key.
     nodeOnBlockchain.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
-
-    Tuple3<BigInteger, BigInteger, List<BigInteger>> result =
-        this.coordContract.getPublicKey(nodeOnBlockchain.getChainId(), keyVersionGenerated).send();
-    LOG.info(
-        "***** {} {} {}", result.component1(), result.component2(), result.component3().size());
-    ByteBuffer buf = ByteBuffer.allocate(32);
-    for (BigInteger a : result.component3()) {
-      buf.putLong(a.longValue());
-    }
-    LOG.info("*** RETRIEVED PUBLIC KEY = {}", new BigInteger(buf.array()));
   }
 
   public void setUpBlockchain1() throws Exception {
