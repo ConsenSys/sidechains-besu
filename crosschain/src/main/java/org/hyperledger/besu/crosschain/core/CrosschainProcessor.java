@@ -57,6 +57,8 @@ public class CrosschainProcessor {
   Vertx vertx;
 
   private LinkedNodeManager linkedNodeManager;
+
+  @SuppressWarnings("UnusedVariable")
   private CoordContractManager coordContractManager;
 
   public CrosschainProcessor(
@@ -119,7 +121,6 @@ public class CrosschainProcessor {
 
         Optional<BigInteger> optionalSidechainId = subordinateTransactionsAndView.getChainId();
         BigInteger sidechainId = optionalSidechainId.orElse(BigInteger.ZERO);
-        // TODO Allow for BigInteger chainids.
 
         // Get the address from chain mapping.
         String ipAddress = this.linkedNodeManager.getIpAddressAndPort(sidechainId);
@@ -161,21 +162,25 @@ public class CrosschainProcessor {
                       coordAddr.get(),
                       sidechainId,
                       viewResultMessage.getKeyVersion());
-          LOG.info("Obtained the public key {} from crosschain coordination contract.", publicKey.toString(16));
+          LOG.info(
+              "Obtained the public key {} from crosschain coordination contract.",
+              publicKey.toString(16));
 
           // Verify the signature
           BlsPoint publicKeyBlsPoint = BlsPoint.load(publicKey.toByteArray());
 
           BlsCryptoProvider cryptoProvider =
-            BlsCryptoProvider.getInstance(
-              BlsCryptoProvider.CryptoProviderTypes.LOCAL_ALT_BN_128,
-              BlsCryptoProvider.DigestAlgorithm.KECCAK256);
+              BlsCryptoProvider.getInstance(
+                  BlsCryptoProvider.CryptoProviderTypes.LOCAL_ALT_BN_128,
+                  BlsCryptoProvider.DigestAlgorithm.KECCAK256);
 
-          boolean signatureVerification = cryptoProvider.verify(publicKeyBlsPoint,
-            viewResultMessage.getEncodedCoreMessage().extractArray(),
-            BlsPoint.load(viewResultMessage.getSignature().getByteArray()));
+          boolean signatureVerification =
+              cryptoProvider.verify(
+                  publicKeyBlsPoint,
+                  viewResultMessage.getEncodedCoreMessage().extractArray(),
+                  BlsPoint.load(viewResultMessage.getSignature().getByteArray()));
 
-          if(signatureVerification) {
+          if (signatureVerification) {
             LOG.info("The signature of Subordinate View Result message verified.");
           } else {
             LOG.error("Verification of the subordinate view result message's signature failed.");
@@ -183,20 +188,23 @@ public class CrosschainProcessor {
           }
 
           // Check that the Subordiante View hash returned matches the submitted subordiante view.
-//          if (viewResultMessage
-//              .getResult()
-//              .equals(subordinateTransactionsAndView.getSignedResult())) {
-//            LOG.info(
-//                "The obtained subordinate view result matches the signed result in the transaction.");
-//            subordinateTransactionsAndView.addSignedResult(result);
-//          } else {
-//            LOG.error(
-//                "The obtained subordinate view result does not match the signed result in the transaction: {} {}",
-//                viewResultMessage.getResult().extractArray(),
-//                subordinateTransactionsAndView.getSignedResult().extractArray());
-//            return true;
-//          }
-          subordinateTransactionsAndView.addSignedResult(result);
+          //          if (viewResultMessage
+          //              .getResult()
+          //              .equals(subordinateTransactionsAndView.getSignedResult())) {
+          //            LOG.info(
+          //                "The obtained subordinate view result matches the signed result in the
+          // transaction.");
+          //            subordinateTransactionsAndView.addSignedResult(result);
+          //          } else {
+          //            LOG.error(
+          //                "The obtained subordinate view result does not match the signed result
+          // in the transaction: {} {}",
+          //                viewResultMessage.getResult().extractArray(),
+          //                subordinateTransactionsAndView.getSignedResult().extractArray());
+          //            return true;
+          //          }
+          LOG.info("Crosschain Result: " + viewResultMessage.getResult().toString());
+          subordinateTransactionsAndView.addSignedResult(viewResultMessage.getResult());
         } else {
           LOG.info("Crosschain Result: " + result.toString());
           subordinateTransactionsAndView.addSignedResult(result);
