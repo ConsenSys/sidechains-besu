@@ -13,6 +13,7 @@
 package org.hyperledger.besu.crosschain.ethereum.crosschain;
 
 import org.hyperledger.besu.ethereum.chain.Blockchain;
+import org.hyperledger.besu.ethereum.core.AbstractWorldUpdater;
 import org.hyperledger.besu.ethereum.core.Account;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
@@ -241,54 +242,61 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
       Collection<Account> changedAccounts = worldUpdater.getTouchedAccounts();
       for (Account acc : changedAccounts) {
         Address accAddress = acc.getAddress();
-        if (acc.isLockable()) {
-          if (acc.isLocked()) {
-            LOG.error(
-                "Attempt to execute transaction on locked contract: {}", accAddress.toString());
-            return Result.failed(gasAvailable.toLong(), validationResult, null);
-          }
+        if (!(acc instanceof MutableAccount)) {
+          LOG.error("Unexpectedly NOT a Mutable account");
+          throw new Error("Unexpectedly NOT a Mutable account");
+        }
+        MutableAccount updateTrackingAccount = (MutableAccount) acc;
+        if (updateTrackingAccount.changed()) {
+          if (acc.isLockable()) {
+            if (acc.isLocked()) {
+              LOG.error(
+                  "Attempt to execute transaction on locked contract: {}", accAddress.toString());
+              return Result.failed(gasAvailable.toLong(), validationResult, null);
+            }
 
-          // Normal, non-crosschain transactions do not lock contracts.
-          if (transaction instanceof CrosschainTransaction) {
-            LOG.info("Locking updated account: {}", accAddress.toString());
-            final MutableAccount mutableContract = worldUpdater.getMutable(accAddress);
-            mutableContract.lock();
-          }
-        } else {
-          // Normal non-crosschain transactions can change non-lockable contract.
-          if (transaction instanceof CrosschainTransaction) {
-            CrosschainTransaction xTx = (CrosschainTransaction) transaction;
-            if (xTx.getType().isLockableTransaction()) {
-              if (acc.hasCode()) {
-                LOG.error(
-                    "Attempt to execute crosschain transaction on non-lockable contract: {}",
-                    accAddress.toString());
-                return Result.failed(gasAvailable.toLong(), validationResult, null);
-              } else {
-                // The account that has changed is an EOA or a precompile.
-                // The sender account must increase its nonce as part of a transaction.
-                // However, no other account can change, and the sender's balance at this point
-                // should
-                // remain unchanged. That is, they shouldn't transfer Ether into a locked account or
-                // have Ether sent from a locked account. This is to prevent Ether being created or
-                // destroyed as a result of ignored Crosschain Transactions.
-                if (accAddress.equals(senderAddress)) {
-                  if (!acc.getBalance().equals(previousBalance.plus(upfrontGasCost))) {
-                    LOG.error(
-                        "Sender account has sent or received Ether as part of a Crosschain Transaction: {}",
-                        acc.getAddress().toString());
-                    return Result.failed(gasAvailable.toLong(), validationResult, null);
-                  }
+            // Normal, non-crosschain transactions do not lock contracts.
+            if (transaction instanceof CrosschainTransaction) {
+              LOG.info("Locking updated account: {}", accAddress.toString());
+              final MutableAccount mutableContract = worldUpdater.getMutable(accAddress);
+              mutableContract.lock();
+            }
+          } else {
+            // Normal non-crosschain transactions can change non-lockable contract.
+            if (transaction instanceof CrosschainTransaction) {
+              CrosschainTransaction xTx = (CrosschainTransaction) transaction;
+              if (xTx.getType().isLockableTransaction()) {
+                if (acc.hasCode()) {
+                  LOG.error(
+                      "Attempt to update the state of a non-lockable contract during a crosschain transaction: {}",
+                      accAddress.toString());
+                  return Result.failed(gasAvailable.toLong(), validationResult, null);
                 } else {
-                  if (accAddress.isPrecompile()) {
-                    LOG.info(
-                        "*****Updated precompile account {}: Needs further investigation",
-                        accAddress.toString());
+                  // The account that has changed is an EOA or a precompile.
+                  // The sender account must increase its nonce as part of a transaction.
+                  // However, no other account can change, and the sender's balance at this point
+                  // should
+                  // remain unchanged. That is, they shouldn't transfer Ether into a locked account or
+                  // have Ether sent from a locked account. This is to prevent Ether being created or
+                  // destroyed as a result of ignored Crosschain Transactions.
+                  if (accAddress.equals(senderAddress)) {
+                    if (!acc.getBalance().equals(previousBalance.plus(upfrontGasCost))) {
+                      LOG.error(
+                          "Sender account has sent or received Ether as part of a Crosschain Transaction: {}",
+                          acc.getAddress().toString());
+                      return Result.failed(gasAvailable.toLong(), validationResult, null);
+                    }
                   } else {
-                    LOG.error(
-                        "****Attempt to alter EOA account other than sender: {}",
-                        acc.getAddress().toString());
-                    return Result.failed(gasAvailable.toLong(), validationResult, null);
+                    if (accAddress.isPrecompile()) {
+                      LOG.info(
+                          "*****Updated precompile account {}: Needs further investigation",
+                          accAddress.toString());
+                    } else {
+                      LOG.error(
+                          "****Attempt to alter EOA account other than sender: {}",
+                          acc.getAddress().toString());
+                      return Result.failed(gasAvailable.toLong(), validationResult, null);
+                    }
                   }
                 }
               }
@@ -296,14 +304,6 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
           }
         }
       }
-
-      //      Collection<Address> deletedAccounts = worldUpdater.deletedAccounts();
-      //      for (Address addr: deletedAccounts) {
-      //        // TODO: We will have to work out how to handle deleted accounts in the future.
-      //        // TODO: calling the code below will return null if the account has been deleted.
-      //        //Account acc = worldState.get(addr);
-      //
-      //      }
 
       worldUpdater.commit();
     }

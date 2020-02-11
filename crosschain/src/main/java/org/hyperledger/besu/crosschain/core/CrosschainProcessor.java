@@ -133,7 +133,7 @@ public class CrosschainProcessor {
 
         // TODO If this is a subordinate view
         // TODO verify the signature of the result
-        // TODO check that the Subordiante View hash returned matches the submitted subordiante
+        // TODO check that the Subordinate View hash returned matches the submitted subordinate
         // view.
         LOG.info("Crosschain Result: " + result.toString());
         subordinateTransactionsAndView.addSignedResult(result);

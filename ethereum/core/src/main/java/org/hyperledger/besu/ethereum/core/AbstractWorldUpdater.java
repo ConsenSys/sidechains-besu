@@ -14,6 +14,8 @@ package org.hyperledger.besu.ethereum.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
 import org.hyperledger.besu.util.uint.UInt256;
@@ -158,6 +160,9 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
    * balance where updated or not doesn't matter, we just need their new value).
    */
   public static class UpdateTrackingAccount<A extends Account> implements MutableAccount {
+    private static final Logger LOG = LogManager.getLogger();
+
+
     private final Address address;
 
     @Nullable private final A account; // null if this is a new account.
@@ -167,6 +172,8 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     private int version;
     private boolean lockable;
     private LockState lockState;
+
+    private boolean hasChanged = false;
 
     @Nullable private BytesValue updatedCode; // Null if the underlying code has not been updated.
     @Nullable private Hash updatedCodeHash;
@@ -204,6 +211,7 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
       this.lockState = account.getLockState();
 
       this.updatedStorage = new TreeMap<>();
+//      LOG.info("*** Account {}: created", this.address.toString());
     }
 
     /**
@@ -254,6 +262,9 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     @Override
     public void setNonce(final long value) {
       this.nonce = value;
+      // Nonce changes do not constitute a reversable change due to discarding updates due to an ignored crosschain transaction.
+//      this.hasChanged = true;
+//      LOG.info("*** Account {} change: nonce set to {}", this.address.toString(), value);
     }
 
     @Override
@@ -263,7 +274,11 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
 
     @Override
     public void setBalance(final Wei value) {
-      this.balance = value;
+      if (!value.equals(this.balance)) {
+        this.balance = value;
+        this.hasChanged = true;
+        LOG.info("*** Account {} change: balance set to {}", this.address.toString(), value.toHexString());
+      }
     }
 
     @Override
@@ -274,6 +289,8 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     @Override
     public void setLockability(final boolean lockable) {
       this.lockable = lockable;
+//      this.hasChanged = true;
+//      LOG.info("*** Account {} change: lockability set to {}", this.address.toString(), lockable);
     }
 
     @Override
@@ -284,11 +301,15 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     @Override
     public void lock() {
       this.lockState = LockState.LOCK;
+//      this.hasChanged = true;
+//      LOG.info("*** Account {} change: lock called", this.address.toString());
     }
 
     @Override
     public void unlock(final boolean commit) {
       this.lockState = commit ? LockState.UNLOCK_COMMIT : LockState.UNLOCK_IGNORE;
+//      this.hasChanged = true;
+//      LOG.info("*** Account {} change: unlock called", this.address.toString());
     }
 
     @Override
@@ -299,6 +320,8 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     @Override
     public void setLockState(final LockState action) {
       this.lockState = action;
+//      this.hasChanged = true;
+//      LOG.info("*** Account {} change: set lock state called with action: {}", this.address.toString(), action.toString());
     }
 
     @Override
@@ -331,11 +354,15 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     @Override
     public void setCode(final BytesValue code) {
       this.updatedCode = code;
+      this.hasChanged = true;
+  //    LOG.info("*** Account {} change: set code called", this.address.toString());
     }
 
     @Override
     public void setVersion(final int version) {
       this.version = version;
+      this.hasChanged = true;
+//      LOG.info("*** Account {} change: set version to {}", this.address.toString(), version);
     }
 
     @Override
@@ -388,16 +415,28 @@ public abstract class AbstractWorldUpdater<W extends WorldView, A extends Accoun
     @Override
     public void setStorageValue(final UInt256 key, final UInt256 value) {
       updatedStorage.put(key, value);
+      this.hasChanged = true;
+//      LOG.info("*** Account {} change: set storage value", this.address.toString());
     }
 
     @Override
     public void clearStorage() {
       storageWasCleared = true;
       updatedStorage.clear();
+      this.hasChanged = true;
+//      LOG.info("*** Account {} change: clear storage", this.address.toString());
     }
 
     public boolean getStorageWasCleared() {
       return storageWasCleared;
+    }
+
+    @Override
+    public boolean changed() {
+//      LOG.info("*** Has Changed: {}; Storage Cleared: {}, updatedStorageLength: {}",
+//          hasChanged, storageWasCleared, updatedStorage.size());
+
+      return this.hasChanged;
     }
 
     @Override
