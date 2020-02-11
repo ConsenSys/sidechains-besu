@@ -57,8 +57,6 @@ public class CrosschainProcessor {
   Vertx vertx;
 
   private LinkedNodeManager linkedNodeManager;
-
-  @SuppressWarnings("UnusedVariable")
   private CoordContractManager coordContractManager;
 
   public CrosschainProcessor(

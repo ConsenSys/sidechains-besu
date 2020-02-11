@@ -265,7 +265,6 @@ public class CrosschainKeyManager {
     ThresholdSigning signer =
         new ThresholdSigning(this.p2p, this.credentials.get(this.activeKeyVersion));
     BlsPoint point = signer.sign(toBeSigned.extractArray(), message.getEncodedMessage());
-    ThresholdSignedMessage result = message;
-    result.setSignature(this.activeKeyVersion, BytesValue.wrap(point.store()));
+    message.setSignature(this.activeKeyVersion, BytesValue.wrap(point.store()));
   }
 }

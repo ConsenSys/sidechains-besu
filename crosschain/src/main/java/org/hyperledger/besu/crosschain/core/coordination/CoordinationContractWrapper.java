@@ -35,7 +35,6 @@ import org.web3j.tx.gas.StaticGasProvider;
 
 public class CoordinationContractWrapper {
   private static final Logger LOG = LogManager.getLogger();
-  public static final BigInteger VOTE_CHANGE_PUBLIC_KEY = BigInteger.valueOf(5);
 
   public static final int RETRY = 5;
   // TODO this should be parameter and not hard coded.
