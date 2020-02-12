@@ -17,6 +17,7 @@ import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
+import org.hyperledger.besu.crosschain.core.messages.SubordinateTransactionReadyMessage;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
 import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
@@ -88,14 +89,15 @@ public class CrosschainController {
       final Blockchain blockchain,
       final WorldStateArchive worldStateArchive,
       final CrosschainNodeStorage nodeStorage) {
+    this.crosschainKeyManager.init(sidechainId, nodeKeys);
     this.processor.init(
         transactionSimulator,
         transactionPool,
         sidechainId,
         nodeKeys,
         blockchain,
-        worldStateArchive);
-    this.crosschainKeyManager.init(sidechainId, nodeKeys);
+        worldStateArchive,
+        this.crosschainKeyManager);
     this.origMsgProcessor.init(nodeKeys);
     this.transactionPool = transactionPool;
     this.blockchain = blockchain;
@@ -116,6 +118,8 @@ public class CrosschainController {
       // TODO The start message stuff will take a while. The rest of the code should be executed in
       // some sort of "do later"
       origMsgProcessor.doStartMessageMagic(transaction);
+      // Setup the list of to be mined (originating and subordinate) transactions.
+      origMsgProcessor.listMiningTxForCommit(transaction);
     }
 
     // Get Subordinate View results.
@@ -140,6 +144,27 @@ public class CrosschainController {
     // blockingExecutor, maybe
     ValidationResult<TransactionValidator.TransactionInvalidReason> validationResult =
         this.transactionPool.addLocalTransaction(transaction);
+
+    // Wait for the transaction to be mined. The transaction is deemed to be mined when the
+    // transaction disappears from the list of pendingTransactions.
+    while (this.transactionPool.getPendingTransactions().containsTransaction(transaction.hash())) {
+      try {
+        Thread.sleep(1000);
+      } catch (Exception e) {
+        LOG.error(
+            "Exception in Thread.sleep while waiting for the transaction to be mined: {}",
+            e.toString());
+      }
+    }
+
+    // Now that the transaction is mined, send subordinate transaction ready messages in case of
+    // subordinate transactions. After receiving the ready message update the list of txsToBeMined.
+    // In case of originating transaction update the list directly.
+    Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>> txReadyMsgError =
+        updateListAndSendTxReadyMsg(transaction);
+    if (txReadyMsgError.isPresent()) {
+      return txReadyMsgError.get();
+    }
 
     if (transaction.getType().isLockableTransaction()) {
       validationResult.ifValid(
@@ -323,6 +348,37 @@ public class CrosschainController {
    */
   public BlsThresholdPublicKey getBlockchainPublicKey(final long keyVersion) {
     return this.crosschainKeyManager.getPublicKey(keyVersion);
+  }
+
+  /**
+   * Now that the transaction is mined, send subordinate transaction ready messages in case of
+   * subordinate transactions. After receiving the ready message update the list of txsToBeMined. In
+   * case of originating transaction update the list directly.
+   *
+   * @param transaction Transaction that was mined.
+   * @return Any error in the process of sending subordinateTransactionReady message.
+   */
+  private Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>>
+      updateListAndSendTxReadyMsg(final CrosschainTransaction transaction) {
+    if (transaction.getType().isOriginatingTransaction()) {
+      this.origMsgProcessor.removeOrigTxInsideToBeMined(
+          transaction.getOriginatingSidechainId().get(), transaction.hash());
+      return Optional.empty();
+    } else {
+      return this.processor.sendSubTxReady(transaction);
+    }
+  }
+
+  /**
+   * We are receiving the subordinateTransactionReady message on the originating chain. This method
+   * verifies the signature and removes the entry from the txsToBeMined set. When this set becomes
+   * empty, we are good to send the commit message to the coordination contract
+   *
+   * @param subTxReadyMsg SubordinateTransactionReady message.
+   * @return Returns true if there is any error, otherwise false.
+   */
+  public boolean receiveSubTxReadyMsg(final SubordinateTransactionReadyMessage subTxReadyMsg) {
+    return this.origMsgProcessor.removeTxInsideToBeMined(subTxReadyMsg);
   }
 
   public void setKeyGenerationContractAddress(final Address address) {

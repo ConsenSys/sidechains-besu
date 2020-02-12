@@ -12,6 +12,8 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
+import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
+import org.hyperledger.besu.crosschain.core.messages.SubordinateTransactionReadyMessage;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
 import org.hyperledger.besu.crosschain.crypto.threshold.crypto.BlsCryptoProvider;
@@ -58,6 +60,7 @@ public class CrosschainProcessor {
 
   private LinkedNodeManager linkedNodeManager;
   private CoordContractManager coordContractManager;
+  private CrosschainKeyManager crosschainKeyManager;
 
   public CrosschainProcessor(
       final LinkedNodeManager linkedNodeManager, final CoordContractManager coordContractManager) {
@@ -71,13 +74,15 @@ public class CrosschainProcessor {
       final BigInteger sidechainId,
       final SECP256K1.KeyPair nodeKeys,
       final Blockchain blockchain,
-      final WorldStateArchive worldStateArchive) {
+      final WorldStateArchive worldStateArchive,
+      final CrosschainKeyManager crosschainKeyManager) {
     this.transactionSimulator = transactionSimulator;
     this.transactionPool = transactionPool;
     this.sidechainId = sidechainId;
     this.nodeKeys = nodeKeys;
     this.blockchain = blockchain;
     this.worldStateArchive = worldStateArchive;
+    this.crosschainKeyManager = crosschainKeyManager;
 
     this.vertx = Vertx.vertx();
     // this seems to cause a couple of internal exceptions visible in DEBUG
@@ -280,6 +285,39 @@ public class CrosschainProcessor {
               transaction.getTo().orElse(transaction.contractAddress().orElse(Address.ZERO));
           sendSignallingTransaction(toAddress);
         });
+  }
+
+  /**
+   * This method threshold signs and sends the subordinateTransactionReady message to the
+   * originating chain.
+   *
+   * @param subTx The given subordinate transaction.
+   * @return Returns error (if any) in the ValidationResult with the reason.
+   */
+  public Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>> sendSubTxReady(
+      final CrosschainTransaction subTx) {
+    // Because this is a subordinate transaction, we are guaranteed to have the Optional
+    // field of originating chain Id and subordinate chain Id to be set.
+    BigInteger origChainId = subTx.getOriginatingSidechainId().get();
+    String origIpAddressAndPort = this.linkedNodeManager.getIpAddressAndPort(origChainId);
+    SubordinateTransactionReadyMessage txReadyMsg = new SubordinateTransactionReadyMessage(subTx);
+    this.crosschainKeyManager.thresholdSign(txReadyMsg);
+
+    // Submit the message to the linked node that is on originating chain
+    try {
+      OutwardBoundConnectionManager.post(
+          origIpAddressAndPort,
+          RpcMethod.CROSS_SEND_TRANSACTION_READY_MESSAGE.getMethodName(),
+          txReadyMsg.getEncodedMessage().getHexString());
+    } catch (Exception e) {
+      LOG.error(
+          "Exception during sending transaction ready message happens here: " + e.getMessage());
+      return Optional.of(
+          ValidationResult.invalid(
+              TransactionValidator.TransactionInvalidReason
+                  .CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION));
+    }
+    return Optional.empty();
   }
 
   /**

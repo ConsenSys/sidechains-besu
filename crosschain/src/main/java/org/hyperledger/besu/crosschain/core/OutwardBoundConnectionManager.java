@@ -103,4 +103,8 @@ public class OutwardBoundConnectionManager {
     return this.wrapper.getPublicKeyFromCoordContract(
         coordIpAddrAndPort, coordChainId, coordContractAddr, blockchainId, keyVersion);
   }
+
+  // Send the TransactionReady message
+  public void sendTransactionReadyMessage(
+      final String fromIpAddressAndPort, final BigInteger fromChainId, final Address fromAddress) {}
 }

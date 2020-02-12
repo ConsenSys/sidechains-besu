@@ -130,7 +130,8 @@ public enum RpcMethod {
   CROSS_REMOVE_LINKED_NODE("cross_removeLinkedNode"),
   CROSS_SEND_RAW_CROSSCHAIN_TRANSACTION(Constants.CROSS_SEND_RAW_CROSSCHAIN_TRANSACTION_STR),
   CROSS_SET_KEY_GENERATION_CONTRACT_ADDRESS("cross_setKeyGenerationContractAddress"),
-  CROSS_START_THRESHOLD_KEY_GENERATION("cross_startThresholdKeyGeneration");
+  CROSS_START_THRESHOLD_KEY_GENERATION("cross_startThresholdKeyGeneration"),
+  CROSS_SEND_TRANSACTION_READY_MESSAGE("cross_sendTransactionReadyMessage");
 
   public static class Constants {
     public static final String ETH_GET_TRANSACTION_COUNT = "eth_getTransactionCount";
