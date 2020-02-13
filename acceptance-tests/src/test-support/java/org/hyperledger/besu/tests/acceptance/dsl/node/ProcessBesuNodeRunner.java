@@ -289,7 +289,7 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
         }
       } else {
         LOG.debug("Stdout from process {} closed", node.getName());
-        assert(!process.isAlive());
+        assert (!process.isAlive());
       }
     }
   }
