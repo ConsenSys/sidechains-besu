@@ -37,7 +37,9 @@ import org.hyperledger.besu.ethereum.worldstate.WorldStateArchive;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -204,6 +206,9 @@ public class CrosschainController {
    * which is coordinating the Crosschain Transaction to see if the transaction has completed and if
    * the contract can be unlocked.
    *
+   * <p>The thought is that this method should never be used. However, if there was some unexpected
+   * situation, probably due to a code defect, this method would provide a way to unlock a contract.</p>
+   *
    * @param address Address of contract to check.
    */
   public void checkUnlock(final Address address) {
@@ -226,8 +231,9 @@ public class CrosschainController {
 
     if (contract.isLocked()) {
       // TODO here we need to check the Crosschain Coordination Contract.
-
-      this.processor.sendSignallingTransaction(address);
+      List<Address> addressesToUnlock = new ArrayList<>();
+      addressesToUnlock.add(address);
+      this.processor.sendSignallingTransaction(addressesToUnlock);
     }
   }
 

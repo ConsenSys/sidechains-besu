@@ -181,6 +181,12 @@ public class CrosschainTransaction extends Transaction {
   // Signed result if a subordinate view.
   private BytesValue signedResult;
 
+  // Holds the list of addresses on this blockchain that were locked when this Originating
+  // or Subordinate transaction were executed. This information does not need to be stored
+  // or communicated to other nodes. It is used to create the signalling transaction, to
+  // unlock the addresses in due course.
+  private List<Address> lockedAddresses;
+
   protected static Logger LOG = LogManager.getLogger();
 
   public static CrosschainTransaction.Builder builderX() {
@@ -476,6 +482,14 @@ public class CrosschainTransaction extends Transaction {
   public BytesValue getRawResult() {
     // TODO when the result really is signed, extract the raw result and return it.
     return this.signedResult;
+  }
+
+  public void setLockedAddresses(final List<Address> lockedAddresses) {
+    this.lockedAddresses = lockedAddresses;
+  }
+
+  public List<Address> getLockedAddresses() {
+    return this.lockedAddresses;
   }
 
   /**

@@ -213,10 +213,13 @@ public class CrosschainProcessor {
     this.vertx.setTimer(
         2000,
         id -> {
-          // Work out TO address.
-          Address toAddress =
-              transaction.getTo().orElse(transaction.contractAddress().orElse(Address.ZERO));
-          sendSignallingTransaction(toAddress);
+          List<Address> addressesToUnlock = transaction.getLockedAddresses();
+          if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
+            LOG.info("No addresses to unlock. Not sending signalling transaction");
+          }
+          else {
+            sendSignallingTransaction(addressesToUnlock);
+          }
         });
   }
 
@@ -225,9 +228,9 @@ public class CrosschainProcessor {
    *
    * <p>TODO we should probably check the response and retry if appropriate.
    *
-   * @param toAddress Address of contract to unlock / send the signalling transaction to.
+   * @param addressesToUnlock Addresses of contracts to unlock / send the signalling transaction to.
    */
-  void sendSignallingTransaction(final Address toAddress) {
+  void sendSignallingTransaction(final List<Address> addressesToUnlock) {
     LOG.debug("Crosschain Signalling Transaction: Initiated");
 
     // Work out sender's nonce.
@@ -246,12 +249,14 @@ public class CrosschainProcessor {
     final Account sender = worldState.get(senderAddress);
     final long nonce = sender != null ? sender.getNonce() : 0L;
 
-    if (toAddress.equals(Address.ZERO)) {
-      LOG.error("Crosschain Signalling Transaction: No TO address specified");
-      return;
-    }
-
     List<CrosschainTransaction> emptyList = List.of();
+
+    BytesValue payload = BytesValue.EMPTY;
+    for (Address addr: addressesToUnlock) {
+      LOG.info("Sending Signalling Transaction for address {}",
+          addr);
+      payload = payload.concat(addr);
+    }
 
     CrosschainTransaction ignoreCommitTransaction =
         CrosschainTransaction.builderX()
@@ -261,9 +266,9 @@ public class CrosschainProcessor {
             .nonce(nonce)
             .gasPrice(Wei.ZERO)
             .gasLimit(100000)
-            .to(toAddress)
+            .to(Address.ZERO)
             .value(Wei.ZERO)
-            .payload(BytesValue.EMPTY)
+            .payload(payload)
             .chainId(this.sidechainId)
             .subordinateTransactionsAndViews(emptyList)
             .signAndBuild(this.nodeKeys);

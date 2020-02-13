@@ -12,6 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.crosschain;
 
+import org.apache.commons.math3.analysis.function.Add;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
 import org.hyperledger.besu.ethereum.core.AbstractWorldUpdater;
 import org.hyperledger.besu.ethereum.core.Account;
@@ -38,8 +39,10 @@ import org.hyperledger.besu.ethereum.vm.OperationTracer;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -168,13 +171,25 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
             ((CrosschainTransaction) transaction).getType();
         if (type.isSignallingTransaction()) {
           boolean commit = type.isUnlockCommitSignallingTransaction();
-          final MutableAccount mutableContract = worldState.getMutable(contract.getAddress());
-          mutableContract.unlock(commit);
+
+          // Extract the list of addresses to unlock from the payload.
+          BytesValue payload = transaction.getPayload();
+          int len = payload.size();
+          int numAddresses = len / Address.SIZE;
+          if (len % Address.SIZE != 0) {
+            LOG.error("Unexpected signalling transaction size: {}", len);
+          }
+          for (int i = 0; i < numAddresses; i++) {
+            BytesValue addrBytesVal = payload.slice(i * Address.SIZE, Address.SIZE);
+            Address addressToUnlock = Address.wrap(addrBytesVal);
+            final MutableAccount mutableContract = worldState.getMutable(addressToUnlock);
+            mutableContract.unlock(commit);
+            LOG.info(
+                "Signalling Transaction: unlock_{} for account {}",
+                (commit ? "commit" : "ignore"),
+                addressToUnlock);
+          }
           worldUpdater.commit();
-          LOG.debug(
-              "Signalling Transaction: unlock_{} for account {}",
-              (commit ? "commit" : "ignore"),
-              contract.getAddress());
           return Result.successful(LogSeries.empty(), 0, BytesValue.EMPTY, validationResult);
         }
       }
@@ -238,7 +253,8 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
     }
 
     if (initialFrame.getState() == MessageFrame.State.COMPLETED_SUCCESS) {
-      // Fail if a locked account is touched + lock touched accounts.
+      // Fail if a locked account is touched + lock updated accounts.
+      List<Address> lockedAddresses = new ArrayList<>();
       Collection<Account> changedAccounts = worldUpdater.getTouchedAccounts();
       for (Account acc : changedAccounts) {
         Address accAddress = acc.getAddress();
@@ -260,6 +276,7 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
               LOG.info("Locking updated account: {}", accAddress.toString());
               final MutableAccount mutableContract = worldUpdater.getMutable(accAddress);
               mutableContract.lock();
+              lockedAddresses.add(accAddress);
             }
           } else {
             // Normal non-crosschain transactions can change non-lockable contract.
@@ -287,11 +304,14 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
                       return Result.failed(gasAvailable.toLong(), validationResult, null);
                     }
                   } else {
-                    if (accAddress.isPrecompile()) {
-                      LOG.info(
-                          "*****Updated precompile account {}: Needs further investigation",
-                          accAddress.toString());
-                    } else {
+//                    if (accAddress.isPrecompile()) {
+                      // Precompiles and other some other accounts have zero balances written to them, and empty code
+                      // written to then when they are touched. This needs more investigation.
+//                      LOG.info(
+//                          "*****Updated precompile account {}: Needs further investigation",
+//                          accAddress.toString());
+//                    } else {
+                    if (!accAddress.isPrecompile()) {
                       LOG.error(
                           "****Attempt to alter EOA account other than sender: {}",
                           acc.getAddress().toString());
@@ -306,6 +326,10 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
       }
 
       worldUpdater.commit();
+
+      if (!lockedAddresses.isEmpty()) {
+        ((CrosschainTransaction) transaction).setLockedAddresses(lockedAddresses);
+      }
     }
 
     if (LOG.isTraceEnabled()) {
