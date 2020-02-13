@@ -258,7 +258,7 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
 
     try {
       final Process process = processBuilder.start();
-      outputProcessorExecutor.execute(() -> printOutput(node.getName(), process));
+      outputProcessorExecutor.execute(() -> printOutput(node, process));
       besuProcesses.put(node.getName(), process);
     } catch (final IOException e) {
       LOG.error("Error starting BesuNode process", e);
@@ -269,7 +269,7 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
     ThreadContext.remove("node");
   }
 
-  private void printOutput(final String nodeName, final Process process) {
+  private void printOutput(final BesuNode node, final Process process) {
     try (final BufferedReader in =
         new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
       String line = in.readLine();
@@ -279,10 +279,17 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
         line = in.readLine();
       }
     } catch (final IOException e) {
-      if (besuProcesses.containsKey(nodeName)) {
-        LOG.error("Failed to read output from process for node " + nodeName, e);
+      if (besuProcesses.containsKey(node.getName())) {
+        LOG.error("Failed to read output from process for node " + node.getName(), e);
+        if (process.isAlive()) {
+          LOG.error("Process is still alive, killing it now");
+          stopNode(node);
+        } else {
+          LOG.error("Node exited with code {}", process.exitValue());
+        }
       } else {
-        LOG.debug("Stdout from process {} closed", nodeName);
+        LOG.debug("Stdout from process {} closed", node.getName());
+        assert(!process.isAlive());
       }
     }
   }
@@ -313,7 +320,7 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
       final Process process = besuProcesses.get(node.getName());
       killBesuProcess(node.getName(), process);
     } else {
-      LOG.error("There was a request to stop an uknown node: {}", node.getName());
+      LOG.error("There was a request to stop a node not in the known list: {}", node.getName());
     }
   }
 
