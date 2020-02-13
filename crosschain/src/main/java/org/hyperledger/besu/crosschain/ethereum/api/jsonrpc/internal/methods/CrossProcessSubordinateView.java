@@ -15,6 +15,8 @@ package org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods;
 import static org.hyperledger.besu.ethereum.api.jsonrpc.JsonRpcErrorConverter.convertTransactionInvalidReason;
 
 import org.hyperledger.besu.crosschain.core.CrosschainController;
+import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
+import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
 import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
@@ -104,10 +106,15 @@ public class CrossProcessSubordinateView implements JsonRpcMethod {
       throw new Error("Unexpected result: null");
     }
     if (resultOrError instanceof TransactionSimulatorResult) {
-      LOG.info("Simulator Result: " + ((TransactionSimulatorResult) resultOrError).getOutput());
+      // Decode the response
+      SubordinateViewResultMessage resultMessage =
+          (SubordinateViewResultMessage)
+              ThresholdSignedMessage.decodeEncodedMessage(
+                  ((TransactionSimulatorResult) resultOrError).getOutput());
+      LOG.info("Simulator Result: " + resultMessage.getResult());
 
       return new JsonRpcSuccessResponse(
-          request.getId(), ((TransactionSimulatorResult) resultOrError).getOutput().toString());
+          request.getId(), resultMessage.getEncodedMessage().getHexString());
     } else if (resultOrError instanceof TransactionValidator.TransactionInvalidReason) {
       JsonRpcError error =
           convertTransactionInvalidReason(

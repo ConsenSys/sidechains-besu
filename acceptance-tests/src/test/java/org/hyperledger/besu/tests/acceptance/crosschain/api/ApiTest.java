@@ -245,7 +245,7 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
 
   @After
   public void closeDown() throws Exception {
-    this.cluster.close();
+    this.clusterCoordinationBlockchain.close();
     this.clusterBc1.close();
   }
 }

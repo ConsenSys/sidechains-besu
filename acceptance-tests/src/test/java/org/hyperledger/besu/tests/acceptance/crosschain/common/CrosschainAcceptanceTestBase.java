@@ -21,21 +21,45 @@ import org.hyperledger.besu.tests.acceptance.dsl.node.cluster.Cluster;
 
 import java.math.BigInteger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.besu.JsonRpc2_0Besu;
 import org.web3j.protocol.besu.crypto.crosschain.BlsThresholdCryptoSystem;
+import org.web3j.protocol.besu.response.crosschain.CrossBlockchainPublicKeyResponse;
 import org.web3j.protocol.besu.response.crosschain.CrossIsLockedResponse;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.CrosschainTransactionManager;
 
 public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
+  private static final Logger LOG = LogManager.getLogger();
+
+  public static byte[] stringToBytes(final String str1) {
+    System.out.println(str1);
+    String str = str1.substring(2);
+    byte[] out = new byte[(str.length()) / 2];
+    for (int i = 0; i < out.length; i++) {
+      String s = str.substring(i * 2, i * 2 + 2);
+      byte b = (byte) (Integer.decode("0x" + s) & 0xff);
+      out[i] = b;
+    }
+    return out;
+  }
+
   public static final int VOTING_TIME_OUT = 2;
+  public static final int VOTING_TIME_PERIOD = 1;
   public static final long CROSSCHAIN_TRANSACTION_TIMEOUT = 10;
+  public static final long BLOCK_PERIOD = 2000;
+  public static final long VOTING_WAIT_TIME = VOTING_TIME_PERIOD * BLOCK_PERIOD;
+  public static final BigInteger VOTE_CHANGE_PUBLIC_KEY = BigInteger.valueOf(5);
+
   protected Credentials BENEFACTOR_ONE;
 
   protected Cluster clusterCoordinationBlockchain;
   protected BesuNode nodeOnCoordinationBlockchain;
   protected CrosschainCoordinationV1 coordContract;
+  protected VotingAlgMajorityWhoVoted votingContract;
 
   protected Cluster clusterBc1;
   protected BesuNode nodeOnBlockchain1;
@@ -57,7 +81,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
     this.clusterCoordinationBlockchain = new Cluster(this.net);
     this.clusterCoordinationBlockchain.start(nodeOnCoordinationBlockchain);
 
-    final VotingAlgMajorityWhoVoted votingContract =
+    this.votingContract =
         nodeOnCoordinationBlockchain.execute(
             contractTransactions.createSmartContract(VotingAlgMajorityWhoVoted.class));
     this.coordContract =
@@ -76,6 +100,83 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.nodeOnCoordinationBlockchain.getChainId(),
             this.coordContract.getContractAddress(),
             ipAddressAndPort));
+  }
+
+  private void commonSetup(final BesuNode nodeOnBlockchain) throws Exception {
+    // Adding the coordination contract
+    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
+    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
+    String ipAddressAndPort = ipAddress + ":" + port;
+    nodeOnBlockchain.execute(
+        crossTransactions.addCoordinationContract(
+            this.nodeOnCoordinationBlockchain.getChainId(),
+            this.coordContract.getContractAddress(),
+            ipAddressAndPort));
+
+    BigInteger keyVersionGenerated =
+        nodeOnBlockchain.execute(
+            crossTransactions.startThresholdKeyGeneration(
+                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
+    System.out.println("Key version generated: " + keyVersionGenerated);
+
+    LOG.info("Adding the blockchain to the coordination contract");
+    TransactionReceipt receipt =
+        coordContract
+            .addBlockchain(
+                nodeOnBlockchain.getChainId(),
+                this.votingContract.getContractAddress(),
+                BigInteger.valueOf(VOTING_TIME_PERIOD))
+            .send();
+    LOG.info(" TX Receipt: {}", receipt);
+
+    boolean exists = coordContract.getBlockchainExists(nodeOnBlockchain.getChainId()).send();
+    LOG.info(
+        " Blockchain {} has been added to coordination contract: {}",
+        nodeOnBlockchain.getChainId(),
+        exists);
+
+    CrossBlockchainPublicKeyResponse publicKeyResponse =
+        nodeOnBlockchain.execute(
+            this.crossTransactions.getBlockchainPublicKey(keyVersionGenerated.longValue()));
+
+    byte[] publicKeyBytes = stringToBytes(publicKeyResponse.getEncodedKey());
+    LOG.info(
+        "Propose vote to add the public key {} with key version = {}",
+        publicKeyBytes,
+        keyVersionGenerated);
+    receipt =
+        coordContract
+            .proposeVote(
+                nodeOnBlockchain.getChainId(),
+                VOTE_CHANGE_PUBLIC_KEY,
+                BigInteger.ZERO,
+                keyVersionGenerated,
+                publicKeyBytes)
+            .send();
+    LOG.info(" TX Receipt: {}", receipt);
+
+    // Sleep for voting period
+    LOG.info("Waiting for end of voting period");
+    Thread.sleep(VOTING_WAIT_TIME);
+
+    LOG.info(" Action vote to add key");
+    receipt = coordContract.actionVotes(nodeOnBlockchain.getChainId(), BigInteger.ZERO).send();
+    LOG.info(" TX Receipt: {}", receipt);
+
+    LOG.info("Waiting for block to be mined");
+    Thread.sleep(BLOCK_PERIOD);
+
+    boolean keyExists =
+        coordContract.publicKeyExists(nodeOnBlockchain.getChainId(), keyVersionGenerated).send();
+    if (keyExists) {
+      LOG.info("Key successfully added to coordination contract");
+    } else {
+      LOG.error("FAILED to add key to contract");
+      return;
+    }
+
+    // Finally, activate the key.
+    nodeOnBlockchain.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
   }
 
   public void setUpBlockchain1() throws Exception {
@@ -99,51 +200,12 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.coordContract.getContractAddress(),
             CROSSCHAIN_TRANSACTION_TIMEOUT);
 
-    // Adding the coordination contract
-    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
-    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
-    String ipAddressAndPort = ipAddress + ":" + port;
-    this.nodeOnBlockchain1.execute(
-        crossTransactions.addCoordinationContract(
-            this.nodeOnCoordinationBlockchain.getChainId(),
-            this.coordContract.getContractAddress(),
-            ipAddressAndPort));
-
-    // TODO need to call addBlockchain on Crosschain Coordination Contract to add this blockchain.
-
-    BigInteger keyVersionGenerated =
-        this.nodeOnBlockchain1.execute(
-            crossTransactions.startThresholdKeyGeneration(
-                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
-    System.out.println("Key version generated: " + keyVersionGenerated);
-
-    // TODO we now need to get the public key from the node
-    // TODO then propose the vote for the public key
-    // TODO then wait until the vote can be actioned
-    // TODO then action the vote.
-
-    // Once the action vote it final on the coordination chain...
-    // Finally, activate the key.
-    this.nodeOnBlockchain1.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
+    commonSetup(this.nodeOnBlockchain1);
   }
 
   public void setUpBlockchain2() throws Exception {
     setUpBlockchain2_NoKeyGenerate();
-
-    BigInteger keyVersionGenerated =
-        this.nodeOnBlockchain2.execute(
-            crossTransactions.startThresholdKeyGeneration(
-                1, BlsThresholdCryptoSystem.ALT_BN_128_WITH_KECCAK256));
-    System.out.println("Key version generated: " + keyVersionGenerated);
-
-    // TODO we now need to get the public key from the node
-    // TODO then propose the vote for the public key
-    // TODO then wait until the vote can be actioned
-    // TODO then action the vote.
-
-    // Once the action vote it final on the coordination chain...
-    // Finally, activate the key.
-    this.nodeOnBlockchain2.execute(crossTransactions.activateKey(keyVersionGenerated.longValue()));
+    commonSetup(this.nodeOnBlockchain2);
   }
 
   public void setUpBlockchain2_NoKeyGenerate() throws Exception {
@@ -166,18 +228,6 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.nodeOnCoordinationBlockchain.getChainId(),
             this.coordContract.getContractAddress(),
             CROSSCHAIN_TRANSACTION_TIMEOUT);
-
-    // Adding the coordination contract
-    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
-    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
-    String ipAddressAndPort = ipAddress + ":" + port;
-    this.nodeOnBlockchain2.execute(
-        crossTransactions.addCoordinationContract(
-            this.nodeOnCoordinationBlockchain.getChainId(),
-            this.coordContract.getContractAddress(),
-            ipAddressAndPort));
-
-    // TODO need to call addBlockchain on Crosschain Coordination Contract to add this blockchain.
   }
 
   public void setUpBlockchain3() throws Exception {
@@ -201,15 +251,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
             this.coordContract.getContractAddress(),
             CROSSCHAIN_TRANSACTION_TIMEOUT);
 
-    // Adding the coordination contract
-    String ipAddress = this.nodeOnCoordinationBlockchain.jsonRpcListenHost1();
-    int port = this.nodeOnCoordinationBlockchain.getJsonRpcSocketPort1().intValue();
-    String ipAddressAndPort = ipAddress + ":" + port;
-    this.nodeOnBlockchain3.execute(
-        crossTransactions.addCoordinationContract(
-            this.nodeOnCoordinationBlockchain.getChainId(),
-            this.coordContract.getContractAddress(),
-            ipAddressAndPort));
+    commonSetup(this.nodeOnBlockchain3);
   }
 
   public void addMultichainNode(final BesuNode node, final BesuNode nodeToAdd) {

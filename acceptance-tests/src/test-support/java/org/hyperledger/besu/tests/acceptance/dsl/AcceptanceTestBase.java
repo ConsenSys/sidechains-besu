@@ -12,6 +12,8 @@
  */
 package org.hyperledger.besu.tests.acceptance.dsl;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import org.hyperledger.besu.tests.acceptance.dsl.account.Accounts;
 import org.hyperledger.besu.tests.acceptance.dsl.blockchain.Blockchain;
 import org.hyperledger.besu.tests.acceptance.dsl.condition.admin.AdminConditions;
@@ -38,26 +40,25 @@ import org.hyperledger.besu.tests.acceptance.dsl.transaction.net.NetTransactions
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.perm.PermissioningTransactions;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.web3.Web3Transactions;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
-import org.apache.logging.log4j.core.appender.ConsoleAppender.Target;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 public class AcceptanceTestBase {
+  protected final Logger LOG = LogManager.getLogger();
 
   protected final Accounts accounts;
   protected final AccountTransactions accountTransactions;
@@ -82,6 +83,8 @@ public class AcceptanceTestBase {
   protected final PermissioningTransactions permissioningTransactions;
   protected final MinerTransactions minerTransactions;
   protected final Web3Conditions web3;
+
+  private final ExecutorService outputProcessorExecutor = Executors.newCachedThreadPool();
 
   protected AcceptanceTestBase() {
     ethTransactions = new EthTransactions();
@@ -110,76 +113,94 @@ public class AcceptanceTestBase {
     permissionedNodeBuilder = new PermissionedNodeBuilder();
   }
 
-  private static LoggerContext ctx;
-  private static XmlConfiguration config;
-  private static PatternLayout layout;
-  // private static String pattern;
-
   static {
     System.setProperty("log4j2.isThreadContextMapInheritable", "true");
   }
 
   @Rule public final TestName name = new TestName();
 
-  @BeforeClass
-  public static void classSetUpAcceptanceTestBase() {
-    // Store the initial Console Appender's layout
-    if (layout == null) {
-      ctx = (LoggerContext) LogManager.getContext(false);
-      config = (XmlConfiguration) ctx.getConfiguration();
-      var originalAppender =
-          (ConsoleAppender)
-              config.getAppenders().values().stream()
-                  .filter(a -> a instanceof ConsoleAppender)
-                  .collect(Collectors.toList())
-                  .get(0);
-      var originalLayout = (PatternLayout) originalAppender.getLayout();
-      var pattern = originalLayout.getConversionPattern();
-      layout = PatternLayout.newBuilder().withPattern(pattern).build();
-    }
-  }
+  @Rule
+  public TestWatcher log_eraser =
+      new TestWatcher() {
 
-  @Before
-  public void setUpAcceptanceTestBase() {
+        @Override
+        protected void starting(final Description description) {
+          ThreadContext.put("test", description.getMethodName());
+          ThreadContext.put("class", description.getClassName());
+          Thread.currentThread()
+              .setUncaughtExceptionHandler(
+                  (thread, error) ->
+                      LOG.error(
+                          "Uncaught exception in thread \"" + thread.getName() + "\"", error));
+          Thread.setDefaultUncaughtExceptionHandler(
+              (thread, error) ->
+                  LOG.error("Uncaught exception in thread \"" + thread.getName() + "\"", error));
+        }
 
-    Collection<Appender> old_appenders = config.getAppenders().values();
-    Collection<Appender> new_appenders = new ArrayList<Appender>();
-    ConsoleAppender appender1 =
-        ConsoleAppender.newBuilder()
-            .setLayout(layout)
-            .setConfiguration(config)
-            .setIgnoreExceptions(false)
-            .setTarget(Target.SYSTEM_OUT)
-            .setFollow(true)
-            .setName("stdout")
-            .build();
-    new_appenders.add(appender1);
-    if (Boolean.getBoolean("acctests.savePerTestLogs")) {
-      FileAppender appender2 =
-          FileAppender.newBuilder()
-              .setName("file")
-              .withFileName("build/acceptanceTestLogs/" + name.getMethodName() + ".log")
-              .withAppend(false)
-              .setLayout(layout)
-              .setConfiguration(config)
-              .build();
-      new_appenders.add(appender2);
-    }
-    for (var a : old_appenders) {
-      config.removeAppender(a.getName());
-    }
-    for (var a : new_appenders) {
-      a.start();
-      config.addAppender(a);
-      config.getRootLogger().addAppender(a, null, null);
-    }
+        @Override
+        protected void failed(final Throwable e, final Description description) {
+          // add the result at the end of the log so it is self-sufficient
+          LOG.error(
+              "==========================================================================================");
+          LOG.error("Test failed. Reported Throwable at the point of failure:", e);
+        }
 
-    ctx.updateLoggers();
-    ThreadContext.put("test", name.getMethodName());
-  }
+        @Override
+        protected void succeeded(final Description description) {
+          // if so configured, delete logs of successful tests
+          if (!Boolean.getBoolean("acctests.keepLogs")) {
+            String pathname =
+                "build/acceptanceTestLogs/"
+                    + description.getClassName()
+                    + "."
+                    + description.getMethodName()
+                    + ".log";
+            LOG.info("Test successful, deleting log at {}", pathname);
+            File file = new File(pathname);
+            file.delete();
+          }
+        }
+      };
 
   @After
   public void tearDownAcceptanceTestBase() {
     cluster.close();
+
+    String os = System.getProperty("os.name");
+    String[] command = null;
+    if (os.contains("Linux")) {
+      command = new String[] {"/usr/bin/top", "-n", "1", "-o", "%MEM", "-b", "-c", "-w", "180"};
+    }
+    if (os.contains("Mac")) {
+      command = new String[] {"/usr/bin/top", "-l", "1", "-o", "mem", "-n", "20"};
+    }
+    if (command != null) {
+      LOG.info("Memory usage at end of test:");
+      final ProcessBuilder processBuilder =
+          new ProcessBuilder(command).redirectErrorStream(true).redirectInput(Redirect.INHERIT);
+      try {
+        final Process memInfoProcess = processBuilder.start();
+        outputProcessorExecutor.execute(
+            () -> {
+              try (final BufferedReader in =
+                  new BufferedReader(
+                      new InputStreamReader(memInfoProcess.getInputStream(), UTF_8))) {
+                String line = in.readLine();
+                while (line != null) {
+                  LOG.info(line);
+                  line = in.readLine();
+                }
+              } catch (final IOException e) {
+                LOG.warn("Failed to read output from memory information process: ", e);
+              }
+            });
+        memInfoProcess.waitFor();
+        LOG.debug("Memory info process exited with code {}", memInfoProcess.exitValue());
+      } catch (final Exception e) {
+        LOG.warn("Error running memory information process", e);
+      }
+    } else {
+      LOG.info("Don't know how to report memory for OS {}", os);
+    }
   }
 }

@@ -248,10 +248,9 @@ public class CrosschainKeyManager {
   /**
    * Coordinate with other nodes to sign the message.
    *
-   * @param message The message to be signed.
-   * @return The signed message.
+   * @param message The message to be (in-place) signed.
    */
-  public ThresholdSignedMessage thresholdSign(final ThresholdSignedMessage message) {
+  public void thresholdSign(final ThresholdSignedMessage message) {
     if (this.activeKeyVersion == NO_ACTIVE_VERSION) {
       String msg =
           "Attempted to threshold sign message ("
@@ -266,9 +265,6 @@ public class CrosschainKeyManager {
     ThresholdSigning signer =
         new ThresholdSigning(this.p2p, this.credentials.get(this.activeKeyVersion));
     BlsPoint point = signer.sign(toBeSigned.extractArray(), message.getEncodedMessage());
-
-    ThresholdSignedMessage result = message;
-    result.setSignature(this.activeKeyVersion, BytesValue.wrap(point.store()));
-    return result;
+    message.setSignature(this.activeKeyVersion, BytesValue.wrap(point.store()));
   }
 }

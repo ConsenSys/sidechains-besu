@@ -17,6 +17,7 @@ import org.hyperledger.besu.crosschain.core.keys.BlsThresholdPublicKey;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
+import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
 import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
@@ -74,7 +75,7 @@ public class CrosschainController {
   public CrosschainController() {
     this.linkedNodeManager = new LinkedNodeManager();
     this.coordContractManager = new CoordContractManager();
-    this.processor = new CrosschainProcessor(this.linkedNodeManager);
+    this.processor = new CrosschainProcessor(this.linkedNodeManager, this.coordContractManager);
     this.crosschainKeyManager = CrosschainKeyManager.getCrosschainKeyManager();
     this.origMsgProcessor =
         new OriginatingBlockchainMessageProcessor(
@@ -109,13 +110,7 @@ public class CrosschainController {
    * Execute a subordinate transaction.
    *
    * @param transaction Subordinate Transaction to execute.
-   * @return Validation result.
-   */
-  /**
-   * Execute a subordinate transaction.
-   *
-   * @param transaction Subordinate Transaction to execute.
-   * @return Validation result.
+   * @return Validaiton result.
    */
   public ValidationResult<TransactionValidator.TransactionInvalidReason> addLocalTransaction(
       final CrosschainTransaction transaction) {
@@ -178,18 +173,19 @@ public class CrosschainController {
       BytesValue resultBytesValue = resultTxSim.getOutput();
       LOG.info("Transaction Simulator Result: " + resultBytesValue.toString());
 
-      BytesValue signedResult = resultBytesValue;
-      // TODO RESULT IS NOT SIGNED
-      //      BytesValue signedResult =
-      //          this.subordinateViewCoordinator.getSignedResult(
-      //              subordinateView, blockNumber, resultBytesValue);
+      SubordinateViewResultMessage resultMessage =
+          new SubordinateViewResultMessage(subordinateView, resultBytesValue, blockNumber);
 
-      // Replace the output with the output and signature in the result object.
+      // Cooperate with other nodes to threshold sign (in-place) the message.
+      this.crosschainKeyManager.thresholdSign(resultMessage);
+
+      // TODO: Broadcast using P2P
+
       txResult =
           MainnetTransactionProcessor.Result.successful(
               resultTxSim.getResult().getLogs(),
               resultTxSim.getResult().getGasRemaining(),
-              signedResult,
+              resultMessage.getEncodedMessage(),
               resultTxSim.getValidationResult());
       return new TransactionSimulatorResult(subordinateView, txResult);
     } else {

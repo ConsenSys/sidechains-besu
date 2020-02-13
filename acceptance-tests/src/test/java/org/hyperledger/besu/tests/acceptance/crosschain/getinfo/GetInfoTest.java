@@ -114,7 +114,6 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     long chain3Id = nodeOnBlockchain3.getChainId().longValue();
     long cbcId = nodeOnCoordinationBlockchain.getChainId().longValue();
 
-    // TODO Tests related to TxType are not happening correctly. Need to fix.
     waitForUnlock(ctrt1.getContractAddress(), nodeOnBlockchain1);
     assertThat(ctrt1.nonCrossChainId().send().longValue()).isEqualTo(chain1Id);
     assertThat(ctrt1.myChainId().send().longValue()).isEqualTo(chain1Id);
@@ -165,7 +164,7 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
 
   @After
   public void closeDown() throws Exception {
-    this.cluster.close();
+    this.clusterCoordinationBlockchain.close();
     this.clusterBc1.close();
     this.clusterBc2.close();
     this.clusterBc3.close();
