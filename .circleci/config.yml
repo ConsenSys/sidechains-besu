@@ -146,6 +146,7 @@ jobs:
       - capture_test_results
 
   acceptanceTests:
+    parallelism: 4
     executor: besu_executor_xl
     steps:
       - prepare
@@ -155,9 +156,16 @@ jobs:
           name: AcceptanceTests
           no_output_timeout: 40m
           environment:
-            GRADLE_MAX_TEST_FORKS: 1
+            GRADLE_MAX_TEST_FORKS: 3
           command: |
-            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG -Dacctests.showStandardStreams=true
+            CLASSNAMES=$(circleci tests glob "acceptance-tests/tests/src/test/java/**/*.java" \
+              | sed 's@.*/src/test/java/@@' \
+              | sed 's@/@.@g' \
+              | sed 's/.\{5\}$//' \
+              | circleci tests split --split-by=timings --timings-type=classname)
+            # Format the arguments to "./gradlew test"
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
+            ./gradlew --parallel --fail-fast acceptanceTest -Droot.log.level=DEBUG -Dacctests.showStandardStreams=true $GRADLE_ARGS
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports
