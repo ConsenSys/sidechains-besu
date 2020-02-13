@@ -118,7 +118,7 @@ task acceptanceTest(type: Test) {
 
   dependsOn(rootProject.installDist)
   systemProperty 'acctests.runBesuAsProcess', 'false'
-   systemProperty 'acctests.savePerTestLogs', 'true'
+  systemProperty 'acctests.savePerTestLogs', 'true'
   mustRunAfter rootProject.subprojects*.test
   description = 'Runs Besu acceptance tests.'
   group = 'verification'

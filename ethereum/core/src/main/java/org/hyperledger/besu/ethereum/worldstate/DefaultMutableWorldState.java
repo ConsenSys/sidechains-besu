@@ -455,8 +455,11 @@ public class DefaultMutableWorldState implements MutableWorldState {
             storeUpdatedStateTo(origin, updated, wrapped, provisionalStateAddress);
             break;
           default:
-            LOG.error("Unexpected lock state transition1, address {}, origin lock state is {} and lock action is {}",
-                realAddress, origin.lockState, updated.getLockState());
+            LOG.error(
+                "Unexpected lock state transition1, address {}, origin lock state is {} and lock action is {}",
+                realAddress,
+                origin.lockState,
+                updated.getLockState());
             break;
         }
       } else {
@@ -479,8 +482,11 @@ public class DefaultMutableWorldState implements MutableWorldState {
             deleteAccount(wrapped, provisionalStateAddress);
             break;
           default:
-            LOG.error("Unexpected lock state transition2, address {}, origin lock state is {} and lock action is {}",
-                realAddress, origin.lockState, updated.getLockState());
+            LOG.error(
+                "Unexpected lock state transition2, address {}, origin lock state is {} and lock action is {}",
+                realAddress,
+                origin.lockState,
+                updated.getLockState());
             break;
         }
       }

@@ -216,8 +216,7 @@ public class CrosschainProcessor {
           List<Address> addressesToUnlock = transaction.getLockedAddresses();
           if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
             LOG.info("No addresses to unlock. Not sending signalling transaction");
-          }
-          else {
+          } else {
             sendSignallingTransaction(addressesToUnlock);
           }
         });
@@ -252,9 +251,8 @@ public class CrosschainProcessor {
     List<CrosschainTransaction> emptyList = List.of();
 
     BytesValue payload = BytesValue.EMPTY;
-    for (Address addr: addressesToUnlock) {
-      LOG.info("Sending Signalling Transaction for address {}",
-          addr);
+    for (Address addr : addressesToUnlock) {
+      LOG.info("Sending Signalling Transaction for address {}", addr);
       payload = payload.concat(addr);
     }
 

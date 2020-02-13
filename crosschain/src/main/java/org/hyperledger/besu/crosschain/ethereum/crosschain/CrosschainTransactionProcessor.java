@@ -12,9 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.crosschain;
 
-import org.apache.commons.math3.analysis.function.Add;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
-import org.hyperledger.besu.ethereum.core.AbstractWorldUpdater;
 import org.hyperledger.besu.ethereum.core.Account;
 import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
@@ -293,8 +291,10 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
                   // The sender account must increase its nonce as part of a transaction.
                   // However, no other account can change, and the sender's balance at this point
                   // should
-                  // remain unchanged. That is, they shouldn't transfer Ether into a locked account or
-                  // have Ether sent from a locked account. This is to prevent Ether being created or
+                  // remain unchanged. That is, they shouldn't transfer Ether into a locked account
+                  // or
+                  // have Ether sent from a locked account. This is to prevent Ether being created
+                  // or
                   // destroyed as a result of ignored Crosschain Transactions.
                   if (accAddress.equals(senderAddress)) {
                     if (!acc.getBalance().equals(previousBalance.plus(upfrontGasCost))) {
@@ -304,13 +304,15 @@ public class CrosschainTransactionProcessor extends MainnetTransactionProcessor 
                       return Result.failed(gasAvailable.toLong(), validationResult, null);
                     }
                   } else {
-//                    if (accAddress.isPrecompile()) {
-                      // Precompiles and other some other accounts have zero balances written to them, and empty code
-                      // written to then when they are touched. This needs more investigation.
-//                      LOG.info(
-//                          "*****Updated precompile account {}: Needs further investigation",
-//                          accAddress.toString());
-//                    } else {
+                    //                    if (accAddress.isPrecompile()) {
+                    // Precompiles and other some other accounts have zero balances written to them,
+                    // and empty code
+                    // written to then when they are touched. This needs more investigation.
+                    //                      LOG.info(
+                    //                          "*****Updated precompile account {}: Needs further
+                    // investigation",
+                    //                          accAddress.toString());
+                    //                    } else {
                     if (!accAddress.isPrecompile()) {
                       LOG.error(
                           "****Attempt to alter EOA account other than sender: {}",

@@ -207,7 +207,7 @@ public class CrosschainController {
    * the contract can be unlocked.
    *
    * <p>The thought is that this method should never be used. However, if there was some unexpected
-   * situation, probably due to a code defect, this method would provide a way to unlock a contract.</p>
+   * situation, probably due to a code defect, this method would provide a way to unlock a contract.
    *
    * @param address Address of contract to check.
    */
