@@ -156,16 +156,17 @@ jobs:
           name: AcceptanceTests
           no_output_timeout: 40m
           environment:
-            GRADLE_MAX_TEST_FORKS: 2
+            GRADLE_MAX_TEST_FORKS: 1
           command: |
-            CLASSNAMES=$(circleci tests glob "acceptance-tests/tests/src/test/java/**/*.java" \
+            CLASSNAMES=$(circleci tests glob "acceptance-tests/src/test/java/**/*.java" \
               | sed 's@.*/src/test/java/@@' \
               | sed 's@/@.@g' \
               | sed 's/.\{5\}$//' \
               | circleci tests split --split-by=timings --timings-type=classname)
             # Format the arguments to "./gradlew test"
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
-            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG $GRADLE_ARGS
+            echo This container will run these tests: $GRADLE_ARGS
+            ./gradlew --no-parallel acceptanceTest -Droot.log.level=DEBUG $GRADLE_ARGS
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports
@@ -173,6 +174,38 @@ jobs:
       - store_artifacts:
           path: acceptance-tests/build/acceptanceTestLogs
           destination: acceptance-tests-logs
+
+  acceptanceTestsCrosschain:
+    parallelism: 4
+    executor: besu_executor_xl
+    steps:
+      - prepare
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: acceptanceTestsCrosschain
+          no_output_timeout: 40m
+          environment:
+            GRADLE_MAX_TEST_FORKS: 1
+          command: |
+            CLASSNAMES=$(circleci tests glob "acceptance-tests/src/test/java/**/*.java" \
+              | sed 's@.*/src/test/java/@@' \
+              | sed 's@/@.@g' \
+              | sed 's/.\{5\}$//' \
+              | grep crosschain \
+              | circleci tests split --split-by=timings --timings-type=classname)
+            # Format the arguments to "./gradlew test"
+            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
+            echo This container will run these tests: $GRADLE_ARGS
+            ./gradlew --no-parallel acceptanceTest $GRADLE_ARGS
+      - capture_test_results
+      - store_artifacts:
+          path: acceptance-tests/build/reports
+          destination: acceptance-tests-reports
+      - store_artifacts:
+          path: acceptance-tests/build/acceptanceTestLogs
+          destination: acceptance-tests-logs
+
   buildDocker:
     executor: besu_executor_med
     steps:
@@ -233,7 +266,7 @@ workflows:
       - integrationTests:
           requires:
             - assemble
-      - acceptanceTests:
+      - acceptanceTestsCrosschain:
           requires:
             - assemble
 
