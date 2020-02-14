@@ -146,7 +146,6 @@ jobs:
       - capture_test_results
 
   acceptanceTests:
-    parallelism: 4
     executor: besu_executor_xl
     steps:
       - prepare
@@ -156,17 +155,9 @@ jobs:
           name: AcceptanceTests
           no_output_timeout: 40m
           environment:
-            GRADLE_MAX_TEST_FORKS: 1
+            GRADLE_MAX_TEST_FORKS: 2
           command: |
-            CLASSNAMES=$(circleci tests glob "acceptance-tests/src/test/java/**/*.java" \
-              | sed 's@.*/src/test/java/@@' \
-              | sed 's@/@.@g' \
-              | sed 's/.\{5\}$//' \
-              | circleci tests split --split-by=timings --timings-type=classname)
-            # Format the arguments to "./gradlew test"
-            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
-            echo This container will run these tests: $GRADLE_ARGS
-            ./gradlew --no-parallel acceptanceTest -Droot.log.level=DEBUG $GRADLE_ARGS
+            ./gradlew --parallel acceptanceTest -Dacctests.excludeCrosschain=true
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports
@@ -176,7 +167,7 @@ jobs:
           destination: acceptance-tests-logs
 
   acceptanceTestsCrosschain:
-    parallelism: 2
+    parallelism: 5
     executor: besu_executor_xl
     steps:
       - prepare
@@ -186,9 +177,9 @@ jobs:
           name: acceptanceTestsCrosschain
           no_output_timeout: 40m
           environment:
-            GRADLE_MAX_TEST_FORKS: 1
+            GRADLE_MAX_TEST_FORKS: 2
           command: |
-            ./gradlew --no-parallel acceptanceTest --tests "*crosschain*"
+            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG -Dacctests.keepLogs=true --tests "*crosschain*"
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports
@@ -260,5 +251,7 @@ workflows:
       - acceptanceTestsCrosschain:
           requires:
             - assemble
-
+      - acceptanceTests:
+          requires:
+            - assemble
 

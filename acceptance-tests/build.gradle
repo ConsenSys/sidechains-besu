@@ -123,6 +123,10 @@ task acceptanceTest(type: Test) {
   description = 'Runs Besu acceptance tests.'
   group = 'verification'
 
+  if ('true'.equalsIgnoreCase(System.getProperty('acctests.excludeCrosschain'))) {
+    exclude '**/*crosschain*'
+  }
+
   testLogging {
     exceptionFormat = 'full'
     showStackTraces = true
