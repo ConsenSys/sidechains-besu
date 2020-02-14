@@ -127,6 +127,12 @@ task acceptanceTest(type: Test) {
     exclude '**/*crosschain*'
   }
 
+  retry {
+    maxRetries = 3
+    maxFailures = 3
+  }
+
+
   testLogging {
     exceptionFormat = 'full'
     showStackTraces = true
