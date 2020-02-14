@@ -167,7 +167,6 @@ jobs:
           destination: acceptance-tests-logs
 
   acceptanceTestsCrosschain:
-    parallelism: 2
     executor: besu_executor_xl
     steps:
       - prepare

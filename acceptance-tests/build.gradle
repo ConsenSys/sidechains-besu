@@ -128,7 +128,7 @@ task acceptanceTest(type: Test) {
   }
 
   retry {
-    maxRetries = 3
+    maxRetries = 5
     maxFailures = 3
   }
 

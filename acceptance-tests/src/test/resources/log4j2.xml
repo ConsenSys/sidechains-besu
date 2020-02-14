@@ -16,7 +16,7 @@
           <File
                   name="Test-${ctx:class}-${ctx:test}"
                   filename="build/acceptanceTestLogs/${ctx:class}.${ctx:test}.log"
-                  append="false"
+                  append="true"
                   createOnDemand="true"
           >
             <PatternLayout pattern="%d{HH:mm:ss.SSS} | %t | %-5level | %c{1} | %msg%n" />
