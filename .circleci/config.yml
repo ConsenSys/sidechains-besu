@@ -176,7 +176,7 @@ jobs:
           destination: acceptance-tests-logs
 
   acceptanceTestsCrosschain:
-    parallelism: 4
+    parallelism: 2
     executor: besu_executor_xl
     steps:
       - prepare
@@ -188,16 +188,7 @@ jobs:
           environment:
             GRADLE_MAX_TEST_FORKS: 1
           command: |
-            CLASSNAMES=$(circleci tests glob "acceptance-tests/src/test/java/**/*.java" \
-              | sed 's@.*/src/test/java/@@' \
-              | sed 's@/@.@g' \
-              | sed 's/.\{5\}$//' \
-              | grep crosschain \
-              | circleci tests split --split-by=timings --timings-type=classname)
-            # Format the arguments to "./gradlew test"
-            GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
-            echo This container will run these tests: $GRADLE_ARGS
-            ./gradlew --no-parallel acceptanceTest $GRADLE_ARGS
+            ./gradlew --no-parallel acceptanceTest --tests "*crosschain*"
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports
