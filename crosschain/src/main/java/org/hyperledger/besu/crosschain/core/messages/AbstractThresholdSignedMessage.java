@@ -101,6 +101,11 @@ public abstract class AbstractThresholdSignedMessage implements ThresholdSignedM
   }
 
   @Override
+  public BytesValue getEncodedMessageForCoordContract() {
+    throw new Error("not implemented yet");
+  }
+
+  @Override
   public BytesValue getEncodedMessage() {
     throw new Error("not implemented yet");
   }

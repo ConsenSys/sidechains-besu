@@ -12,6 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.core.messages;
 
+import org.hyperledger.besu.ethereum.core.Address;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
@@ -52,6 +53,45 @@ public class CrosschainTransactionStartMessage extends AbstractThresholdSignedMe
           out.writeBigIntegerScalar(getTransactionTimeoutBlockNumber());
           out.endList();
         });
+  }
+
+  @Override
+  public BytesValue getEncodedMessageForCoordContract() {
+    int messageType = getType().value;
+    byte[] messageTypeBytes = new byte[32];
+    messageTypeBytes[31] = (byte) messageType;
+
+    BigInteger coordBcId = getCoordinationBlockchainId();
+    byte[] coordBcId1 = bigIntToUint256(coordBcId);
+
+    Address coordAddr = getCoordinationContractAddress();
+
+    BigInteger orgBcId = getOriginatingBlockchainId();
+    byte[] orgBcId1 = bigIntToUint256(orgBcId);
+
+    BigInteger txId = getCrosschainTransactionId();
+    byte[] txId1 = bigIntToUint256(txId);
+
+    BytesValue txHash = getCrosschainTransactionHash();
+
+    BigInteger timeoutBlockNumber = getTransactionTimeoutBlockNumber();
+    byte[] timeout1 = bigIntToUint256(timeoutBlockNumber);
+
+    BytesValue result = BytesValue.wrap(messageTypeBytes);
+    result = BytesValue.wrap(result, BytesValue.wrap(coordBcId1));
+    result = BytesValue.wrap(result, coordAddr);
+    result = BytesValue.wrap(result, BytesValue.wrap(orgBcId1));
+    result = BytesValue.wrap(result, BytesValue.wrap(txId1));
+    result = BytesValue.wrap(result, txHash);
+    result = BytesValue.wrap(result, BytesValue.wrap(timeout1));
+    return result;
+  }
+
+  private byte[] bigIntToUint256(final BigInteger bigInteger) {
+    byte[] bVar = bigInteger.toByteArray();
+    byte[] bFixed = new byte[32];
+    System.arraycopy(bVar, 0, bFixed, bFixed.length - bVar.length, bVar.length);
+    return bFixed;
   }
 
   @Override
