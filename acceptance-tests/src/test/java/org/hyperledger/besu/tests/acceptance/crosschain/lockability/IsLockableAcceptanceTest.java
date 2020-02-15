@@ -20,6 +20,7 @@ import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.Si
 import org.hyperledger.besu.tests.acceptance.crosschain.lockability.generated.SimpleIsLockableCrosschain;
 import org.hyperledger.besu.tests.acceptance.dsl.transaction.crosschain.CrossIsLockableTransaction;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -55,5 +56,11 @@ public class IsLockableAcceptanceTest extends CrosschainAcceptanceTestBase {
     boolean isLockable = nodeOnBlockchain1.execute(isLockableObj);
 
     assertThat(isLockable).isTrue();
+  }
+
+  @After
+  public void closeDown() throws Exception {
+    this.clusterCoordinationBlockchain.close();
+    this.clusterBc1.close();
   }
 }

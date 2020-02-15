@@ -7,7 +7,7 @@ executors:
     resource_class: medium
     working_directory: ~/project
     environment:
-      GRADLE_OPTS: -Xmx2048m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2
+      GRADLE_OPTS: -Xmx2048m -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2
 
   besu_executor_xl: # 8cpu, 16G ram
     docker:
@@ -15,7 +15,7 @@ executors:
     resource_class: xlarge
     working_directory: ~/project
     environment:
-      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=4
+      GRADLE_OPTS: -Xmx4096m -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=4
 
 commands:
   prepare:
@@ -155,9 +155,9 @@ jobs:
           name: AcceptanceTests
           no_output_timeout: 40m
           environment:
-            GRADLE_MAX_TEST_FORKS: 3
+            GRADLE_MAX_TEST_FORKS: 2
           command: |
-            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG -Dacctests.showStandardStreams=true
+            ./gradlew --parallel acceptanceTest -Dacctests.excludeCrosschain=true
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports
@@ -165,6 +165,28 @@ jobs:
       - store_artifacts:
           path: acceptance-tests/build/acceptanceTestLogs
           destination: acceptance-tests-logs
+
+  acceptanceTestsCrosschain:
+    executor: besu_executor_xl
+    steps:
+      - prepare
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: acceptanceTestsCrosschain
+          no_output_timeout: 40m
+          environment:
+            GRADLE_MAX_TEST_FORKS: 2
+          command: |
+            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG -Dacctests.keepLogs=true --tests "*crosschain*"
+      - capture_test_results
+      - store_artifacts:
+          path: acceptance-tests/build/reports
+          destination: acceptance-tests-reports
+      - store_artifacts:
+          path: acceptance-tests/build/acceptanceTestLogs
+          destination: acceptance-tests-logs
+
   buildDocker:
     executor: besu_executor_med
     steps:
@@ -225,8 +247,10 @@ workflows:
       - integrationTests:
           requires:
             - assemble
+      - acceptanceTestsCrosschain:
+          requires:
+            - assemble
       - acceptanceTests:
           requires:
             - assemble
-
 

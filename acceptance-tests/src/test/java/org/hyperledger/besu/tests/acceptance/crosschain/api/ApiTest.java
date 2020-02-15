@@ -171,6 +171,8 @@ public class ApiTest extends CrosschainAcceptanceTestBase {
     this.nodeOnBlockchain2.execute(crossTransactions.activateKey(1));
     keyVersion = this.nodeOnBlockchain2.execute(crossTransactions.getActiveKeyVersion());
     assertThat(keyVersion.longValue()).isEqualTo(1);
+
+    this.clusterBc2.close();
   }
 
   @Test
