@@ -35,4 +35,9 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
   public ThresholdSignedMessageType getType() {
     return ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_COMMIT;
   }
+
+  @Override
+  public boolean verifiedByCoordContract() {
+    return false;
+  }
 }

@@ -40,6 +40,11 @@ public class CrosschainTransactionStartMessage extends AbstractThresholdSignedMe
     return ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_START;
   }
 
+  @Override
+  public boolean verifiedByCoordContract() {
+    return true;
+  }
+
   public BigInteger getTransactionTimeoutBlockNumber() {
     return this.transaction.getCrosschainTransactionTimeoutBlockNumber().get();
   }

@@ -172,7 +172,6 @@ public class CrosschainController {
       TransactionSimulatorResult resultTxSim = (TransactionSimulatorResult) resultObj;
       BytesValue resultBytesValue = resultTxSim.getOutput();
       LOG.info("Transaction Simulator Result: " + resultBytesValue.toString());
-
       SubordinateViewResultMessage resultMessage =
           new SubordinateViewResultMessage(subordinateView, resultBytesValue, blockNumber);
 

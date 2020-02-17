@@ -46,12 +46,17 @@ public class SubordinateViewResultMessage extends AbstractThresholdSignedMessage
   }
 
   public SubordinateViewResultMessage(final RLPInput in) {
-    decode(in);
+    super(in);
   }
 
   @Override
   public ThresholdSignedMessageType getType() {
     return ThresholdSignedMessageType.SUBORDINATE_VIEW_RESULT;
+  }
+
+  @Override
+  public boolean verifiedByCoordContract() {
+    return false;
   }
 
   public BytesValue getResult() {

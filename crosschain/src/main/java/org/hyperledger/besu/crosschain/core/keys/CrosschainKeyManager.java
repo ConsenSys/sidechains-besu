@@ -260,7 +260,13 @@ public class CrosschainKeyManager {
       throw new Error(msg);
     }
 
-    BytesValue toBeSigned = message.getEncodedMessageForCoordContract();
+    BytesValue toBeSigned;
+    if (message.verifiedByCoordContract()) {
+      toBeSigned = message.getEncodedMessageForCoordContract();
+    } else {
+      toBeSigned = message.getEncodedCoreMessage();
+    }
+
     LOG.info("Start message contents to be signed: {}", toBeSigned.getHexString());
 
     ThresholdSigning signer =

@@ -73,6 +73,8 @@ public interface ThresholdSignedMessage {
 
   ThresholdSignedMessageType getType();
 
+  boolean verifiedByCoordContract();
+
   BigInteger getCoordinationBlockchainId();
 
   Address getCoordinationContractAddress();
