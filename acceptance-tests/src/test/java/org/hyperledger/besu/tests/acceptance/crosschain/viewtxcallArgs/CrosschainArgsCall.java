@@ -59,6 +59,7 @@ public class CrosschainArgsCall extends CrosschainAcceptanceTestBase {
 
     // Making nodeOnBlockChain1 a multichain node
     addMultichainNode(nodeOnBlockchain1, nodeOnBlockchain2);
+    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
 
     barCtrt.setProperties(nodeOnBlockchain2.getChainId(), fooCtrt.getContractAddress()).send();
     // Calling FooCtrt.setPropertiesForBar, a regular intrachain function call

@@ -41,6 +41,7 @@ import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.Cro
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossRemoveCoordinationContract;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossRemoveLinkedNode;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossSendRawCrosschainTransaction;
+import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossSendTransactionReadyMessage;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossSetKeyGenerationContractAddress;
 import org.hyperledger.besu.crosschain.ethereum.api.jsonrpc.internal.methods.CrossStartThresholdKeyGeneration;
 import org.hyperledger.besu.ethereum.ProtocolContext;
@@ -112,7 +113,8 @@ public class IbftJsonRpcMethodsFactory implements JsonRpcMethodFactory {
           new CrossRemoveLinkedNode(crosschainController, jsonRpcParameter),
           new CrossSendRawCrosschainTransaction(crosschainController, jsonRpcParameter),
           new CrossSetKeyGenerationContractAddress(crosschainController, jsonRpcParameter),
-          new CrossStartThresholdKeyGeneration(crosschainController, jsonRpcParameter));
+          new CrossStartThresholdKeyGeneration(crosschainController, jsonRpcParameter),
+          new CrossSendTransactionReadyMessage(crosschainController, jsonRpcParameter));
     }
 
     return rpcMethods;

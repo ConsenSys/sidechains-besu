@@ -145,25 +145,31 @@ public class CrosschainController {
     ValidationResult<TransactionValidator.TransactionInvalidReason> validationResult =
         this.transactionPool.addLocalTransaction(transaction);
 
-    // Wait for the transaction to be mined. The transaction is deemed to be mined when the
-    // transaction disappears from the list of pendingTransactions.
-    while (this.transactionPool.getPendingTransactions().containsTransaction(transaction.hash())) {
-      try {
-        Thread.sleep(1000);
-      } catch (Exception e) {
-        LOG.error(
-            "Exception in Thread.sleep while waiting for the transaction to be mined: {}",
-            e.toString());
+    if (transaction.getType().isSubordinateTransaction()
+        || transaction.getType().isOriginatingTransaction()) {
+      // Wait for the transaction to be mined. The transaction is deemed to be mined when the
+      // transaction disappears from the list of pendingTransactions.
+      while (this.transactionPool
+          .getPendingTransactions()
+          .containsTransaction(transaction.hash())) {
+        try {
+          Thread.sleep(1000);
+        } catch (Exception e) {
+          LOG.error(
+              "Exception in Thread.sleep while waiting for the transaction to be mined: {}",
+              e.toString());
+        }
       }
-    }
 
-    // Now that the transaction is mined, send subordinate transaction ready messages in case of
-    // subordinate transactions. After receiving the ready message update the list of txsToBeMined.
-    // In case of originating transaction update the list directly.
-    Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>> txReadyMsgError =
-        updateListAndSendTxReadyMsg(transaction);
-    if (txReadyMsgError.isPresent()) {
-      return txReadyMsgError.get();
+      // Now that the transaction is mined, send subordinate transaction ready messages in case of
+      // subordinate transactions. After receiving the ready message update the list of
+      // txsToBeMined.
+      // In case of originating transaction update the list directly.
+      Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>> txReadyMsgError =
+          updateListAndSendTxReadyMsg(transaction);
+      if (txReadyMsgError.isPresent()) {
+        return txReadyMsgError.get();
+      }
     }
 
     if (transaction.getType().isLockableTransaction()) {
@@ -362,7 +368,7 @@ public class CrosschainController {
       updateListAndSendTxReadyMsg(final CrosschainTransaction transaction) {
     if (transaction.getType().isOriginatingTransaction()) {
       this.origMsgProcessor.removeOrigTxInsideToBeMined(
-          transaction.getOriginatingSidechainId().get(), transaction.hash());
+          transaction.getChainId().get(), transaction.hash());
       return Optional.empty();
     } else {
       return this.processor.sendSubTxReady(transaction);

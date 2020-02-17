@@ -68,6 +68,8 @@ public class GetInfoTest extends CrosschainAcceptanceTestBase {
     addMultichainNode(nodeOnBlockchain1, nodeOnBlockchain2);
     addMultichainNode(nodeOnBlockchain1, nodeOnBlockchain3);
     addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain3);
+    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
+    addMultichainNode(nodeOnBlockchain3, nodeOnBlockchain1);
 
     // Setting up the environment
     ctrt1.setCtrt2ChainId(nodeOnBlockchain2.getChainId()).send();

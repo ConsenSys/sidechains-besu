@@ -75,11 +75,12 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
     return RLP.encode(
         out -> {
           out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.SUBORDINATE_TRANSACTION_READY.value);
           out.writeLongScalar(this.origChainId.longValue());
           out.writeLongScalar(this.subChainId.longValue());
           out.writeLongScalar(this.coordChainId.longValue());
           out.writeBytesValue(this.coordAddress);
-          out.writeBytesValue(this.transaction.hash());
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.endList();
         });
   }
@@ -89,11 +90,12 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
     return RLP.encode(
         out -> {
           out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.SUBORDINATE_TRANSACTION_READY.value);
           out.writeLongScalar(this.origChainId.longValue());
           out.writeLongScalar(this.subChainId.longValue());
           out.writeLongScalar(this.coordChainId.longValue());
           out.writeBytesValue(this.coordAddress);
-          out.writeBytesValue(this.transaction.hash());
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.writeLongScalar(this.keyVersion);
           out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
           out.endList();

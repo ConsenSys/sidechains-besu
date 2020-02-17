@@ -114,7 +114,7 @@ public class OriginatingBlockchainMessageProcessor {
     for (CrosschainTransaction subTx : transaction.getSubordinateTransactionsAndViews()) {
       txs.add(subTx.hash());
     }
-    this.txToBeMined.put(transaction.getOriginatingSidechainId().get(), txs);
+    this.txToBeMined.put(transaction.getChainId().get(), txs);
   }
 
   /**

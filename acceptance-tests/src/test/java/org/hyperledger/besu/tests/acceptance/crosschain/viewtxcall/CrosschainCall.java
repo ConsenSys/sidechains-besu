@@ -69,6 +69,7 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
 
     // Making nodeOnBlockChain1 a multichain node
     addMultichainNode(nodeOnBlockchain1, nodeOnBlockchain2);
+    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
 
     // Calling BooCtrt.setProperties, a regular intrachain function call
     barCtrt.setProperties(nodeOnBlockchain2.getChainId(), fooCtrt.getContractAddress()).send();
@@ -166,9 +167,6 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
    */
   @Test
   public void doCCViewViewCall() throws Exception {
-    // Making nodeOnBlockChain2 a 2-chain node
-    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
-
     CrosschainContextGenerator ctxGenerator =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
 
@@ -204,9 +202,6 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
    */
   @Test
   public void doCCViewPureCall() throws Exception {
-    // Making nodeOnBlockChain2 a 2-chain node
-    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
-
     CrosschainContextGenerator ctxGenerator =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
 
@@ -242,9 +237,6 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
    */
   @Test
   public void doCCTxViewCall() throws Exception {
-    // Making nodeOnBlockChain2 a 2-chain node
-    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
-
     CrosschainContextGenerator ctxGenerator =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
 
@@ -281,9 +273,6 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
    */
   @Test
   public void doCCTxPureCall() throws Exception {
-    // Making nodeOnBlockChain2 a 2-chain node
-    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
-
     CrosschainContextGenerator ctxGenerator =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
 
@@ -337,10 +326,10 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
 
     // Making nodeOnBlockChain1 a 3-chain node
     addMultichainNode(nodeOnBlockchain1, nodeOnBlockchain3);
+    addMultichainNode(nodeOnBlockchain3, nodeOnBlockchain1);
 
     // Making nodeOnBlockchain2 a 3-chain node
     addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain3);
-    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
 
     CrosschainContextGenerator ctxGen =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
@@ -399,8 +388,6 @@ public class CrosschainCall extends CrosschainAcceptanceTestBase {
     fooCtrt
         .setPropertiesForBar2(nodeOnBlockchain1.getChainId(), bar2Ctrt.getContractAddress())
         .send();
-
-    addMultichainNode(nodeOnBlockchain2, nodeOnBlockchain1);
 
     CrosschainContextGenerator ctxGen =
         new CrosschainContextGenerator(nodeOnBlockchain1.getChainId());
