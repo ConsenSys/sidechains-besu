@@ -23,6 +23,7 @@ plugins {
   id 'io.spring.dependency-management' version '1.0.8.RELEASE'
   id 'me.champeau.gradle.jmh' version '0.4.8' apply false
   id 'net.ltgt.errorprone' version '0.8.1'
+  id "org.gradle.test-retry" version "1.1.1"
 }
 
 if (!JavaVersion.current().java11Compatible) {
@@ -92,6 +93,7 @@ allprojects {
   apply plugin: 'net.ltgt.errorprone'
   apply from: "${rootDir}/gradle/versions.gradle"
   apply from: "${rootDir}/gradle/check-licenses.gradle"
+  apply plugin: "org.gradle.test-retry"
 
   version = rootProject.version
 
@@ -252,7 +254,8 @@ allprojects {
       'test.ethereum.include',
       'test.ethereum.state.eip',
       'root.log.level',
-      'evm.log.level'
+      'evm.log.level',
+      'acctests.keepLogs'
     ]
     for (String name : toImport) {
       if (System.getProperty(name) != null) {

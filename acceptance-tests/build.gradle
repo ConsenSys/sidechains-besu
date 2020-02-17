@@ -114,19 +114,29 @@ sourceSets {
 processTestResources.dependsOn(':besu:testJar')
 
 task acceptanceTest(type: Test) {
-  inputs.property "integration.date", LocalTime.now() // so it runs every time
+  inputs.property "integration.date", LocalTime.now() // so it runs at every invocation
 
   dependsOn(rootProject.installDist)
-  systemProperty 'acctests.runBesuAsProcess', 'false'
-   systemProperty 'acctests.savePerTestLogs', 'true'
+  setSystemProperties(test.getSystemProperties())
+  systemProperty 'acctests.runBesuAsProcess', 'true'
   mustRunAfter rootProject.subprojects*.test
   description = 'Runs Besu acceptance tests.'
   group = 'verification'
 
+  if ('true'.equalsIgnoreCase(System.getProperty('acctests.excludeCrosschain'))) {
+    exclude '**/*crosschain*'
+  }
+
+  retry {
+    maxRetries = 5
+    maxFailures = 3
+  }
+
+
   testLogging {
     exceptionFormat = 'full'
     showStackTraces = true
-    //showStandardStreams = true
+    showStandardStreams = 'true'.equalsIgnoreCase(System.getProperty('acctests.showStandardStreams'));
     showExceptions = true
     showCauses = true
   }

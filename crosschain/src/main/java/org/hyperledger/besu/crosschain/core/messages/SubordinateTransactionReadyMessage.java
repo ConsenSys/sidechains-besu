@@ -118,4 +118,9 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
       this.signature = sig;
     }
   }
+
+  @Override
+  public boolean verifiedByCoordContract() {
+    return false;
+  }
 }

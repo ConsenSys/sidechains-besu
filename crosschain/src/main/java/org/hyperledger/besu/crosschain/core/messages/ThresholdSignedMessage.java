@@ -73,6 +73,8 @@ public interface ThresholdSignedMessage {
 
   ThresholdSignedMessageType getType();
 
+  boolean verifiedByCoordContract();
+
   BigInteger getCoordinationBlockchainId();
 
   Address getCoordinationContractAddress();
@@ -91,6 +93,8 @@ public interface ThresholdSignedMessage {
 
   // Create a message to be signed.
   BytesValue getEncodedCoreMessage();
+
+  BytesValue getEncodedMessageForCoordContract();
 
   // Create the blob to be sent to other nodes so they have enough information to know whether they
   // should sign.

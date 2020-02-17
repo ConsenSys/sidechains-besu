@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.besu.Besu;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple3;
@@ -79,7 +80,18 @@ public class CoordinationContractWrapper {
     BigInteger keyVersion = BigInteger.valueOf(message.getKeyVersion());
     byte[] signature = message.getSignature().extractArray();
     LOG.info(
-        "Crosschain Coordination Contract start message: signature: {}",
+        "Crosschain Coordination Contract start message: "
+            + "Originating Blockchain {}, "
+            + "Crosschain Transaction Id {}, "
+            + "Hash of Message {}"
+            + "Timeout {}, "
+            + "Key Version {}, "
+            + "Signature {},",
+        originatingBlockchainId,
+        crosschainTransactionId,
+        hashOfMessage,
+        transactionTimeoutBlock,
+        keyVersion,
         message.getSignature().getHexString());
     RemoteFunctionCall<TransactionReceipt> tx =
         contractWrapper.start(
@@ -96,12 +108,68 @@ public class CoordinationContractWrapper {
       LOG.error(
           "Exception thrown while submitting start message transaction to Crosschain Coordination Contract: {}",
           ex.toString());
+      startDebug(ipAddressPort, blockchainId, contractAddress, message);
       return false;
     }
     LOG.info(
         "Crosschain Coordination Contract start message transaction receipt: {}",
         receipt.toString());
     return true;
+  }
+
+  public void startDebug(
+      final String ipAddressPort,
+      final BigInteger blockchainId,
+      final Address contractAddress,
+      final CrosschainTransactionStartMessage message) {
+
+    String uri = "http://" + ipAddressPort + "/";
+    Besu web3j = Besu.build(new HttpService(uri), COORDINATION_BLOCK_PERIOD_IN_MS);
+    // Even though the coordination contract isn't doing crosschain operations, we need to use
+    // it as if it was so the start function can get the current blockchain id using the precompile.
+    RawTransactionManager tm =
+        new RawTransactionManager(
+            web3j,
+            this.credentials,
+            blockchainId.longValue(),
+            RETRY,
+            COORDINATION_BLOCK_PERIOD_IN_MS);
+    CrosschainCoordinationV1 contractWrapper =
+        CrosschainCoordinationV1.load(
+            contractAddress.getHexString(), web3j, tm, this.freeGasProvider);
+
+    BigInteger originatingBlockchainId = message.getOriginatingBlockchainId();
+    BigInteger crosschainTransactionId = message.getCrosschainTransactionId();
+    BigInteger hashOfMessage =
+        new BigInteger(1, message.getCrosschainTransactionHash().getByteArray());
+    BigInteger transactionTimeoutBlock = message.getTransactionTimeoutBlockNumber();
+    LOG.info(
+        "Crosschain Coordination Contract startDebug message: "
+            + "Originating Blockchain {}, "
+            + "Crosschain Transaction Id {}, "
+            + "Hash of Message {}"
+            + "Timeout {}",
+        originatingBlockchainId,
+        crosschainTransactionId,
+        hashOfMessage,
+        transactionTimeoutBlock);
+    RemoteFunctionCall<TransactionReceipt> tx =
+        contractWrapper.startDebug(
+            originatingBlockchainId,
+            crosschainTransactionId,
+            hashOfMessage,
+            transactionTimeoutBlock);
+    TransactionReceipt receipt;
+    try {
+      receipt = tx.send();
+    } catch (Exception ex) {
+      LOG.error("Exception thrown during startDebug: {}", ex.toString());
+      return;
+    }
+    List<Log> logs = receipt.getLogs();
+    for (Log log : logs) {
+      LOG.info("Coordination Contract startDebug: {}", log.toString());
+    }
   }
 
   public BigInteger getPublicKeyFromCoordContract(

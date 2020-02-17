@@ -133,4 +133,11 @@ public interface MutableAccount extends Account {
    * @return a map of storage that has been modified.
    */
   Map<UInt256, UInt256> getUpdatedStorage();
+
+  /**
+   * Indicates if any change: balance, code, or storage has occurred for this account.
+   *
+   * @return true if any change has occurred.
+   */
+  boolean changed();
 }

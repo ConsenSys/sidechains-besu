@@ -23,6 +23,13 @@ public class DebugHelper {
     return sw.toString();
   }
 
+  //  public static String getStackTrace(Throwable th) {
+  //    StringWriter sw = new StringWriter();
+  //    PrintWriter pw = new PrintWriter(sw);
+  //    th.printStackTrace(pw);
+  //    return sw.toString();
+  //  }
+
   //    // TODO SIDECHAINS START
   //    // Debug code to dump all updated statesd for the updated world state.
   //    WorldUpdater worldUpdater = frame.getWorldState();

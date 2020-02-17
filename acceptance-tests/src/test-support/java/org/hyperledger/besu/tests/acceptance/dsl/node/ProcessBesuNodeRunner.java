@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.awaitility.Awaitility;
+import org.apache.logging.log4j.ThreadContext;
 
 public class ProcessBesuNodeRunner implements BesuNodeRunner {
 
@@ -58,6 +58,12 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
 
   @Override
   public void startNode(final BesuNode node) {
+
+    if (ThreadContext.containsKey("node")) {
+      LOG.error("ThreadContext node is already set to {}", ThreadContext.get("node"));
+    }
+    ThreadContext.put("node", node.getName());
+
     final Path dataDir = node.homeDirectory();
 
     final List<String> params = new ArrayList<>();
@@ -233,6 +239,9 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
     params.add("--key-value-storage");
     params.add("rocksdb");
 
+    // in testing, we don't mind logging on success, but we want max info on failures
+    params.add("--logging=DEBUG");
+
     LOG.info("Creating besu process with params {}", params);
     final ProcessBuilder processBuilder =
         new ProcessBuilder(params)
@@ -256,6 +265,8 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
     }
 
     waitForPortsFile(dataDir);
+
+    ThreadContext.remove("node");
   }
 
   private void printOutput(final BesuNode node, final Process process) {
@@ -263,11 +274,23 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
         new BufferedReader(new InputStreamReader(process.getInputStream(), UTF_8))) {
       String line = in.readLine();
       while (line != null) {
-        PROCESS_LOG.info("{}: {}", node.getName(), line);
+        // would be nice to pass up the log level of the incoming log line
+        PROCESS_LOG.info(line);
         line = in.readLine();
       }
     } catch (final IOException e) {
-      LOG.error("Failed to read output from process", e);
+      if (besuProcesses.containsKey(node.getName())) {
+        LOG.error("Failed to read output from process for node " + node.getName(), e);
+        if (process.isAlive()) {
+          LOG.error("Process is still alive, killing it now");
+          stopNode(node);
+        } else {
+          LOG.error("Node exited with code {}", process.exitValue());
+        }
+      } else {
+        LOG.debug("Stdout from process {} closed", node.getName());
+        assert (!process.isAlive());
+      }
     }
   }
 
@@ -296,6 +319,8 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
     if (besuProcesses.containsKey(node.getName())) {
       final Process process = besuProcesses.get(node.getName());
       killBesuProcess(node.getName(), process);
+    } else {
+      LOG.error("There was a request to stop a node not in the known list: {}", node.getName());
     }
   }
 
@@ -323,17 +348,25 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
   private void killBesuProcess(final String name, final Process process) {
     LOG.info("Killing " + name + " process");
 
-    Awaitility.waitAtMost(30, TimeUnit.SECONDS)
-        .until(
-            () -> {
-              if (process.isAlive()) {
-                process.destroy();
-                besuProcesses.remove(name);
-                return false;
-              } else {
-                besuProcesses.remove(name);
-                return true;
-              }
-            });
+    Process p = besuProcesses.remove(name);
+    if (p == null) {
+      LOG.error("Process {} wasn't in our list", name);
+    }
+
+    process.destroy();
+    try {
+      process.waitFor(2, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      LOG.warn("Wait for death of process " + name + " was interrupted", e);
+    }
+    if (process.isAlive()) {
+      LOG.warn("Process {} still alive, destroying forcibly now", name);
+      try {
+        process.destroyForcibly().waitFor(2, TimeUnit.SECONDS);
+      } catch (Exception e) {
+        // just die already
+      }
+      LOG.info("Process exited with code {}", process.exitValue());
+    }
   }
 }
