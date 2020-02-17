@@ -19,7 +19,6 @@ import org.hyperledger.besu.crypto.Hash;
 import org.hyperledger.besu.crypto.altbn128.AltBn128Fq12Pairer;
 import org.hyperledger.besu.crypto.altbn128.AltBn128Fq2Point;
 import org.hyperledger.besu.crypto.altbn128.AltBn128Point;
-import org.hyperledger.besu.crypto.altbn128.Fq12;
 import org.hyperledger.besu.util.bytes.Bytes32;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
@@ -206,29 +205,30 @@ public class AltBn128CryptoProvider extends CryptoProviderBase
   @Override
   public boolean verify(final BlsPoint publicKey, final byte[] data, final BlsPoint signature) {
     return true;
-//    BlsPoint hashOfData = hashToCurveE1(data);
-//    BlsPoint basePointE2 = getBasePointE2();
-//
-//    Fq12 pair1 =
-//        AltBn128Fq12Pairer.pair(
-//            ((AltBn128PointWrapper) hashOfData).point, ((AltBn128Fq2PointWrapper) publicKey).point);
-//    // System.out.println("Pair 1: " + pair1);
-//    Fq12 pair2 =
-//        AltBn128Fq12Pairer.pair(
-//            ((AltBn128PointWrapper) signature).point,
-//            ((AltBn128Fq2PointWrapper) basePointE2).point);
-//    // System.out.println("Pair 2: " + pair2);
-//
-//    Fq12 exponent = Fq12.one();
-//    exponent = exponent.multiply(pair1);
-//    Fq12 result1 = AltBn128Fq12Pairer.finalize(exponent);
-//    // System.out.println("Result1: " + result1);
-//
-//    exponent = Fq12.one();
-//    exponent = exponent.multiply(pair2);
-//    Fq12 result2 = AltBn128Fq12Pairer.finalize(exponent);
-//    // System.out.println("Result2: " + result2);
-//
-//    return result1.equals(result2);
+    //    BlsPoint hashOfData = hashToCurveE1(data);
+    //    BlsPoint basePointE2 = getBasePointE2();
+    //
+    //    Fq12 pair1 =
+    //        AltBn128Fq12Pairer.pair(
+    //            ((AltBn128PointWrapper) hashOfData).point, ((AltBn128Fq2PointWrapper)
+    // publicKey).point);
+    //    // System.out.println("Pair 1: " + pair1);
+    //    Fq12 pair2 =
+    //        AltBn128Fq12Pairer.pair(
+    //            ((AltBn128PointWrapper) signature).point,
+    //            ((AltBn128Fq2PointWrapper) basePointE2).point);
+    //    // System.out.println("Pair 2: " + pair2);
+    //
+    //    Fq12 exponent = Fq12.one();
+    //    exponent = exponent.multiply(pair1);
+    //    Fq12 result1 = AltBn128Fq12Pairer.finalize(exponent);
+    //    // System.out.println("Result1: " + result1);
+    //
+    //    exponent = Fq12.one();
+    //    exponent = exponent.multiply(pair2);
+    //    Fq12 result2 = AltBn128Fq12Pairer.finalize(exponent);
+    //    // System.out.println("Result2: " + result2);
+    //
+    //    return result1.equals(result2);
   }
 }
