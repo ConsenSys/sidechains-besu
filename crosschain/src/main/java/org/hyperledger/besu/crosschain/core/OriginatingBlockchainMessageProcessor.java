@@ -198,13 +198,13 @@ public class OriginatingBlockchainMessageProcessor {
       LOG.info("All transaction ready messages have been received. Sending the commit message.");
       sendCommitMsg(val.component1());
     }
-    this.txToBeMined.replace(origChainId, txs);
+    this.txToBeMined.replace(origChainId, val);
     return false;
   }
 
   private void sendCommitMsg(final CrosschainTransaction origTx) {
     // Construct the commit message.
-    ThresholdSignedMessage msg = new CrosschainTransactionCommitMessage(origTx);
+    CrosschainTransactionCommitMessage msg = new CrosschainTransactionCommitMessage(origTx);
     // Sign it.
     this.keyManager.thresholdSign(msg);
     // Send it to the coordination contract
