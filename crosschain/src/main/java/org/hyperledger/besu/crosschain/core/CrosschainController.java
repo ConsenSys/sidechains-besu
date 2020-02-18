@@ -375,8 +375,7 @@ public class CrosschainController {
   private Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>>
       updateListAndSendTxReadyMsg(final CrosschainTransaction transaction) {
     if (transaction.getType().isOriginatingTransaction()) {
-      this.origMsgProcessor.removeOrigTxInsideToBeMined(
-          transaction.getChainId().get(), transaction.hash());
+      this.origMsgProcessor.removeOrigTxInsideToBeMined(transaction);
       return Optional.empty();
     } else {
       return this.processor.sendSubTxReady(transaction);
@@ -392,7 +391,7 @@ public class CrosschainController {
    * @return Returns true if there is any error, otherwise false.
    */
   public boolean receiveSubTxReadyMsg(final SubordinateTransactionReadyMessage subTxReadyMsg) {
-    return this.origMsgProcessor.removeTxInsideToBeMined(subTxReadyMsg);
+    return this.origMsgProcessor.receiveSubTxReadyMsg(subTxReadyMsg);
   }
 
   public void setKeyGenerationContractAddress(final Address address) {

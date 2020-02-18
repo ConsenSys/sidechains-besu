@@ -12,7 +12,10 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
+import jnr.ffi.annotations.Out;
+import org.checkerframework.checker.units.qual.C;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
+import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionCommitMessage;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateTransactionReadyMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
@@ -31,6 +34,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.web3j.tuples.generated.Tuple2;
 
 /**
  * Does the coordination of the processing required for the Crosschain Transaction Start, Commit,
@@ -42,13 +46,13 @@ public class OriginatingBlockchainMessageProcessor {
   CrosschainKeyManager keyManager;
   CoordContractManager coordContractManager;
   SECP256K1.KeyPair nodeKeys;
-  Map<BigInteger, Set<Hash>> txToBeMined;
+  Map<BigInteger, Tuple2<CrosschainTransaction, Set<Hash>>> txToBeMined;
 
   public OriginatingBlockchainMessageProcessor(
       final CrosschainKeyManager keyManager, final CoordContractManager coordContractManager) {
     this.keyManager = keyManager;
     this.coordContractManager = coordContractManager;
-    this.txToBeMined = new HashMap<BigInteger, Set<Hash>>();
+    this.txToBeMined = new HashMap<BigInteger, Tuple2<CrosschainTransaction, Set<Hash>>>();
   }
 
   public void init(final SECP256K1.KeyPair nodeKeys) {
@@ -114,23 +118,28 @@ public class OriginatingBlockchainMessageProcessor {
     for (CrosschainTransaction subTx : transaction.getSubordinateTransactionsAndViews()) {
       txs.add(subTx.hash());
     }
-    this.txToBeMined.put(transaction.getChainId().get(), txs);
+    Tuple2<CrosschainTransaction, Set<Hash>> val = new Tuple2<CrosschainTransaction, Set<Hash>>(transaction, txs);
+    this.txToBeMined.put(transaction.getCrosschainTransactionId().get(), val);
   }
 
   /**
    * This method updates the txsToBeMined by removing the originating transaction, because it has
    * already been mined.
    *
-   * @param origChainId Originating chain Id
+   * @param txId Originating chain Id
    * @param origTxHash Originating transaction hash
    */
-  public void removeOrigTxInsideToBeMined(final BigInteger origChainId, final Hash origTxHash) {
-    Set<Hash> txs = this.txToBeMined.get(origChainId);
-    txs.remove(origTxHash);
+  public void removeOrigTxInsideToBeMined(final CrosschainTransaction origTx) {
+    BigInteger txId = origTx.getCrosschainTransactionId().get();
+    Tuple2<CrosschainTransaction, Set<Hash>> val = this.txToBeMined.get(txId);
+    Set<Hash> txs = val.component2();
+    txs.remove(origTx.hash());
     if (txs.isEmpty()) {
-      LOG.info("All transaction ready messages have been received. TODO - Send commit message.");
+      LOG.info("All transaction ready messages have been received. Mining of the " +
+        "originating transaction has been the last. Send commit message.");
+      sendCommitMsg(origTx);
     }
-    this.txToBeMined.replace(origChainId, txs);
+    this.txToBeMined.replace(txId, val);
   }
 
   /**
@@ -142,14 +151,13 @@ public class OriginatingBlockchainMessageProcessor {
    *     chain.
    * @return Returns true if there is any error, otherwise false.
    */
-  public boolean removeTxInsideToBeMined(final SubordinateTransactionReadyMessage subTxReadyMsg) {
+  public boolean receiveSubTxReadyMsg(final SubordinateTransactionReadyMessage subTxReadyMsg) {
     BigInteger coordChainId = subTxReadyMsg.getCoordChainId();
     BigInteger subChainId = subTxReadyMsg.getSubChainId();
     Address coordAddress = subTxReadyMsg.getCoordAddress();
 
     String coordIpAddrAndPort = coordContractManager.getIpAndPort(coordChainId, coordAddress);
-    BigInteger publicKey =
-        new OutwardBoundConnectionManager(this.nodeKeys)
+    BigInteger publicKey = new OutwardBoundConnectionManager(this.nodeKeys)
             .getPublicKeyFromCoordContract(
                 coordIpAddrAndPort,
                 coordChainId,
@@ -183,12 +191,24 @@ public class OriginatingBlockchainMessageProcessor {
     }
 
     BigInteger origChainId = subTxReadyMsg.getOrigChainId();
-    Set<Hash> txs = this.txToBeMined.get(origChainId);
+    Tuple2<CrosschainTransaction, Set<Hash>> val = this.txToBeMined.get(origChainId);
+    Set<Hash> txs = val.component2();
     txs.remove(subTxReadyMsg.getTxHash());
     if (txs.isEmpty()) {
-      LOG.info("All transaction ready messages have been received. TODO - Send commit message.");
+      LOG.info("All transaction ready messages have been received. Sending the commit message.");
+      sendCommitMsg(val.component1());
     }
     this.txToBeMined.replace(origChainId, txs);
     return false;
   }
+
+  private void sendCommitMsg(final CrosschainTransaction origTx) {
+    // Construct the commit message.
+    ThresholdSignedMessage msg = new CrosschainTransactionCommitMessage(origTx);
+    // Sign it.
+    this.keyManager.thresholdSign(msg);
+    // Send it to the coordination contract
+    new OutwardBoundConnectionManager(this.nodeKeys).sendCommitToCoordContract(origTx, msg);
+  }
+
 }
