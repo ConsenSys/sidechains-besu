@@ -21,7 +21,6 @@ import org.hyperledger.besu.ethereum.vm.GasCalculator;
 import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,9 +30,7 @@ public abstract class AbstractCrossChainPrecompiledContract extends AbstractPrec
   protected static final Logger LOG = LogManager.getLogger();
 
   private static final int uint256Length = 32;
-  private static final int contractAddressLength = 20;
   private static final int functionSignatureHashLength = 4;
-  private int offset;
 
   private BigInteger actualLength;
   private BigInteger actualSidechainId;
@@ -59,7 +56,7 @@ public abstract class AbstractCrossChainPrecompiledContract extends AbstractPrec
     this.actualLength = extractParameter(input, uint256Length);
     this.actualSidechainId = extractParameter(input, uint256Length);
     this.actualZeroFillBeforeAddress = extractParameter(input, 12);
-    this.actualContractAddress = extractParameter(input, contractAddressLength);
+    this.actualContractAddress = extractParameter(input, Address.SIZE);
     this.actualLengthOfFunctionAndParametersAndLength = extractParameter(input, uint256Length);
     this.actualLengthOfFunctionAndParameters = extractParameter(input, uint256Length);
     this.actualFunction = extractParameter(input, functionSignatureHashLength);
@@ -150,19 +147,4 @@ public abstract class AbstractCrossChainPrecompiledContract extends AbstractPrec
   }
 
   protected abstract boolean isMatched(CrosschainTransaction ct);
-
-  private BigInteger extractParameter(final BytesValue input, final int length) {
-    BigInteger result = extractParameter(input, this.offset, length);
-    this.offset += length;
-    return result;
-  }
-
-  private static BigInteger extractParameter(
-      final BytesValue input, final int offset, final int length) {
-    if (offset > input.size() || length == 0) {
-      return BigInteger.ZERO;
-    }
-    final byte[] raw = Arrays.copyOfRange(input.extractArray(), offset, offset + length);
-    return new BigInteger(1, raw);
-  }
 }

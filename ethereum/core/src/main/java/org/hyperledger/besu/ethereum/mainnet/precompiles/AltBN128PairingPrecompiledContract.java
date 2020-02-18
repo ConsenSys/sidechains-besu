@@ -26,7 +26,6 @@ import org.hyperledger.besu.util.bytes.BytesValue;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class AltBN128PairingPrecompiledContract extends AbstractPrecompiledContract {
@@ -109,14 +108,5 @@ public class AltBN128PairingPrecompiledContract extends AbstractPrecompiledContr
     } else {
       return FALSE;
     }
-  }
-
-  private static BigInteger extractParameter(
-      final BytesValue input, final int offset, final int length) {
-    if (offset > input.size() || length == 0) {
-      return BigInteger.ZERO;
-    }
-    final byte[] raw = Arrays.copyOfRange(input.extractArray(), offset, offset + length);
-    return new BigInteger(1, raw);
   }
 }

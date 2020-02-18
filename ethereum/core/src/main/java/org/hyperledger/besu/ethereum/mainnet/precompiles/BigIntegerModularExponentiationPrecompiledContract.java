@@ -21,7 +21,6 @@ import org.hyperledger.besu.util.bytes.BytesValues;
 import org.hyperledger.besu.util.bytes.MutableBytesValue;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 // The big integer modular exponentiation precompiled contract defined in EIP-198.
 public class BigIntegerModularExponentiationPrecompiledContract
@@ -143,23 +142,6 @@ public class BigIntegerModularExponentiationPrecompiledContract
 
   private static final BigInteger modulusLength(final BytesValue input) {
     return extractParameter(input, MODULUS_LENGTH_OFFSET, PARAMETER_LENGTH);
-  }
-
-  private static BigInteger extractParameter(
-      final BytesValue input, final int offset, final int length) {
-    if (offset > input.size() || length == 0) {
-      return BigInteger.ZERO;
-    }
-    final byte[] raw = Arrays.copyOfRange(input.extractArray(), offset, offset + length);
-    return new BigInteger(1, raw);
-  }
-
-  private static BigInteger extractParameter(
-      final BytesValue input, final BigInteger offset, final int length) {
-    if (BigInteger.valueOf(input.size()).compareTo(offset) <= 0) {
-      return BigInteger.ZERO;
-    }
-    return extractParameter(input, offset.intValue(), length);
   }
 
   private static BigInteger square(final BigInteger n) {

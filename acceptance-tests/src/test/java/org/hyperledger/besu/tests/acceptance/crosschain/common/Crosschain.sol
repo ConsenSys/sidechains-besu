@@ -15,15 +15,15 @@ pragma solidity ^0.5.0;
 contract Crosschain {
     uint256 constant private LENGTH_OF_LENGTH_FIELD = 4;
     uint256 constant private LENGTH_OF_UINT32 = 4;
-    uint256 constant private LENGTH_OF_UINT256 = 0x20;
-    uint256 constant private LENGTH_OF_BYTES32 = 0x20;
+    uint256 constant private LENGTH_OF_UINT256 = 32;
+    uint256 constant private LENGTH_OF_BYTES32 = 32;
     uint256 constant private LENGTH_OF_ADDRESS = 20;
 
-    // Value to be passed ot the getInfo precompile.
+    // Value to be passed to the getInfo precompile.
     uint32 constant private GET_INFO_CROSSCHAIN_TRANSACTION_TYPE = 0;
     uint32 constant private GET_INFO_BLOCKCHAIN_ID = 1;
     uint32 constant private GET_INFO_COORDINAITON_BLOCKHCAIN_ID = 2;
-    uint32 constant private GET_INFO_COORDINAITON_CONTRACT_ADDRESS = 3;
+    uint32 constant private GET_INFO_COORDINATION_CONTRACT_ADDRESS = 3;
     uint32 constant private GET_INFO_ORIGINATING_BLOCKCHAIN_ID = 4;
     uint32 constant private GET_INFO_FROM_BLOCKCHAIN_ID = 5;
     uint32 constant private GET_INFO_FROM_CONTRACT_ADDRESS = 6;
@@ -212,7 +212,7 @@ contract Crosschain {
      *   Contract Deploy.
      */
     function crosschainGetInfoCoordinationContractAddress() internal view returns (address) {
-        return getInfoAddress(GET_INFO_COORDINAITON_CONTRACT_ADDRESS);
+        return getInfoAddress(GET_INFO_COORDINATION_CONTRACT_ADDRESS);
     }
 
     /**
@@ -228,7 +228,7 @@ contract Crosschain {
 
 
     function getInfoAddress(uint256 _requestedAddress) private view returns (address) {
-        uint256 inputLength = LENGTH_OF_UINT256;
+        uint256 inputLength = LENGTH_OF_ADDRESS;
         uint256[1] memory input;
         input[0] = _requestedAddress;
 
@@ -240,6 +240,23 @@ contract Crosschain {
         assembly {
         // GET_INFO_PRECOMPILE = 120. Inline assembler doesn't support constants.
             if iszero(staticcall(not(0), 120, input, inputLength, result, resultLength)) {
+                revert(0, 0)
+            }
+        }
+        return result[0];
+    }
+
+    function crosschainIsLocked(uint256 _address) private view returns (bool) {
+        uint256 inputLength = LENGTH_OF_ADDRESS;
+        uint256[1] memory input;
+        input[0] = _address;
+
+        byte memory result;
+        uint256 resultLength = result.length;
+
+        assembly {
+        // IS_LOCKED_PRECOMPILE = 121. Inline assembler doesn't support constants.
+            if iszero(staticcall(not(0), 121, input, inputLength, result, resultLength)) {
                 revert(0, 0)
             }
         }

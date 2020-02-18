@@ -12,6 +12,7 @@
  */
 package org.hyperledger.besu.crosschain.ethereum.crosschain;
 
+import org.hyperledger.besu.crosschain.core.CrosschainController;
 import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
 import org.hyperledger.besu.ethereum.core.Transaction;
 
@@ -21,31 +22,36 @@ import org.hyperledger.besu.ethereum.core.Transaction;
  * Transactions and Views.
  */
 public class CrosschainThreadLocalDataHolder {
+  // TODO given the usage of thread pools and Vert.X, will ThreadLocals work?
+
   private static final ThreadLocal<CrosschainTransaction> data =
       new ThreadLocal<CrosschainTransaction>();
-  private static final ThreadLocal<Transaction> txData = new ThreadLocal<Transaction>();
 
   public static void setCrosschainTransaction(final CrosschainTransaction tx) {
     data.set(tx);
-  }
-
-  public static void setTransaction(final Transaction tx) {
-    txData.set(tx);
   }
 
   public static CrosschainTransaction getCrosschainTransaction() {
     return data.get();
   }
 
-  public static Transaction getTransaction() {
-    return txData.get();
-  }
-
   public static void removeCrosschainTransaction() {
     data.remove();
+  }
+
+  private static final ThreadLocal<Transaction> txData = new ThreadLocal<Transaction>();
+
+  public static void setTransaction(final Transaction tx) {
+    txData.set(tx);
+  }
+
+  public static Transaction getTransaction() {
+    return txData.get();
   }
 
   public static void removeTransaction() {
     txData.remove();
   }
+
+  public static CrosschainController controller;
 }

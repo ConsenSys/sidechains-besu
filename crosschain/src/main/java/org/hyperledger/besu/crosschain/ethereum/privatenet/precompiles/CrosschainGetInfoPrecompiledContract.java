@@ -119,19 +119,4 @@ public class CrosschainGetInfoPrecompiledContract extends AbstractPrecompiledCon
         return null;
     }
   }
-
-  private static Bytes32 toBytes32(final BigInteger val) {
-    byte[] bytes = val.toByteArray();
-    Bytes32 retval;
-    if (bytes.length <= Bytes32.SIZE) {
-      retval = Bytes32.leftPad(BytesValue.wrap(bytes));
-    } else if ((bytes.length == Bytes32.SIZE + 1) && (bytes[Bytes32.SIZE] == 0)) {
-      retval = Bytes32.wrap(bytes, Bytes32.SIZE - bytes.length);
-    } else {
-      String errorMessage = "Value too large to convert to Bytes32. Actual length: " + bytes.length;
-      LOG.error(errorMessage);
-      throw new RuntimeException(errorMessage);
-    }
-    return retval;
-  }
 }

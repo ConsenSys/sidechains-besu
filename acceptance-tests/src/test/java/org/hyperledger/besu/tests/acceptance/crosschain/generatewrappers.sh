@@ -2,7 +2,6 @@
 
 rm -rf build
 
-# WEB3J=web3j
 # WEB3J=../../../sidechains-web3j/besucodegen/build/distributions/besucodegen-4.6.0-SNAPSHOT/bin/besucodegen
 WEB3J=../../../../../../../../../../../sidechains-web3j/besucodegen/build/install/besucodegen/bin/besucodegen
 

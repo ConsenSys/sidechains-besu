@@ -19,6 +19,7 @@ import org.hyperledger.besu.crosschain.core.keys.KeyStatus;
 import org.hyperledger.besu.crosschain.core.keys.generation.KeyGenFailureToCompleteReason;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateTransactionReadyMessage;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessage;
+import org.hyperledger.besu.crosschain.ethereum.crosschain.CrosschainThreadLocalDataHolder;
 import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
@@ -49,13 +50,10 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// TODO: This class needs to be moved to its own module, and it needs to use the Vertx, rather than
-// blocking,
-// TODO and use the main Vertx instance.
+// TODO: This class needs to use (the main instance of) Vertx rather than blocking
 
 /**
- * This class is the entry point for ALL JSON RPC calls into the crosschain core code. It is the
- * class the is initialise when the Ethereum Client starts up, and holds references to all of the
+ * This class is initialised when the Ethereum Client starts up, and holds references to all of the
  * parts of the crosschain core code.
  */
 public class CrosschainController {
@@ -106,13 +104,14 @@ public class CrosschainController {
     this.worldStateArchive = worldStateArchive;
     this.nodeStorage = nodeStorage;
     nodeStorage.restoreNodeData(linkedNodeManager, coordContractManager, crosschainKeyManager);
+    CrosschainThreadLocalDataHolder.controller = this;
   }
 
   /**
    * Execute a subordinate transaction.
    *
    * @param transaction Subordinate Transaction to execute.
-   * @return Validaiton result.
+   * @return Validation result.
    */
   public ValidationResult<TransactionValidator.TransactionInvalidReason> addLocalTransaction(
       final CrosschainTransaction transaction) {
@@ -225,6 +224,24 @@ public class CrosschainController {
     }
   }
 
+  public boolean isLocked(final Address address) {
+    Hash latestBlockStateRootHash = this.blockchain.getChainHeadBlock().getHeader().getStateRoot();
+    final Optional<WorldState> maybeWorldState = worldStateArchive.get(latestBlockStateRootHash);
+    if (maybeWorldState.isEmpty()) {
+      LOG.error("Can't fetch world state");
+      // TODO should rather be an exception
+      return false;
+    }
+    WorldState worldState = maybeWorldState.get();
+    final Account contract = worldState.get(address);
+
+    if (!contract.isLockable()) {
+      throw new InvalidJsonRpcRequestException("Contract is not lockable");
+    }
+
+    return contract.isLocked();
+  }
+
   /**
    * Called by the JSON RPC method: CrossCheckUnlock.
    *
@@ -241,21 +258,7 @@ public class CrosschainController {
 
     // TODO For the moment just unlock the contract.
 
-    // Is the contract lockable and is it locked?
-    Hash latestBlockStateRootHash = this.blockchain.getChainHeadBlock().getHeader().getStateRoot();
-    final Optional<WorldState> maybeWorldState = worldStateArchive.get(latestBlockStateRootHash);
-    if (maybeWorldState.isEmpty()) {
-      LOG.error("Crosschain Signalling Transaction: Can't fetch world state");
-      return;
-    }
-    WorldState worldState = maybeWorldState.get();
-    final Account contract = worldState.get(address);
-
-    if (!contract.isLockable()) {
-      throw new InvalidJsonRpcRequestException("Contract is not lockable");
-    }
-
-    if (contract.isLocked()) {
+    if (isLocked(address)) {
       // TODO here we need to check the Crosschain Coordination Contract.
       List<Address> addressesToUnlock = new ArrayList<>();
       addressesToUnlock.add(address);
