@@ -56,33 +56,33 @@ public class CrosschainTransactionCommitMessage extends AbstractThresholdSignedM
   @Override
   public BytesValue getEncodedCoreMessage() {
     return RLP.encode(
-      out -> {
-        out.startList();
-        out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_COMMIT.value);
-        out.writeLongScalar(this.coordChainId.longValue());
-        out.writeBytesValue(this.coordAddress);
-        out.writeLongScalar(this.origChainId.longValue());
-        out.writeLongScalar(this.txId.longValue());
-        out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
-        out.endList();
-      });
+        out -> {
+          out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_COMMIT.value);
+          out.writeLongScalar(this.coordChainId.longValue());
+          out.writeBytesValue(this.coordAddress);
+          out.writeLongScalar(this.origChainId.longValue());
+          out.writeLongScalar(this.txId.longValue());
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
+          out.endList();
+        });
   }
 
   @Override
   public BytesValue getEncodedMessage() {
     return RLP.encode(
-      out -> {
-        out.startList();
-        out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_COMMIT.value);
-        out.writeLongScalar(this.coordChainId.longValue());
-        out.writeBytesValue(this.coordAddress);
-        out.writeLongScalar(this.origChainId.longValue());
-        out.writeLongScalar(this.txId.longValue());
-        out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
-        out.writeLongScalar(this.keyVersion);
-        out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
-        out.endList();
-      });
+        out -> {
+          out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_COMMIT.value);
+          out.writeLongScalar(this.coordChainId.longValue());
+          out.writeBytesValue(this.coordAddress);
+          out.writeLongScalar(this.origChainId.longValue());
+          out.writeLongScalar(this.txId.longValue());
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
+          out.writeLongScalar(this.keyVersion);
+          out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
+          out.endList();
+        });
   }
 
   @Override
@@ -101,6 +101,7 @@ public class CrosschainTransactionCommitMessage extends AbstractThresholdSignedM
       this.signature = sig;
     }
   }
+
   @Override
   public boolean verifiedByCoordContract() {
     return true;

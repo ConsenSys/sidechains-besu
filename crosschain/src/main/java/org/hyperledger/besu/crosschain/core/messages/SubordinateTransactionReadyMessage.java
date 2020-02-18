@@ -72,7 +72,9 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
     return this.coordAddress;
   }
 
-  public BigInteger getTxId() { return this.txId; }
+  public BigInteger getTxId() {
+    return this.txId;
+  }
 
   @Override
   public BytesValue getEncodedCoreMessage() {

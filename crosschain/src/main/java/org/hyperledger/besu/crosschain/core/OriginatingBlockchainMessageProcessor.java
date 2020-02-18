@@ -12,8 +12,6 @@
  */
 package org.hyperledger.besu.crosschain.core;
 
-import jnr.ffi.annotations.Out;
-import org.checkerframework.checker.units.qual.C;
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionCommitMessage;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
@@ -118,7 +116,8 @@ public class OriginatingBlockchainMessageProcessor {
     for (CrosschainTransaction subTx : transaction.getSubordinateTransactionsAndViews()) {
       txs.add(subTx.hash());
     }
-    Tuple2<CrosschainTransaction, Set<Hash>> val = new Tuple2<CrosschainTransaction, Set<Hash>>(transaction, txs);
+    Tuple2<CrosschainTransaction, Set<Hash>> val =
+        new Tuple2<CrosschainTransaction, Set<Hash>>(transaction, txs);
     this.txToBeMined.put(transaction.getCrosschainTransactionId().get(), val);
   }
 
@@ -135,8 +134,9 @@ public class OriginatingBlockchainMessageProcessor {
     Set<Hash> txs = val.component2();
     txs.remove(origTx.hash());
     if (txs.isEmpty()) {
-      LOG.info("All transaction ready messages have been received. Mining of the " +
-        "originating transaction has been the last. Send commit message.");
+      LOG.info(
+          "All transaction ready messages have been received. Mining of the "
+              + "originating transaction has been the last. Send commit message.");
       sendCommitMsg(origTx);
     }
     this.txToBeMined.replace(txId, val);
@@ -157,7 +157,8 @@ public class OriginatingBlockchainMessageProcessor {
     Address coordAddress = subTxReadyMsg.getCoordAddress();
 
     String coordIpAddrAndPort = coordContractManager.getIpAndPort(coordChainId, coordAddress);
-    BigInteger publicKey = new OutwardBoundConnectionManager(this.nodeKeys)
+    BigInteger publicKey =
+        new OutwardBoundConnectionManager(this.nodeKeys)
             .getPublicKeyFromCoordContract(
                 coordIpAddrAndPort,
                 coordChainId,
@@ -210,5 +211,4 @@ public class OriginatingBlockchainMessageProcessor {
     // Send it to the coordination contract
     new OutwardBoundConnectionManager(this.nodeKeys).sendCommitToCoordContract(origTx, msg);
   }
-
 }

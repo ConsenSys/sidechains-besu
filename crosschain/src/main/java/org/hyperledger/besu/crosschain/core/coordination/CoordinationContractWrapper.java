@@ -174,63 +174,59 @@ public class CoordinationContractWrapper {
   }
 
   public boolean commit(
-    final String ipAddressPort,
-    final BigInteger blockchainId,
-    final Address contractAddress,
-    final CrosschainTransactionCommitMessage message) {
+      final String ipAddressPort,
+      final BigInteger blockchainId,
+      final Address contractAddress,
+      final CrosschainTransactionCommitMessage message) {
 
     String uri = "http://" + ipAddressPort + "/";
     Besu web3j = Besu.build(new HttpService(uri), COORDINATION_BLOCK_PERIOD_IN_MS);
     // Even though the coordination contract isn't doing crosschain operations, we need to use
     // it as if it was so the start function can get the current blockchain id using the precompile.
     RawTransactionManager tm =
-      new RawTransactionManager(
-        web3j,
-        this.credentials,
-        blockchainId.longValue(),
-        RETRY,
-        COORDINATION_BLOCK_PERIOD_IN_MS);
+        new RawTransactionManager(
+            web3j,
+            this.credentials,
+            blockchainId.longValue(),
+            RETRY,
+            COORDINATION_BLOCK_PERIOD_IN_MS);
     CrosschainCoordinationV1 contractWrapper =
-      CrosschainCoordinationV1.load(
-        contractAddress.getHexString(), web3j, tm, this.freeGasProvider);
+        CrosschainCoordinationV1.load(
+            contractAddress.getHexString(), web3j, tm, this.freeGasProvider);
 
     BigInteger originatingBlockchainId = message.getOriginatingBlockchainId();
     BigInteger crosschainTransactionId = message.getCrosschainTransactionId();
     BigInteger hashOfMessage =
-      new BigInteger(1, message.getCrosschainTransactionHash().getByteArray());
+        new BigInteger(1, message.getCrosschainTransactionHash().getByteArray());
     BigInteger keyVersion = BigInteger.valueOf(message.getKeyVersion());
     byte[] signature = message.getSignature().extractArray();
     LOG.info(
-      "Crosschain Coordination Contract commit message: "
-        + "Originating Blockchain {}, "
-        + "Crosschain Transaction Id {}, "
-        + "Hash of Message {}"
-        + "Key Version {}, "
-        + "Signature {},",
-      originatingBlockchainId,
-      crosschainTransactionId,
-      hashOfMessage,
-      keyVersion,
-      message.getSignature().getHexString());
-    RemoteFunctionCall<TransactionReceipt> tx =
-      contractWrapper.commit(
+        "Crosschain Coordination Contract commit message: "
+            + "Originating Blockchain {}, "
+            + "Crosschain Transaction Id {}, "
+            + "Hash of Message {}"
+            + "Key Version {}, "
+            + "Signature {},",
         originatingBlockchainId,
         crosschainTransactionId,
         hashOfMessage,
         keyVersion,
-        signature);
+        message.getSignature().getHexString());
+    RemoteFunctionCall<TransactionReceipt> tx =
+        contractWrapper.commit(
+            originatingBlockchainId, crosschainTransactionId, hashOfMessage, keyVersion, signature);
     TransactionReceipt receipt;
     try {
       receipt = tx.send();
     } catch (Exception ex) {
       LOG.error(
-        "Exception thrown while submitting commit message transaction to Crosschain Coordination Contract: {}",
-        ex.toString());
+          "Exception thrown while submitting commit message transaction to Crosschain Coordination Contract: {}",
+          ex.toString());
       return false;
     }
     LOG.info(
-      "Crosschain Coordination Contract commit message transaction receipt: {}",
-      receipt.toString());
+        "Crosschain Coordination Contract commit message transaction receipt: {}",
+        receipt.toString());
     return true;
   }
 
