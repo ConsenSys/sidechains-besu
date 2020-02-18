@@ -204,11 +204,30 @@ public class OriginatingBlockchainMessageProcessor {
   }
 
   private void sendCommitMsg(final CrosschainTransaction origTx) {
+    BigInteger coordBcId = origTx.getCrosschainCoordinationBlockchainId().get();
+    Address coordContractAddress = origTx.getCrosschainCoordinationContractAddress().get();
+
+    // We must trust the Crosschain Coordination Contract to proceed.
+    String ipAndPort = this.coordContractManager.getIpAndPort(coordBcId, coordContractAddress);
+    if (ipAndPort == null) {
+      String msg =
+          "Crosschain Transaction uses unknown Coordination Blockchain and Address combination "
+              + "Blockchain: 0x"
+              + coordBcId.toString(16)
+              + ", Address: "
+              + coordContractAddress.getHexString();
+      LOG.error(msg);
+      throw new RuntimeException(msg);
+    }
+
     // Construct the commit message.
     CrosschainTransactionCommitMessage msg = new CrosschainTransactionCommitMessage(origTx);
     // Sign it.
     this.keyManager.thresholdSign(msg);
     // Send it to the coordination contract
-    new OutwardBoundConnectionManager(this.nodeKeys).sendCommitToCoordContract(origTx, msg);
+    boolean commitOk =
+        new OutwardBoundConnectionManager(this.nodeKeys)
+            .sendCommitToCoordContract(ipAndPort, coordBcId, coordContractAddress, msg);
+    LOG.info("Commit message sent successfully {}", commitOk);
   }
 }

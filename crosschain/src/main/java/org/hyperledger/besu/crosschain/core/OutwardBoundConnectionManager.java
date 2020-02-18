@@ -20,7 +20,6 @@ import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartM
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
 import org.hyperledger.besu.crypto.SECP256K1;
 import org.hyperledger.besu.ethereum.core.Address;
-import org.hyperledger.besu.ethereum.core.CrosschainTransaction;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -110,10 +109,12 @@ public class OutwardBoundConnectionManager {
    * This method sends the signed CrosschainTransactionCommit message from the originating chain to
    * the coordination contract. The coordination contract will check the signature and update the
    * state of the crosschain transaction.
-   *
-   * @param origTx originating transaction
-   * @param msg CrosschainTransactionCommitMessage that has to be sent to the coordination contract
    */
-  public void sendCommitToCoordContract(
-      final CrosschainTransaction origTx, final CrosschainTransactionCommitMessage msg) {}
+  public boolean sendCommitToCoordContract(
+      final String ipAndPort,
+      final BigInteger coordChainId,
+      final Address coordAddress,
+      final CrosschainTransactionCommitMessage msg) {
+    return this.wrapper.commit(ipAndPort, coordChainId, coordAddress, msg);
+  }
 }
