@@ -104,7 +104,22 @@ public class OutwardBoundConnectionManager {
         coordIpAddrAndPort, coordChainId, coordContractAddr, blockchainId, keyVersion);
   }
 
-  // Send the TransactionReady message
-  public void sendTransactionReadyMessage(
-      final String fromIpAddressAndPort, final BigInteger fromChainId, final Address fromAddress) {}
+  /**
+   * This method sends the signed CrosschainTransactionCommit message from the originating chain to
+   * the coordination contract. The coordination contract will check the signature and update the
+   * state of the crosschain transaction.
+   *
+   * @param ipAndPort Coordination node's ipAddress and Port
+   * @param coordChainId Coordination chain ID
+   * @param coordAddress Coordination contract's address
+   * @param msg CrosschainTransactionCommitMessage or CrosschainTransactionIgnoreMessage
+   * @return True when successfully sent otherwise false
+   */
+  public boolean sendCommitOrIgnoreToCoordContract(
+      final String ipAndPort,
+      final BigInteger coordChainId,
+      final Address coordAddress,
+      final ThresholdSignedMessage msg) {
+    return this.wrapper.commitOrIgnore(ipAndPort, coordChainId, coordAddress, msg);
+  }
 }

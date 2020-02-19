@@ -125,6 +125,9 @@ public class CrosschainController {
 
     // Get Subordinate View results.
     if (this.processor.processSubordinates(transaction, false)) {
+      if (transaction.getType().isOriginatingTransaction()) {
+        sendIgnoreMessage(transaction);
+      }
       return ValidationResult.invalid(
           TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_VIEW);
     }
@@ -132,11 +135,17 @@ public class CrosschainController {
     Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>> executionError =
         this.processor.trialExecution(transaction);
     if (executionError.isPresent()) {
+      if (transaction.getType().isOriginatingTransaction()) {
+        sendIgnoreMessage(transaction);
+      }
       return executionError.get();
     }
 
     // Dispatch Subordinate Transactions if the trial execution worked OK.
     if (this.processor.processSubordinates(transaction, true)) {
+      if (transaction.getType().isOriginatingTransaction()) {
+        sendIgnoreMessage(transaction);
+      }
       return ValidationResult.invalid(
           TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
     }
@@ -375,12 +384,20 @@ public class CrosschainController {
   private Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>>
       updateListAndSendTxReadyMsg(final CrosschainTransaction transaction) {
     if (transaction.getType().isOriginatingTransaction()) {
-      this.origMsgProcessor.removeOrigTxInsideToBeMined(
-          transaction.getChainId().get(), transaction.hash());
+      this.origMsgProcessor.removeOrigTxInsideToBeMined(transaction);
       return Optional.empty();
     } else {
       return this.processor.sendSubTxReady(transaction);
     }
+  }
+
+  /**
+   * This method sends the CrosschainIgnoreMessage to the coordination contract
+   *
+   * @param origTx Originating transaction
+   */
+  private void sendIgnoreMessage(final CrosschainTransaction origTx) {
+    this.origMsgProcessor.sendIgnoreMessage(origTx);
   }
 
   /**
@@ -392,7 +409,7 @@ public class CrosschainController {
    * @return Returns true if there is any error, otherwise false.
    */
   public boolean receiveSubTxReadyMsg(final SubordinateTransactionReadyMessage subTxReadyMsg) {
-    return this.origMsgProcessor.removeTxInsideToBeMined(subTxReadyMsg);
+    return this.origMsgProcessor.receiveSubTxReadyMsg(subTxReadyMsg);
   }
 
   public void setKeyGenerationContractAddress(final Address address) {
