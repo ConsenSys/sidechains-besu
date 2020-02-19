@@ -112,6 +112,7 @@ public class OutwardBoundConnectionManager {
    * @param ipAndPort Coordination node's ipAddress and Port
    * @param coordChainId Coordination chain ID
    * @param coordAddress Coordination contract's address
+   * @param msg CrosschainTransactionCommitMessage or CrosschainTransactionIgnoreMessage
    * @return True when successfully sent otherwise false
    */
   public boolean sendCommitOrIgnoreToCoordContract(
