@@ -62,10 +62,45 @@ public class CrosschainTransactionCommitMessage extends AbstractThresholdSignedM
           out.writeLongScalar(this.coordChainId.longValue());
           out.writeBytesValue(this.coordAddress);
           out.writeLongScalar(this.origChainId.longValue());
-          out.writeLongScalar(this.txId.longValue());
+          out.writeBigIntegerScalar(this.txId);
           out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.endList();
         });
+  }
+
+  private byte[] bigIntToUint256(final BigInteger bigInteger) {
+    byte[] bVar = bigInteger.toByteArray();
+    byte[] bFixed = new byte[32];
+    System.arraycopy(bVar, 0, bFixed, bFixed.length - bVar.length, bVar.length);
+    return bFixed;
+  }
+
+  @Override
+  public BytesValue getEncodedMessageForCoordContract() {
+    int messageType = getType().value;
+    byte[] messageTypeBytes = new byte[32];
+    messageTypeBytes[31] = (byte) messageType;
+
+    BigInteger coordBcId = getCoordinationBlockchainId();
+    byte[] coordBcId1 = bigIntToUint256(coordBcId);
+
+    Address coordAddr = getCoordinationContractAddress();
+
+    BigInteger orgBcId = getOriginatingBlockchainId();
+    byte[] orgBcId1 = bigIntToUint256(orgBcId);
+
+    BigInteger txId = getCrosschainTransactionId();
+    byte[] txId1 = bigIntToUint256(txId);
+
+    BytesValue txHash = getCrosschainTransactionHash();
+
+    BytesValue result = BytesValue.wrap(messageTypeBytes);
+    result = BytesValue.wrap(result, BytesValue.wrap(coordBcId1));
+    result = BytesValue.wrap(result, coordAddr);
+    result = BytesValue.wrap(result, BytesValue.wrap(orgBcId1));
+    result = BytesValue.wrap(result, BytesValue.wrap(txId1));
+    result = BytesValue.wrap(result, txHash);
+    return result;
   }
 
   @Override
@@ -77,7 +112,7 @@ public class CrosschainTransactionCommitMessage extends AbstractThresholdSignedM
           out.writeLongScalar(this.coordChainId.longValue());
           out.writeBytesValue(this.coordAddress);
           out.writeLongScalar(this.origChainId.longValue());
-          out.writeLongScalar(this.txId.longValue());
+          out.writeBigIntegerScalar(this.txId);
           out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.writeLongScalar(this.keyVersion);
           out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
@@ -90,7 +125,7 @@ public class CrosschainTransactionCommitMessage extends AbstractThresholdSignedM
     this.coordChainId = BigInteger.valueOf(in.readLongScalar());
     this.coordAddress = Address.wrap(in.readBytesValue());
     this.origChainId = BigInteger.valueOf(in.readLongScalar());
-    this.txId = BigInteger.valueOf(in.readLongScalar());
+    this.txId = in.readBigIntegerScalar();
     String hashHexString = in.readBytesValue().getHexString();
     this.txHash = Hash.fromHexString(hashHexString);
     this.keyVersion = in.readLongScalar();

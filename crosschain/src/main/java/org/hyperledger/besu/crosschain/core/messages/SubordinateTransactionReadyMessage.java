@@ -85,7 +85,7 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
           out.writeLongScalar(this.origChainId.longValue());
           out.writeLongScalar(this.subChainId.longValue());
           out.writeLongScalar(this.coordChainId.longValue());
-          out.writeLongScalar(this.txId.longValue());
+          out.writeBigIntegerScalar(this.txId);
           out.writeBytesValue(this.coordAddress);
           out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.endList();
@@ -101,7 +101,7 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
           out.writeLongScalar(this.origChainId.longValue());
           out.writeLongScalar(this.subChainId.longValue());
           out.writeLongScalar(this.coordChainId.longValue());
-          out.writeLongScalar(this.txId.longValue());
+          out.writeBigIntegerScalar(this.txId);
           out.writeBytesValue(this.coordAddress);
           out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
           out.writeLongScalar(this.keyVersion);
@@ -115,7 +115,7 @@ public class SubordinateTransactionReadyMessage extends AbstractThresholdSignedM
     this.origChainId = BigInteger.valueOf(in.readLongScalar());
     this.subChainId = BigInteger.valueOf(in.readLongScalar());
     this.coordChainId = BigInteger.valueOf(in.readLongScalar());
-    this.txId = BigInteger.valueOf(in.readLongScalar());
+    this.txId = in.readBigIntegerScalar();
     this.coordAddress = Address.wrap(in.readBytesValue());
     String hashHexString = in.readBytesValue().getHexString();
     this.txHash = Hash.fromHexString(hashHexString);

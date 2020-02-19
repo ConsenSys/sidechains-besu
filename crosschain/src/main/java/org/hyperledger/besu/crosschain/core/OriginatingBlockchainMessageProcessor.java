@@ -191,15 +191,15 @@ public class OriginatingBlockchainMessageProcessor {
       return true;
     }
 
-    BigInteger origChainId = subTxReadyMsg.getOrigChainId();
-    Tuple2<CrosschainTransaction, Set<Hash>> val = this.txToBeMined.get(origChainId);
+    BigInteger txId = subTxReadyMsg.getTxId();
+    Tuple2<CrosschainTransaction, Set<Hash>> val = this.txToBeMined.get(txId);
     Set<Hash> txs = val.component2();
     txs.remove(subTxReadyMsg.getTxHash());
     if (txs.isEmpty()) {
       LOG.info("All transaction ready messages have been received. Sending the commit message.");
       sendCommitMsg(val.component1());
     }
-    this.txToBeMined.replace(origChainId, val);
+    this.txToBeMined.replace(txId, val);
     return false;
   }
 

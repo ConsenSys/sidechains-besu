@@ -267,7 +267,7 @@ public class CrosschainKeyManager {
       toBeSigned = message.getEncodedCoreMessage();
     }
 
-    LOG.info("Start message contents to be signed: {}", toBeSigned.getHexString());
+    LOG.info("Message contents to be signed: {}", toBeSigned.getHexString());
 
     ThresholdSigning signer =
         new ThresholdSigning(this.p2p, this.credentials.get(this.activeKeyVersion));
