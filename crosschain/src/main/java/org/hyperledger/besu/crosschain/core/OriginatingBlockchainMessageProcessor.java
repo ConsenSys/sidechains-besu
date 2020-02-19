@@ -126,8 +126,7 @@ public class OriginatingBlockchainMessageProcessor {
    * This method updates the txsToBeMined by removing the originating transaction, because it has
    * already been mined.
    *
-   * @param txId Originating chain Id
-   * @param origTxHash Originating transaction hash
+   * @param origTx Originating transaction
    */
   public void removeOrigTxInsideToBeMined(final CrosschainTransaction origTx) {
     BigInteger txId = origTx.getCrosschainTransactionId().get();
