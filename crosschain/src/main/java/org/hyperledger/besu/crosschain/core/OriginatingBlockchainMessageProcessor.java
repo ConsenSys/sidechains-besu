@@ -14,6 +14,7 @@ package org.hyperledger.besu.crosschain.core;
 
 import org.hyperledger.besu.crosschain.core.keys.CrosschainKeyManager;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionCommitMessage;
+import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionIgnoreMessage;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
 import org.hyperledger.besu.crosschain.core.messages.SubordinateTransactionReadyMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
@@ -137,7 +138,7 @@ public class OriginatingBlockchainMessageProcessor {
       LOG.info(
           "All transaction ready messages have been received. Mining of the "
               + "originating transaction has been the last. Send commit message.");
-      sendCommitMsg(origTx);
+      sendCommitMessage(origTx);
     }
     this.txToBeMined.replace(txId, val);
   }
@@ -197,13 +198,13 @@ public class OriginatingBlockchainMessageProcessor {
     txs.remove(subTxReadyMsg.getTxHash());
     if (txs.isEmpty()) {
       LOG.info("All transaction ready messages have been received. Sending the commit message.");
-      sendCommitMsg(val.component1());
+      sendCommitMessage(val.component1());
     }
     this.txToBeMined.replace(txId, val);
     return false;
   }
 
-  private void sendCommitMsg(final CrosschainTransaction origTx) {
+  private void sendCommitMessage(final CrosschainTransaction origTx) {
     BigInteger coordBcId = origTx.getCrosschainCoordinationBlockchainId().get();
     Address coordContractAddress = origTx.getCrosschainCoordinationContractAddress().get();
 
@@ -227,7 +228,36 @@ public class OriginatingBlockchainMessageProcessor {
     // Send it to the coordination contract
     boolean commitOk =
         new OutwardBoundConnectionManager(this.nodeKeys)
-            .sendCommitToCoordContract(ipAndPort, coordBcId, coordContractAddress, msg);
+            .sendCommitOrIgnoreToCoordContract(ipAndPort, coordBcId, coordContractAddress, msg);
     LOG.info("Commit message sent successfully {}", commitOk);
+  }
+
+  public void sendIgnoreMessage(final CrosschainTransaction origTx) {
+    BigInteger coordBcId = origTx.getCrosschainCoordinationBlockchainId().get();
+    Address coordContractAddress = origTx.getCrosschainCoordinationContractAddress().get();
+
+    // We must trust the Crosschain Coordination Contract to proceed.
+    String ipAndPort = this.coordContractManager.getIpAndPort(coordBcId, coordContractAddress);
+    if (ipAndPort == null) {
+      String msg =
+        "Crosschain Transaction uses unknown Coordination Blockchain and Address combination "
+          + "Blockchain: 0x"
+          + coordBcId.toString(16)
+          + ", Address: "
+          + coordContractAddress.getHexString();
+      LOG.error(msg);
+      throw new RuntimeException(msg);
+    }
+
+    // Construct the commit message.
+    CrosschainTransactionIgnoreMessage msg = new CrosschainTransactionIgnoreMessage(origTx);
+    // Sign it.
+    this.keyManager.thresholdSign(msg);
+    // Send it to the coordination contract
+    boolean ignoreOk =
+      new OutwardBoundConnectionManager(this.nodeKeys)
+        .sendCommitOrIgnoreToCoordContract(ipAndPort, coordBcId, coordContractAddress, msg);
+    LOG.info("Ignore message sent successfully {}", ignoreOk);
+
   }
 }

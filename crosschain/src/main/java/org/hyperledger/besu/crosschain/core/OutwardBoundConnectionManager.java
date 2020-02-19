@@ -110,11 +110,11 @@ public class OutwardBoundConnectionManager {
    * the coordination contract. The coordination contract will check the signature and update the
    * state of the crosschain transaction.
    */
-  public boolean sendCommitToCoordContract(
+  public boolean sendCommitOrIgnoreToCoordContract(
       final String ipAndPort,
       final BigInteger coordChainId,
       final Address coordAddress,
-      final CrosschainTransactionCommitMessage msg) {
-    return this.wrapper.commit(ipAndPort, coordChainId, coordAddress, msg);
+      final ThresholdSignedMessage msg) {
+    return this.wrapper.commitOrIgnore(ipAndPort, coordChainId, coordAddress, msg);
   }
 }
