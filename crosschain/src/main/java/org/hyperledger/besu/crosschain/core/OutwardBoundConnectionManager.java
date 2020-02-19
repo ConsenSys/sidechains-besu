@@ -15,7 +15,6 @@ package org.hyperledger.besu.crosschain.core;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.hyperledger.besu.crosschain.core.coordination.CoordinationContractWrapper;
-import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionCommitMessage;
 import org.hyperledger.besu.crosschain.core.messages.CrosschainTransactionStartMessage;
 import org.hyperledger.besu.crosschain.core.messages.ThresholdSignedMessage;
 import org.hyperledger.besu.crypto.SECP256K1;

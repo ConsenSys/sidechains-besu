@@ -240,11 +240,11 @@ public class OriginatingBlockchainMessageProcessor {
     String ipAndPort = this.coordContractManager.getIpAndPort(coordBcId, coordContractAddress);
     if (ipAndPort == null) {
       String msg =
-        "Crosschain Transaction uses unknown Coordination Blockchain and Address combination "
-          + "Blockchain: 0x"
-          + coordBcId.toString(16)
-          + ", Address: "
-          + coordContractAddress.getHexString();
+          "Crosschain Transaction uses unknown Coordination Blockchain and Address combination "
+              + "Blockchain: 0x"
+              + coordBcId.toString(16)
+              + ", Address: "
+              + coordContractAddress.getHexString();
       LOG.error(msg);
       throw new RuntimeException(msg);
     }
@@ -255,9 +255,8 @@ public class OriginatingBlockchainMessageProcessor {
     this.keyManager.thresholdSign(msg);
     // Send it to the coordination contract
     boolean ignoreOk =
-      new OutwardBoundConnectionManager(this.nodeKeys)
-        .sendCommitOrIgnoreToCoordContract(ipAndPort, coordBcId, coordContractAddress, msg);
+        new OutwardBoundConnectionManager(this.nodeKeys)
+            .sendCommitOrIgnoreToCoordContract(ipAndPort, coordBcId, coordContractAddress, msg);
     LOG.info("Ignore message sent successfully {}", ignoreOk);
-
   }
 }

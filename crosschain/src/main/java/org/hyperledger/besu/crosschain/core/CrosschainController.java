@@ -125,7 +125,7 @@ public class CrosschainController {
 
     // Get Subordinate View results.
     if (this.processor.processSubordinates(transaction, false)) {
-      if(transaction.getType().isOriginatingTransaction()) {
+      if (transaction.getType().isOriginatingTransaction()) {
         sendIgnoreMessage(transaction);
       }
       return ValidationResult.invalid(
@@ -135,7 +135,7 @@ public class CrosschainController {
     Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>> executionError =
         this.processor.trialExecution(transaction);
     if (executionError.isPresent()) {
-      if(transaction.getType().isOriginatingTransaction()) {
+      if (transaction.getType().isOriginatingTransaction()) {
         sendIgnoreMessage(transaction);
       }
       return executionError.get();
@@ -143,7 +143,7 @@ public class CrosschainController {
 
     // Dispatch Subordinate Transactions if the trial execution worked OK.
     if (this.processor.processSubordinates(transaction, true)) {
-      if(transaction.getType().isOriginatingTransaction()) {
+      if (transaction.getType().isOriginatingTransaction()) {
         sendIgnoreMessage(transaction);
       }
       return ValidationResult.invalid(
@@ -393,6 +393,7 @@ public class CrosschainController {
 
   /**
    * This method sends the CrosschainIgnoreMessage to the coordination contract
+   *
    * @param origTx Originating transaction
    */
   private void sendIgnoreMessage(final CrosschainTransaction origTx) {

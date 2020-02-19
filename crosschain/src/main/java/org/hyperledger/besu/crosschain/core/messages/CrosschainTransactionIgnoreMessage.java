@@ -55,16 +55,16 @@ public class CrosschainTransactionIgnoreMessage extends AbstractThresholdSignedM
   @Override
   public BytesValue getEncodedCoreMessage() {
     return RLP.encode(
-      out -> {
-        out.startList();
-        out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_IGNORE.value);
-        out.writeLongScalar(this.coordChainId.longValue());
-        out.writeBytesValue(this.coordAddress);
-        out.writeLongScalar(this.origChainId.longValue());
-        out.writeBigIntegerScalar(this.txId);
-        out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
-        out.endList();
-      });
+        out -> {
+          out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_IGNORE.value);
+          out.writeLongScalar(this.coordChainId.longValue());
+          out.writeBytesValue(this.coordAddress);
+          out.writeLongScalar(this.origChainId.longValue());
+          out.writeBigIntegerScalar(this.txId);
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
+          out.endList();
+        });
   }
 
   private byte[] bigIntToUint256(final BigInteger bigInteger) {
@@ -105,18 +105,18 @@ public class CrosschainTransactionIgnoreMessage extends AbstractThresholdSignedM
   @Override
   public BytesValue getEncodedMessage() {
     return RLP.encode(
-      out -> {
-        out.startList();
-        out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_IGNORE.value);
-        out.writeLongScalar(this.coordChainId.longValue());
-        out.writeBytesValue(this.coordAddress);
-        out.writeLongScalar(this.origChainId.longValue());
-        out.writeBigIntegerScalar(this.txId);
-        out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
-        out.writeLongScalar(this.keyVersion);
-        out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
-        out.endList();
-      });
+        out -> {
+          out.startList();
+          out.writeLongScalar(ThresholdSignedMessageType.CROSSCHAIN_TRANSACTION_IGNORE.value);
+          out.writeLongScalar(this.coordChainId.longValue());
+          out.writeBytesValue(this.coordAddress);
+          out.writeLongScalar(this.origChainId.longValue());
+          out.writeBigIntegerScalar(this.txId);
+          out.writeBytesValue(BytesValue.fromHexString(this.txHash.getHexString()));
+          out.writeLongScalar(this.keyVersion);
+          out.writeBytesValue(this.signature != null ? this.signature : BytesValue.EMPTY);
+          out.endList();
+        });
   }
 
   @Override
