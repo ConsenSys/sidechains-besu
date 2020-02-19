@@ -128,9 +128,9 @@ task acceptanceTest(type: Test) {
   }
 
   retry {
-    mr = System.getProperty('acctests.maxRetries')
+    String mr = System.getProperty('acctests.maxRetries')
     if (mr != null) {
-      maxRetries = Integer.valueOf(mr)
+      maxRetries = Integer.parseInt(mr)
       maxFailures = 3
     }
   }

@@ -240,7 +240,7 @@ public class ProcessBesuNodeRunner implements BesuNodeRunner {
     params.add("rocksdb");
 
     String level = System.getProperty("root.log.level");
-    if(level == null){
+    if(level != null){
       params.add("--logging="+level);
     }
 
