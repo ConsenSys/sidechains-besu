@@ -22,7 +22,6 @@ import org.hyperledger.besu.crosschain.core.messages.SubordinateViewResultMessag
 import org.hyperledger.besu.crosschain.ethereum.crosschain.CrosschainThreadLocalDataHolder;
 import org.hyperledger.besu.crosschain.ethereum.storage.keyvalue.CrosschainNodeStorage;
 import org.hyperledger.besu.crypto.SECP256K1;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.exception.InvalidJsonRpcRequestException;
 import org.hyperledger.besu.ethereum.chain.Blockchain;
 import org.hyperledger.besu.ethereum.core.Account;
 import org.hyperledger.besu.ethereum.core.Address;
@@ -243,11 +242,11 @@ public class CrosschainController {
     }
     WorldState worldState = maybeWorldState.get();
     final Account contract = worldState.get(address);
-
-    if (!contract.isLockable()) {
-      throw new InvalidJsonRpcRequestException("Contract is not lockable");
+    // If the contract doesn't exist in the world state, always indicate it isn't locked.
+    if (contract == null) {
+      return false;
     }
-
+    // Note that all non-lockable contracts will be always unlocked.
     return contract.isLocked();
   }
 

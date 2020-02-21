@@ -19,6 +19,7 @@ import org.hyperledger.besu.ethereum.mainnet.AbstractPrecompiledContract;
 import org.hyperledger.besu.ethereum.vm.GasCalculator;
 import org.hyperledger.besu.ethereum.vm.MessageFrame;
 import org.hyperledger.besu.util.bytes.BytesValue;
+import org.hyperledger.besu.util.uint.UInt256;
 
 import java.math.BigInteger;
 
@@ -42,10 +43,11 @@ public class CrosschainIsLockedPrecompiledContract extends AbstractPrecompiledCo
 
   @Override
   public BytesValue compute(final BytesValue input, final MessageFrame messageFrame) {
-    // BigInteger contractAddress = extractParameter(input, Address.SIZE);
-    // LOG.info("CrosschainIsLocked Precompile called for address {}", contractAddress);
+    BytesValue addressBytes = input.slice(UInt256.SIZE - Address.SIZE);
+    Address addr = Address.wrap(addressBytes);
+    LOG.info("CrosschainIsLocked Precompile called for address {})", addr.toString());
 
-    boolean result = CrosschainThreadLocalDataHolder.controller.isLocked(Address.wrap(input));
+    boolean result = CrosschainThreadLocalDataHolder.controller.isLocked(addr);
 
     return toBytes32(BigInteger.valueOf(result ? 1 : 0));
   }
