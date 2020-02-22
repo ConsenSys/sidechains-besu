@@ -178,7 +178,7 @@ jobs:
           environment:
             GRADLE_MAX_TEST_FORKS: 2
           command: |
-            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG -Dacctests.keepLogs=true --tests "*crosschain*"
+            ./gradlew --parallel acceptanceTest -Droot.log.level=DEBUG -Dacctests.keepLogs=true -Dacctests.maxRetries=5 --tests "*crosschain*"
       - capture_test_results
       - store_artifacts:
           path: acceptance-tests/build/reports

@@ -128,10 +128,12 @@ task acceptanceTest(type: Test) {
   }
 
   retry {
-    maxRetries = 5
-    maxFailures = 3
+    String mr = System.getProperty('acctests.maxRetries')
+    if (mr != null) {
+      maxRetries = Integer.parseInt(mr)
+      maxFailures = 3
+    }
   }
-
 
   testLogging {
     exceptionFormat = 'full'
