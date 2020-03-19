@@ -402,7 +402,7 @@ public class CrosschainController {
    * @param transaction Crosschain transaction whose state is queried upon.
    * @return true iff the state is NOT committed
    */
-  private boolean getCrosschainTransactionStatus(CrosschainTransaction transaction)  {
+  private boolean getCrosschainTransactionStatus(final CrosschainTransaction transaction)  {
     Optional<BigInteger> coordChainId = transaction.getCrosschainCoordinationBlockchainId();
     Optional<Address> coordAddr = transaction.getCrosschainCoordinationContractAddress();
     if (coordChainId.isEmpty() || coordAddr.isEmpty()) {
