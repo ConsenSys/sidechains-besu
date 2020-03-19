@@ -270,34 +270,33 @@ public class CoordinationContractWrapper {
    * @return true iff the state is NOT committed
    */
   public boolean getCrosschainTransactionStatus(
-    final String coordIpAddrAndPort,
-    final BigInteger coordChainId,
-    final Address coordContractAddr,
-    final BigInteger origChainId,
-    final BigInteger ccTransactionId) {
+      final String coordIpAddrAndPort,
+      final BigInteger coordChainId,
+      final Address coordContractAddr,
+      final BigInteger origChainId,
+      final BigInteger ccTransactionId) {
 
     String uri = "http://" + coordIpAddrAndPort + "/";
     Besu web3j = Besu.build(new HttpService(uri), COORDINATION_BLOCK_PERIOD_IN_MS);
     RawTransactionManager tm =
-      new RawTransactionManager(
-        web3j,
-        this.credentials,
-        coordChainId.longValue(),
-        RETRY,
-        COORDINATION_BLOCK_PERIOD_IN_MS);
+        new RawTransactionManager(
+            web3j,
+            this.credentials,
+            coordChainId.longValue(),
+            RETRY,
+            COORDINATION_BLOCK_PERIOD_IN_MS);
     CrosschainCoordinationV1 contractWrapper =
-      CrosschainCoordinationV1.load(
-        coordContractAddr.getHexString(), web3j, tm, this.freeGasProvider);
+        CrosschainCoordinationV1.load(
+            coordContractAddr.getHexString(), web3j, tm, this.freeGasProvider);
 
     try {
-      LOG.info(
-        "Querying the coordination contract for the status of the crosschain transaction");
+      LOG.info("Querying the coordination contract for the status of the crosschain transaction");
       final BigInteger txStatus =
-        contractWrapper.getCrosschainTransactionStatus(origChainId, ccTransactionId).send();
+          contractWrapper.getCrosschainTransactionStatus(origChainId, ccTransactionId).send();
       return txStatus.longValue() != 2;
     } catch (Exception e) {
       LOG.error(
-        "Exception while getting the status of the crosschain transaction -- {}", e.toString());
+          "Exception while getting the status of the crosschain transaction -- {}", e.toString());
     }
     return true;
   }

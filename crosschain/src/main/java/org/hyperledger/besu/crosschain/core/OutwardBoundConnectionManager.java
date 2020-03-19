@@ -106,13 +106,13 @@ public class OutwardBoundConnectionManager {
 
   // Get a blockchain's public key from the coordination contract
   public boolean getCrosschainTransactionStatus(
-    final String coordIpAddrAndPort,
-    final BigInteger coordChainId,
-    final Address coordContractAddr,
-    final BigInteger origChainId,
-    final BigInteger ccTransactionId) {
+      final String coordIpAddrAndPort,
+      final BigInteger coordChainId,
+      final Address coordContractAddr,
+      final BigInteger origChainId,
+      final BigInteger ccTransactionId) {
     return this.wrapper.getCrosschainTransactionStatus(
-      coordIpAddrAndPort, coordChainId, coordContractAddr, origChainId, ccTransactionId);
+        coordIpAddrAndPort, coordChainId, coordContractAddr, origChainId, ccTransactionId);
   }
 
   /**

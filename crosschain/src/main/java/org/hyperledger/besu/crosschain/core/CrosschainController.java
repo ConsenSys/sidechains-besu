@@ -150,9 +150,9 @@ public class CrosschainController {
     }
 
     // Check the state of the crosschain transaction in the CrosschainCoordinationContract
-    if(getCrosschainTransactionStatus(transaction)) {
+    if (getCrosschainTransactionStatus(transaction)) {
       return ValidationResult.invalid(
-        TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
+          TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
     }
 
     // TODO there is a synchronized inside this call. This should be surrounded by a Vertx
@@ -402,7 +402,7 @@ public class CrosschainController {
    * @param transaction Crosschain transaction whose state is queried upon.
    * @return true iff the state is NOT committed
    */
-  private boolean getCrosschainTransactionStatus(final CrosschainTransaction transaction)  {
+  private boolean getCrosschainTransactionStatus(final CrosschainTransaction transaction) {
     Optional<BigInteger> coordChainId = transaction.getCrosschainCoordinationBlockchainId();
     Optional<Address> coordAddr = transaction.getCrosschainCoordinationContractAddress();
     if (coordChainId.isEmpty() || coordAddr.isEmpty()) {
@@ -411,14 +411,14 @@ public class CrosschainController {
     }
 
     final String coordIpAddrAndPort =
-      this.coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
+        this.coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
     return new OutwardBoundConnectionManager(this.processor.nodeKeys)
-      .getCrosschainTransactionStatus(
-        coordIpAddrAndPort,
-        coordChainId.get(),
-        coordAddr.get(),
-        transaction.getOriginatingSidechainId().get(),
-        transaction.getCrosschainTransactionId().get());
+        .getCrosschainTransactionStatus(
+            coordIpAddrAndPort,
+            coordChainId.get(),
+            coordAddr.get(),
+            transaction.getOriginatingSidechainId().get(),
+            transaction.getCrosschainTransactionId().get());
   }
 
   /**
