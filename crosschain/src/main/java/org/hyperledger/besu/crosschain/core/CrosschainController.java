@@ -149,6 +149,12 @@ public class CrosschainController {
           TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
     }
 
+    // Check the state of the crosschain transaction in the CrosschainCoordinationContract
+    if(getCrosschainTransactionStatus(transaction)) {
+      return ValidationResult.invalid(
+        TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
+    }
+
     // TODO there is a synchronized inside this call. This should be surrounded by a Vertx
     // blockingExecutor, maybe
     ValidationResult<TransactionValidator.TransactionInvalidReason> validationResult =
@@ -388,6 +394,31 @@ public class CrosschainController {
     } else {
       return this.processor.sendSubTxReady(transaction);
     }
+  }
+
+  /**
+   * This method queries the state of the crosschain transaction from the coordination contract.
+   *
+   * @param transaction Crosschain transaction whose state is queried upon.
+   * @return true iff the state is NOT committed
+   */
+  private boolean getCrosschainTransactionStatus(CrosschainTransaction transaction)  {
+    Optional<BigInteger> coordChainId = transaction.getCrosschainCoordinationBlockchainId();
+    Optional<Address> coordAddr = transaction.getCrosschainCoordinationContractAddress();
+    if (coordChainId.isEmpty() || coordAddr.isEmpty()) {
+      LOG.error("Coordination Chain is not set up");
+      return true;
+    }
+
+    final String coordIpAddrAndPort =
+      this.coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
+    return new OutwardBoundConnectionManager(this.processor.nodeKeys)
+      .getCrosschainTransactionStatus(
+        coordIpAddrAndPort,
+        coordChainId.get(),
+        coordAddr.get(),
+        transaction.getOriginatingSidechainId().get(),
+        transaction.getCrosschainTransactionId().get());
   }
 
   /**

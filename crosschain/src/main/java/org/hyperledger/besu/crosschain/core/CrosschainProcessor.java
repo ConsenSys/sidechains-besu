@@ -128,7 +128,7 @@ public class CrosschainProcessor {
         // Get the address from chain mapping.
         String ipAddress = this.linkedNodeManager.getIpAddressAndPort(sidechainId);
         String response = null;
-        LOG.debug("Sending Crosschain Transaction or view to chain at " + ipAddress);
+        LOG.info("Sending Crosschain Transaction or view to chain at " + ipAddress);
         try {
           response =
               OutwardBoundConnectionManager.post(ipAddress, method, signedTransaction.toString());

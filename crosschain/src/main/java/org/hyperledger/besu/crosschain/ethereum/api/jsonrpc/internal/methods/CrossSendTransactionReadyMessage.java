@@ -70,7 +70,7 @@ public class CrossSendTransactionReadyMessage implements JsonRpcMethod {
       return new JsonRpcErrorResponse(request.getId(), JsonRpcError.INVALID_PARAMS);
     } else {
       LOG.info(
-          "JSON RPC {}: SubordinateTransactionReadyMessage received form chain {}",
+          "JSON RPC : SubordinateTransactionReadyMessage received form chain {}",
           subTxReadyMsg.getSubChainId().longValue());
       return new JsonRpcSuccessResponse(
           request.getId(), subTxReadyMsg.getEncodedMessage().getHexString());
