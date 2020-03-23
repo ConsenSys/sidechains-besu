@@ -267,9 +267,9 @@ public class CoordinationContractWrapper {
    * @param coordContractAddr Deployed Coordination contract's address.
    * @param origChainId Originating blockchain ID
    * @param ccTransactionId Crosschain Transaction ID
-   * @return true iff the state is NOT committed
+   * @return status of the crosschain transaction
    */
-  public boolean getCrosschainTransactionStatus(
+  public long getCrosschainTransactionStatus(
       final String coordIpAddrAndPort,
       final BigInteger coordChainId,
       final Address coordContractAddr,
@@ -290,15 +290,20 @@ public class CoordinationContractWrapper {
             coordContractAddr.getHexString(), web3j, tm, this.freeGasProvider);
 
     try {
-      LOG.info("Querying the coordination contract for the status of the crosschain transaction");
-      final BigInteger txStatus =
-          contractWrapper.getCrosschainTransactionStatus(origChainId, ccTransactionId).send();
-      return txStatus.longValue() != 2;
+      LOG.info(
+          "Querying the coordination contract for the status of the crosschain transaction "
+              + "with Originating chain ID = {} and Transaction ID = {}",
+          origChainId,
+          ccTransactionId);
+      return contractWrapper
+          .getCrosschainTransactionStatus(origChainId, ccTransactionId)
+          .send()
+          .longValue();
     } catch (Exception e) {
       LOG.error(
           "Exception while getting the status of the crosschain transaction -- {}", e.toString());
     }
-    return true;
+    return 0;
   }
 
   public BigInteger getPublicKeyFromCoordContract(

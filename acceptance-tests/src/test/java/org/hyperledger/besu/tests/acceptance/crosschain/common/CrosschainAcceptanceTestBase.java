@@ -49,7 +49,7 @@ public abstract class CrosschainAcceptanceTestBase extends AcceptanceTestBase {
 
   public static final int VOTING_TIME_OUT = 2;
   public static final int VOTING_TIME_PERIOD = 1;
-  public static final long CROSSCHAIN_TRANSACTION_TIMEOUT = 10;
+  public static final long CROSSCHAIN_TRANSACTION_TIMEOUT = 20;
   public static final long BLOCK_PERIOD = 2000;
   public static final long VOTING_WAIT_TIME = VOTING_TIME_PERIOD * BLOCK_PERIOD;
   public static final BigInteger VOTE_CHANGE_PUBLIC_KEY = BigInteger.valueOf(5);

@@ -149,14 +149,9 @@ public class CrosschainController {
           TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
     }
 
-    // Check the state of the crosschain transaction in the CrosschainCoordinationContract
-    if (getCrosschainTransactionStatus(transaction)) {
-      return ValidationResult.invalid(
-          TransactionValidator.TransactionInvalidReason.CROSSCHAIN_FAILED_SUBORDINATE_TRANSACTION);
-    }
-
     // TODO there is a synchronized inside this call. This should be surrounded by a Vertx
     // blockingExecutor, maybe
+    LOG.info("Transaction is getting added on chain with ID = {}", transaction.getChainId());
     ValidationResult<TransactionValidator.TransactionInvalidReason> validationResult =
         this.transactionPool.addLocalTransaction(transaction);
 
@@ -276,7 +271,7 @@ public class CrosschainController {
       // TODO here we need to check the Crosschain Coordination Contract.
       List<Address> addressesToUnlock = new ArrayList<>();
       addressesToUnlock.add(address);
-      this.processor.sendSignallingTransaction(addressesToUnlock);
+      this.processor.sendSignallingTransaction(addressesToUnlock, 2);
     }
   }
 
@@ -389,36 +384,12 @@ public class CrosschainController {
   private Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>>
       updateListAndSendTxReadyMsg(final CrosschainTransaction transaction) {
     if (transaction.getType().isOriginatingTransaction()) {
+      LOG.info("Originating transaction is ready. Chain ID = {}", transaction.getChainId());
       this.origMsgProcessor.removeOrigTxInsideToBeMined(transaction);
       return Optional.empty();
     } else {
       return this.processor.sendSubTxReady(transaction);
     }
-  }
-
-  /**
-   * This method queries the state of the crosschain transaction from the coordination contract.
-   *
-   * @param transaction Crosschain transaction whose state is queried upon.
-   * @return true iff the state is NOT committed
-   */
-  private boolean getCrosschainTransactionStatus(final CrosschainTransaction transaction) {
-    Optional<BigInteger> coordChainId = transaction.getCrosschainCoordinationBlockchainId();
-    Optional<Address> coordAddr = transaction.getCrosschainCoordinationContractAddress();
-    if (coordChainId.isEmpty() || coordAddr.isEmpty()) {
-      LOG.error("Coordination Chain is not set up");
-      return true;
-    }
-
-    final String coordIpAddrAndPort =
-        this.coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
-    return new OutwardBoundConnectionManager(this.processor.nodeKeys)
-        .getCrosschainTransactionStatus(
-            coordIpAddrAndPort,
-            coordChainId.get(),
-            coordAddr.get(),
-            transaction.getOriginatingSidechainId().get(),
-            transaction.getCrosschainTransactionId().get());
   }
 
   /**

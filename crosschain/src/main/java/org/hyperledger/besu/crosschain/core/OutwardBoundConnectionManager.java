@@ -105,7 +105,7 @@ public class OutwardBoundConnectionManager {
   }
 
   // Get a blockchain's public key from the coordination contract
-  public boolean getCrosschainTransactionStatus(
+  public long getCrosschainTransactionStatus(
       final String coordIpAddrAndPort,
       final BigInteger coordChainId,
       final Address coordContractAddr,
