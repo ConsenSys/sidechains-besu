@@ -309,35 +309,56 @@ public class CrosschainProcessor {
   }
 
   void startCrosschainTransactionCommitIgnoreTimeOut(final CrosschainTransaction transaction) {
-    this.commitOrIgnoreFlag = false;
-
-    while (!commitOrIgnoreFlag) {
-      this.vertx.setTimer(
-          2000,
-          id -> {
-            // check coordination contract if committed / ignored
-            long txStatus = getCrosschainTransactionStatus(transaction);
-            LOG.info(
-                "Crosschain Transaction Status as fetched from the coordination contract is {}",
-                txStatus);
-            if (txStatus == 2 || txStatus == 3) {
-              List<Address> addressesToUnlock = transaction.getLockedAddresses();
-              commitOrIgnoreFlag = true;
-              if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
-                LOG.info("No addresses to unlock. Not sending signalling transaction");
-              } else {
-                sendSignallingTransaction(addressesToUnlock, txStatus);
-              }
+    this.vertx.setTimer(
+        2000,
+        id -> {
+          // check coordination contract if committed / ignored
+          long txStatus = getCrosschainTransactionStatus(transaction);
+          LOG.info(
+              "Crosschain Transaction Status as fetched from the coordination contract is {}",
+              txStatus);
+          if (txStatus == 2 || txStatus == 3) {
+            List<Address> addressesToUnlock = transaction.getLockedAddresses();
+            if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
+              LOG.info("No addresses to unlock. Not sending signalling transaction");
             } else {
-              try {
-                Thread.sleep(60000);
-              } catch (Exception e) {
-                LOG.info("Thead.sleep throws an exception {}", e.toString());
-              }
+              sendSignallingTransaction(addressesToUnlock, txStatus);
             }
-          });
-    }
+          } else {
+            startCrosschainTransactionCommitIgnoreTimeOut(transaction);
+          }
+        });
   }
+  //  void startCrosschainTransactionCommitIgnoreTimeOut(final CrosschainTransaction transaction) {
+  //    this.commitOrIgnoreFlag = false;
+  //
+  //    while (!commitOrIgnoreFlag) {
+  //      this.vertx.setTimer(
+  //          2000,
+  //          id -> {
+  //            // check coordination contract if committed / ignored
+  //            long txStatus = getCrosschainTransactionStatus(transaction);
+  //            LOG.info(
+  //                "Crosschain Transaction Status as fetched from the coordination contract is {}",
+  //                txStatus);
+  //            if (txStatus == 2 || txStatus == 3) {
+  //              List<Address> addressesToUnlock = transaction.getLockedAddresses();
+  //              commitOrIgnoreFlag = true;
+  //              if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
+  //                LOG.info("No addresses to unlock. Not sending signalling transaction");
+  //              } else {
+  //                sendSignallingTransaction(addressesToUnlock, txStatus);
+  //              }
+  //            } else {
+  //              try {
+  //                Thread.sleep(60000);
+  //              } catch (Exception e) {
+  //                LOG.info("Thead.sleep throws an exception {}", e.toString());
+  //              }
+  //            }
+  //          });
+  //    }
+  //  }
 
   /**
    * This method threshold signs and sends the subordinateTransactionReady message to the
