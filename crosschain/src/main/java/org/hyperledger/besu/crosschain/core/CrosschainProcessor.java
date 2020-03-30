@@ -62,6 +62,8 @@ public class CrosschainProcessor {
   private CoordContractManager coordContractManager;
   private CrosschainKeyManager crosschainKeyManager;
 
+  boolean commitOrIgnoreFlag;
+
   public CrosschainProcessor(
       final LinkedNodeManager linkedNodeManager, final CoordContractManager coordContractManager) {
     this.linkedNodeManager = linkedNodeManager;
@@ -128,7 +130,7 @@ public class CrosschainProcessor {
         // Get the address from chain mapping.
         String ipAddress = this.linkedNodeManager.getIpAddressAndPort(sidechainId);
         String response = null;
-        LOG.debug("Sending Crosschain Transaction or view to chain at " + ipAddress);
+        LOG.info("Sending Crosschain Transaction or view to chain at " + ipAddress);
         try {
           response =
               OutwardBoundConnectionManager.post(ipAddress, method, signedTransaction.toString());
@@ -276,18 +278,87 @@ public class CrosschainProcessor {
     return BytesValue.fromHexString(result);
   }
 
+  /**
+   * This method queries the state of the crosschain transaction from the coordination contract.
+   *
+   * @param transaction Crosschain transaction whose state is queried upon.
+   * @return status of the crosschain transaction
+   */
+  private long getCrosschainTransactionStatus(final CrosschainTransaction transaction) {
+    Optional<BigInteger> coordChainId = transaction.getCrosschainCoordinationBlockchainId();
+    Optional<Address> coordAddr = transaction.getCrosschainCoordinationContractAddress();
+    if (coordChainId.isEmpty() || coordAddr.isEmpty()) {
+      LOG.error("Coordination Chain is not set up");
+      return 0;
+    }
+
+    final String coordIpAddrAndPort =
+        this.coordContractManager.getIpAndPort(coordChainId.get(), coordAddr.get());
+    final BigInteger origChainId =
+        (transaction.getType().isOriginatingTransaction()
+            ? transaction.getChainId().get()
+            : transaction.getOriginatingSidechainId().get());
+
+    return new OutwardBoundConnectionManager(this.nodeKeys)
+        .getCrosschainTransactionStatus(
+            coordIpAddrAndPort,
+            coordChainId.get(),
+            coordAddr.get(),
+            origChainId,
+            transaction.getCrosschainTransactionId().get());
+  }
+
   void startCrosschainTransactionCommitIgnoreTimeOut(final CrosschainTransaction transaction) {
     this.vertx.setTimer(
         2000,
         id -> {
-          List<Address> addressesToUnlock = transaction.getLockedAddresses();
-          if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
-            LOG.info("No addresses to unlock. Not sending signalling transaction");
+          // check coordination contract if committed / ignored
+          long txStatus = getCrosschainTransactionStatus(transaction);
+          LOG.info(
+              "Crosschain Transaction Status as fetched from the coordination contract is {}",
+              txStatus);
+          if (txStatus == 2 || txStatus == 3) {
+            List<Address> addressesToUnlock = transaction.getLockedAddresses();
+            if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
+              LOG.info("No addresses to unlock. Not sending signalling transaction");
+            } else {
+              sendSignallingTransaction(addressesToUnlock, txStatus);
+            }
           } else {
-            sendSignallingTransaction(addressesToUnlock);
+            startCrosschainTransactionCommitIgnoreTimeOut(transaction);
           }
         });
   }
+  //  void startCrosschainTransactionCommitIgnoreTimeOut(final CrosschainTransaction transaction) {
+  //    this.commitOrIgnoreFlag = false;
+  //
+  //    while (!commitOrIgnoreFlag) {
+  //      this.vertx.setTimer(
+  //          2000,
+  //          id -> {
+  //            // check coordination contract if committed / ignored
+  //            long txStatus = getCrosschainTransactionStatus(transaction);
+  //            LOG.info(
+  //                "Crosschain Transaction Status as fetched from the coordination contract is {}",
+  //                txStatus);
+  //            if (txStatus == 2 || txStatus == 3) {
+  //              List<Address> addressesToUnlock = transaction.getLockedAddresses();
+  //              commitOrIgnoreFlag = true;
+  //              if (addressesToUnlock == null || addressesToUnlock.size() == 0) {
+  //                LOG.info("No addresses to unlock. Not sending signalling transaction");
+  //              } else {
+  //                sendSignallingTransaction(addressesToUnlock, txStatus);
+  //              }
+  //            } else {
+  //              try {
+  //                Thread.sleep(60000);
+  //              } catch (Exception e) {
+  //                LOG.info("Thead.sleep throws an exception {}", e.toString());
+  //              }
+  //            }
+  //          });
+  //    }
+  //  }
 
   /**
    * This method threshold signs and sends the subordinateTransactionReady message to the
@@ -307,6 +378,7 @@ public class CrosschainProcessor {
 
     // Submit the message to the linked node that is on originating chain
     try {
+      LOG.info("Sending signed Transaction Ready message from chain {}", subTx.getChainId());
       OutwardBoundConnectionManager.post(
           origIpAddressAndPort,
           RpcMethod.CROSS_SEND_TRANSACTION_READY_MESSAGE.getMethodName(),
@@ -328,8 +400,9 @@ public class CrosschainProcessor {
    * <p>TODO we should probably check the response and retry if appropriate.
    *
    * @param addressesToUnlock Addresses of contracts to unlock / send the signalling transaction to.
+   * @param txStatus Status of the crosschain transaction
    */
-  void sendSignallingTransaction(final List<Address> addressesToUnlock) {
+  void sendSignallingTransaction(final List<Address> addressesToUnlock, final long txStatus) {
     LOG.debug("Crosschain Signalling Transaction: Initiated");
 
     // Work out sender's nonce.
@@ -356,11 +429,19 @@ public class CrosschainProcessor {
       payload = payload.concat(addr);
     }
 
+    final CrosschainTransaction.CrosschainTransactionType txType;
+    if (txStatus == 2) {
+      txType = CrosschainTransaction.CrosschainTransactionType.UNLOCK_COMMIT_SIGNALLING_TRANSACTION;
+    } else if (txStatus == 3) {
+      txType = CrosschainTransaction.CrosschainTransactionType.UNLOCK_IGNORE_SIGNALLING_TRANSACTION;
+    } else {
+      LOG.error("Signalling transaction called when the transaction is not COMMITTED or IGNORED");
+      return;
+    }
+
     CrosschainTransaction ignoreCommitTransaction =
         CrosschainTransaction.builderX()
-            .type(
-                CrosschainTransaction.CrosschainTransactionType
-                    .UNLOCK_COMMIT_SIGNALLING_TRANSACTION)
+            .type(txType)
             .nonce(nonce)
             .gasPrice(Wei.ZERO)
             .gasLimit(100000)

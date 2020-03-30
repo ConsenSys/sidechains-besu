@@ -104,6 +104,17 @@ public class OutwardBoundConnectionManager {
         coordIpAddrAndPort, coordChainId, coordContractAddr, blockchainId, keyVersion);
   }
 
+  // Get a blockchain's public key from the coordination contract
+  public long getCrosschainTransactionStatus(
+      final String coordIpAddrAndPort,
+      final BigInteger coordChainId,
+      final Address coordContractAddr,
+      final BigInteger origChainId,
+      final BigInteger ccTransactionId) {
+    return this.wrapper.getCrosschainTransactionStatus(
+        coordIpAddrAndPort, coordChainId, coordContractAddr, origChainId, ccTransactionId);
+  }
+
   /**
    * This method sends the signed CrosschainTransactionCommit message from the originating chain to
    * the coordination contract. The coordination contract will check the signature and update the

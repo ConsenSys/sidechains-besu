@@ -258,6 +258,54 @@ public class CoordinationContractWrapper {
     }
   }
 
+  /**
+   * This method queries the coordination contract about the status of the crosschain transaction
+   * specified by the parameters.
+   *
+   * @param coordIpAddrAndPort Deployed Coordination contract's IP Address and Port
+   * @param coordChainId ID of the blockchain where the coordination contract is deployed.
+   * @param coordContractAddr Deployed Coordination contract's address.
+   * @param origChainId Originating blockchain ID
+   * @param ccTransactionId Crosschain Transaction ID
+   * @return status of the crosschain transaction
+   */
+  public long getCrosschainTransactionStatus(
+      final String coordIpAddrAndPort,
+      final BigInteger coordChainId,
+      final Address coordContractAddr,
+      final BigInteger origChainId,
+      final BigInteger ccTransactionId) {
+
+    String uri = "http://" + coordIpAddrAndPort + "/";
+    Besu web3j = Besu.build(new HttpService(uri), COORDINATION_BLOCK_PERIOD_IN_MS);
+    RawTransactionManager tm =
+        new RawTransactionManager(
+            web3j,
+            this.credentials,
+            coordChainId.longValue(),
+            RETRY,
+            COORDINATION_BLOCK_PERIOD_IN_MS);
+    CrosschainCoordinationV1 contractWrapper =
+        CrosschainCoordinationV1.load(
+            coordContractAddr.getHexString(), web3j, tm, this.freeGasProvider);
+
+    try {
+      LOG.info(
+          "Querying the coordination contract for the status of the crosschain transaction "
+              + "with Originating chain ID = {} and Transaction ID = {}",
+          origChainId,
+          ccTransactionId);
+      return contractWrapper
+          .getCrosschainTransactionStatus(origChainId, ccTransactionId)
+          .send()
+          .longValue();
+    } catch (Exception e) {
+      LOG.error(
+          "Exception while getting the status of the crosschain transaction -- {}", e.toString());
+    }
+    return 0;
+  }
+
   public BigInteger getPublicKeyFromCoordContract(
       final String coordIpAddrAndPort,
       final BigInteger coordChainId,

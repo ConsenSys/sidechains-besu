@@ -151,6 +151,7 @@ public class CrosschainController {
 
     // TODO there is a synchronized inside this call. This should be surrounded by a Vertx
     // blockingExecutor, maybe
+    LOG.info("Transaction is getting added on chain with ID = {}", transaction.getChainId());
     ValidationResult<TransactionValidator.TransactionInvalidReason> validationResult =
         this.transactionPool.addLocalTransaction(transaction);
 
@@ -270,7 +271,7 @@ public class CrosschainController {
       // TODO here we need to check the Crosschain Coordination Contract.
       List<Address> addressesToUnlock = new ArrayList<>();
       addressesToUnlock.add(address);
-      this.processor.sendSignallingTransaction(addressesToUnlock);
+      this.processor.sendSignallingTransaction(addressesToUnlock, 2);
     }
   }
 
@@ -383,6 +384,7 @@ public class CrosschainController {
   private Optional<ValidationResult<TransactionValidator.TransactionInvalidReason>>
       updateListAndSendTxReadyMsg(final CrosschainTransaction transaction) {
     if (transaction.getType().isOriginatingTransaction()) {
+      LOG.info("Originating transaction is ready. Chain ID = {}", transaction.getChainId());
       this.origMsgProcessor.removeOrigTxInsideToBeMined(transaction);
       return Optional.empty();
     } else {

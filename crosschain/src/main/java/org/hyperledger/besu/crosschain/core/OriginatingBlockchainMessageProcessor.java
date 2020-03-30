@@ -105,6 +105,15 @@ public class OriginatingBlockchainMessageProcessor {
     LOG.info("started OK {}", startedOK);
   }
 
+  private void addTransactionHashes(final CrosschainTransaction transaction, final Set<Hash> txs) {
+    for (CrosschainTransaction subTx : transaction.getSubordinateTransactionsAndViews()) {
+      if (subTx.getType().isSubordinateTransaction()) {
+        txs.add(subTx.hash());
+        addTransactionHashes(subTx, txs);
+      }
+    }
+  }
+
   /**
    * This method lists all the transactions that needs to be mined so as to start committing a
    * crosschain transaction.
@@ -114,9 +123,8 @@ public class OriginatingBlockchainMessageProcessor {
   public void listMiningTxForCommit(final CrosschainTransaction transaction) {
     Set<Hash> txs = new HashSet<Hash>();
     txs.add(transaction.hash());
-    for (CrosschainTransaction subTx : transaction.getSubordinateTransactionsAndViews()) {
-      txs.add(subTx.hash());
-    }
+    addTransactionHashes(transaction, txs);
+    LOG.info("No. of Transaction Ready messages expected at this point = {}", txs.size() - 1);
     Tuple2<CrosschainTransaction, Set<Hash>> val =
         new Tuple2<CrosschainTransaction, Set<Hash>>(transaction, txs);
     this.txToBeMined.put(transaction.getCrosschainTransactionId().get(), val);
@@ -133,6 +141,7 @@ public class OriginatingBlockchainMessageProcessor {
     Tuple2<CrosschainTransaction, Set<Hash>> val = this.txToBeMined.get(txId);
     Set<Hash> txs = val.component2();
     txs.remove(origTx.hash());
+    LOG.info("Transaction Ready messages yet to be received from {} chains.", txs.size());
     if (txs.isEmpty()) {
       LOG.info(
           "All transaction ready messages have been received. Mining of the "
